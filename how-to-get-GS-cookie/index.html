@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>how to get GS cookie | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Stack cookieStack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，详见。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="how to get GS cookie">
+<meta property="og:url" content="http://anhkgg.github.io/how-to-get-GS-cookie/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="Stack cookieStack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，详见。">
+<meta property="og:updated_time" content="2016-07-07T04:33:15.101Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="how to get GS cookie">
+<meta name="twitter:description" content="Stack cookieStack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，详见。">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-how-to-get-GS-cookie" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/how-to-get-GS-cookie/" class="article-date">
+  	<time datetime="2014-11-05T03:32:29.000Z" itemprop="datePublished">2014-11-05</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      how to get GS cookie
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GS/">GS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PE/">PE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cookie/">cookie</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/security/">security</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Stack-cookie"><a href="#Stack-cookie" class="headerlink" title="Stack cookie"></a><strong>Stack cookie</strong></h1><p>Stack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，<a href="http://www.pediy.com/kssd/pediy12/102719/724039/39112.pdf" target="_blank" rel="external">详见</a>。</p>
+<a id="more"></a>
+<blockquote>
+<p><strong>栈中的 cookie/GS保护</strong></p>
+<p>/GS 编译选项会在函数的开头和结尾添加代码来阻止对典型的栈溢出漏洞（字符串缓冲区）的利用。<br>当应用程序启动时，程序的 cookie（4 字节（dword），无符号整型）被计算出来（伪随机数）并保存在<br>加载模块的.data 节中,在函数的开头这个 cookie 被拷贝到栈中，位于 EBP 和返回地址的正前方（位于返<br>回地址和局部变量的中间）。<br>[buffer][cookie][saved EBP][saved EIP]<br>在函数的结尾处，程序会把这个 cookie 和保存在.data 节中的 cookie 进行比较。<br>如果不相等，就说明进程栈被破坏，进程必须被终止。</p>
+<p><strong>栈中的 cookie/GS绕过方法</strong><br>挫败这种栈溢出保护机制的最直接的方法是检索/猜测/计算出 cookie 值（这样就可以用相同的 cookie<br>覆盖栈中的 cookie），这个 cookie 有时候（很少）是一个静态值…但即使如此，它也可能包含一些不利<br>的字符而导致不能使用它。</p>
+</blockquote>
+<h1 id="如何通过PE来获取GS-cookie的值"><a href="#如何通过PE来获取GS-cookie的值" class="headerlink" title="如何通过PE来获取GS cookie的值"></a><strong>如何通过PE来获取GS cookie的值</strong></h1><p>在PE的DataDirectory中，第10序号的是一个叫做LoadConfig的东西，保存了映像的配置数据，里面就有GS cookie，来看看这个数据结构<br><a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms680328(v=vs.85).aspx" title="loadconfig" target="_blank" rel="external">IMAGE_LOAD_CONFIG_DIRECTORY32</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">typedef struct &#123;</div><div class="line">    DWORD   Size;</div><div class="line">    DWORD   TimeDateStamp;</div><div class="line">    WORD    MajorVersion;</div><div class="line">    WORD    MinorVersion;</div><div class="line">    DWORD   GlobalFlagsClear;</div><div class="line">    DWORD   GlobalFlagsSet;</div><div class="line">    DWORD   CriticalSectionDefaultTimeout;</div><div class="line">    DWORD   DeCommitFreeBlockThreshold;</div><div class="line">    DWORD   DeCommitTotalFreeThreshold;</div><div class="line">    DWORD   LockPrefixTable;            // VA</div><div class="line">    DWORD   MaximumAllocationSize;</div><div class="line">    DWORD   VirtualMemoryThreshold;</div><div class="line">    DWORD   ProcessHeapFlags;</div><div class="line">    DWORD   ProcessAffinityMask;</div><div class="line">    WORD    CSDVersion;</div><div class="line">    WORD    Reserved1;</div><div class="line">    DWORD   EditList;                   // VA</div><div class="line">    DWORD   SecurityCookie;             // VA</div><div class="line">    DWORD   SEHandlerTable;             // VA</div><div class="line">    DWORD   SEHandlerCount;</div><div class="line">&#125; IMAGE_LOAD_CONFIG_DIRECTORY32, *PIMAGE_LOAD_CONFIG_DIRECTORY32;</div></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>SecurityCookie</strong><br>A pointer to a cookie that is used by Visual C++ or GS implementation.</p>
+</blockquote>
+<p>所以，可以通过解析pe的方式，获取到SecurityCookie，进而绕过cookie/GS保护，这只是我的想法，也没测试过，是在分析某个sys的时间想到的，下面贴出获取Cookie的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">unsigned int __stdcall myGetGSSecureCookie(PVOID ImageBase, ULONG Size)</div><div class="line">&#123;</div><div class="line">  ULONG v2; // edi@1</div><div class="line">  PVOID v3; // esi@1</div><div class="line">  PVOID v4; // eax@2</div><div class="line">  unsigned int result; // eax@7</div><div class="line"></div><div class="line">  v3 = ImageBase;</div><div class="line">  v2 = Size;</div><div class="line">  if ( (signed int)myGetValidNtHeader(1, (unsigned int)ImageBase, Size, (int)&amp;ImageBase) &lt; 0//myGetValidNtHeader获取nt头地址</div><div class="line">    || (v4 = RtlImageDirectoryEntryToData(v3, 1u, 0xAu, &amp;Size), !v4)// 通过加载配置目录信息找到SecureCookie</div><div class="line">    || !Size</div><div class="line">    || Size != 0x40 &amp;&amp; Size != *(_DWORD *)v4</div><div class="line">    || *(_DWORD *)v4 &lt; 0x48u</div><div class="line">    || (result = *((_DWORD *)v4 + 15), result &lt;= (unsigned int)v3)// loadcofig-&gt;SecurityCookie</div><div class="line">						// A pointer to a cookie that is used by Visual C++ or GS implementation.</div><div class="line">    || result &gt;= (unsigned int)(v3 + v2 - 4) )</div><div class="line">    result = 0;</div><div class="line">  return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a><strong>其他</strong></h1><p>没来得及查资料，是否有完整的绕过方法，这只是自己突然分析到这，想到的，不对之处，敬请见谅。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/hctf-writeup/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          hctf writeup
+        
+      </div>
+    </a>
+  
+  
+    <a href="/known-ctf/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ctf认识</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="how-to-get-GS-cookie/" data-title="how to get GS cookie" data-url="http://anhkgg.github.io/how-to-get-GS-cookie/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+  </div>
+</body>
+</html>
