@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  
   <title><![CDATA[Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit]]></title>
   <subtitle><![CDATA[Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘]]></subtitle>
   <link href="/atom.xml" rel="self"/>
-  <link href="http://anhkgg.github.io//"/>
+  <link href="http://anhkgg.github.io/"/>
   <updated>2016-07-06T23:46:33.472Z</updated>
-  <id>http://anhkgg.github.io//</id>
+  <id>http://anhkgg.github.io/</id>
   
   <author>
     <name><![CDATA[Anhkgg]]></name>
