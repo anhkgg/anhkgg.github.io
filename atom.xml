@@ -20,7 +20,7 @@
     <id>http://anhkgg.github.io/Windbg系列-RPC调试/</id>
     <published>2016-01-04T12:16:10.000Z</published>
     <updated>2016-07-06T23:46:33.472Z</updated>
-    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧<br>算是自己的笔记，有看客的话，可以多多指出问题，提提建议，不吝赐教！</p>
+    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧<br>算是自己的笔记，有看客的话，可以多多指出问题，</p>
 <p>微软的远程过程调用（RPC）可以轻松越过进程和机器的界限并且进行数据通信。这种网络通信标准是微软Window网络通信如此强大的原因（….太绕了，翻不来，也不重要）。<br>然而，因为RPC对进程隐藏了网络调用，所以隐藏了计算机之间的交互细节。这使得用户很难确认线程为什么这么做，正在做什么，为什么在支持的功能上失败。所以，调试和解决RPC错误非常困难。另外，大部分RPC错误的问题实际上出现在配置问题，网络连接问题，其他组件问题上。<br><a id="more"></a><br>Windows有个调试工具是DbgRpc，是RPC相关的调试器扩展。这些扩展能够用来分析Windows Xp以及更新版本系统的各种RPC问题。<br>这些Windows版本可以配置来保存RPC实时状态信息。可以保存不同数量的状态信息；这可以让你获得需要的信息，而不用防止一个重的负担在你的电脑上了（significant burden，什么东西）。细节请看Enabling RPC State Information</p>
 <p>之后这些信息就可以被调试器或者DbgRpc访问了。在每种情况下，一个集合的查询都是可以用的。细节请看Displaying RPC State Information</p>
 <p>在大部分情况下，你可以通过使用Common RPC Debugging Techniques.中的技术找到问题。<br>如果你想探索一下机器是怎么保存这些细腻的，或者你想设计自己的状态信息分析的技术，可以看看RPC State Information Internals.<br>这些工具和技术在Windows2000中不能使用</p>
