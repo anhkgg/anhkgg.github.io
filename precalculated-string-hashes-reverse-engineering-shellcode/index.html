@@ -15,11 +15,11 @@
 <meta property="og:description" content="前言对fireeye关于ida中shellcode_hashes_search_plugin.py的文章翻译，原文链接是USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
 文章是fireeye的Jay Smith写的，介绍说经常在分析恶意样本中遇到shellcode，文章会介绍shellcode导入技术的背景以及">
 <meta property="og:image" content="http://anhkgg.github.io/img/Figure-3-QT-GUI-view-300x185.png">
-<meta property="og:image" content="http://anhkgg.github.io/img/Figure-4-Comments-are-added-for-identified-hashes.png">
-<meta property="og:image" content="http://anhkgg.github.io/img/Figure-5-DWORD-array-of-hashes.png">
-<meta property="og:image" content="http://anhkgg.github.io/img/Figure-6-Generated-structure-of-function-pointers.png">
+<meta property="og:image" content="http://anhkgg.github.io/img/Figure-4-Comments-are-added-for-identified-hashes-300x150.png">
+<meta property="og:image" content="http://anhkgg.github.io/img/Figure-5-DWORD-array-of-hashes-300x149.png">
+<meta property="og:image" content="http://anhkgg.github.io/img/Figure-6-Generated-structure-of-function-pointers-300x221.png">
 <meta property="og:image" content="http://anhkgg.github.io/img/Figure-7-Sample-function-pointer-array-usage-300x199.png">
-<meta property="og:updated_time" content="2016-07-11T10:36:55.448Z">
+<meta property="og:updated_time" content="2016-07-11T10:38:41.611Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用预先算好的字符串hash逆向分析shellcode">
 <meta name="twitter:description" content="前言对fireeye关于ida中shellcode_hashes_search_plugin.py的文章翻译，原文链接是USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
@@ -264,11 +264,11 @@
 <p><img src="/img/Figure-3-QT-GUI-view-300x185.png" alt="Figure-3-QT-GUI-view-300x185"></p>
 <p>脚本会尝试使用HexRays发布的用于QT的PySide(可以在这里下载<a href="http://www.hex-rays.com/products/ida/support/download.shtml" target="_blank" rel="external">http://www.hex-rays.com/products/ida/support/download.shtml)</a>))。如果HexRays中没有PySide，它使用简单的对话框来或者相同的信息。</p>
 <p>如果没有任何信息被高亮，脚本搜索当前段或者高亮区域。脚本查询每个DWORD（选中了DWORD Array选项），每个指令操作数（选中了Instr Operands选项）来决定是不是选中算法的一个hash值。如果找到了一个hash值会有一个line comment。如图：</p>
-<p><img src="/img/Figure-4-Comments-are-added-for-identified-hashes.png" alt="Figure-4-Comments-are-added-for-identified-hashes-300x150.png"></p>
+<p><img src="/img/Figure-4-Comments-are-added-for-identified-hashes-300x150.png" alt="Figure-4-Comments-are-added-for-identified-hashes-300x150.png"></p>
 <p>有些shellcode作者也经常使用hash值保存在DWORD数组中，而不是将每个值压入函数参数，如图：</p>
-<p><img src="/img/Figure-5-DWORD-array-of-hashes.png" alt="Figure-5-DWORD-array-of-hashes-300x149.png"></p>
+<p><img src="/img/Figure-5-DWORD-array-of-hashes-300x149.png" alt="Figure-5-DWORD-array-of-hashes-300x149.png"></p>
 <p>如果选中了Create Struct，如果找到的hash值在一段连续地址，脚本会自动创建一个结构体，如图：</p>
-<p><img src="/img/Figure-6-Generated-structure-of-function-pointers.png" alt="Figure-6-Generated-structure-of-function-pointers-300x221.png"></p>
+<p><img src="/img/Figure-6-Generated-structure-of-function-pointers-300x221.png" alt="Figure-6-Generated-structure-of-function-pointers-300x221.png"></p>
 <p>如果shellcode作者使用函数指针数组，结构体非常有用，它会转换成<code>[base+index]</code>的结构体引用。如图：</p>
 <p><img src="/img/Figure-7-Sample-function-pointer-array-usage-300x199.png" alt="Figure-7-Sample-function-pointer-array-usage-300x199 (1).png"></p>
 <p><code>shellcode_hashes_search_plugin.py</code>用来显示IDA插件菜单的。拷贝到<code>%PROGRAMFILES%IDAplugins</code>，设置其他python文件到PATH环境变量中确保可被使用。</p>
