@@ -5,12 +5,14 @@
     
   <url>
     <loc>http://anhkgg.github.iohttp://anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/</loc>
-    <lastmod>2016-07-11T10:34:32.931Z</lastmod>
+    <lastmod>2016-07-11T10:35:51.812Z</lastmod>
     <data>
         <display>
-        <title>precalculated-string-hashes-reverse-engineering-shellcode</title>
+        <title>使用预先算好的字符串hash逆向分析shellcode(precalculated-string-hashes-reverse-engineering-shellcode)</title>
         <pubTime>2016-07-11T10:29:16.000Z</pubTime>
         
+        <tag>reverse</tag>
+         
         <tag>shellcode</tag>
          
         <tag>IDAPython</tag>
