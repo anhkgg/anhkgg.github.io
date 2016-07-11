@@ -79,7 +79,7 @@
 						<li>Links</li>
 						
 						
-						<li>Über</li>
+						<li>About</li>
 						
 					</ul>
 				</div>
@@ -116,7 +116,7 @@
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="http:/anhkgg.github.io/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="http:/anhkgg.github.io/tags/GS/" style="font-size: 10px;">GS</a> <a href="http:/anhkgg.github.io/tags/PE/" style="font-size: 10px;">PE</a> <a href="http:/anhkgg.github.io/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="http:/anhkgg.github.io/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="http:/anhkgg.github.io/tags/c/" style="font-size: 10px;">c++</a> <a href="http:/anhkgg.github.io/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="http:/anhkgg.github.io/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="http:/anhkgg.github.io/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="http:/anhkgg.github.io/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="http:/anhkgg.github.io/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="http:/anhkgg.github.io/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="http:/anhkgg.github.io/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="http:/anhkgg.github.io/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="http:/anhkgg.github.io/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="http:/anhkgg.github.io/tags/upx/" style="font-size: 10px;">upx</a> <a href="http:/anhkgg.github.io/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="http:/anhkgg.github.io/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a>
+						<a href="http:/anhkgg.github.io/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="http:/anhkgg.github.io/tags/GS/" style="font-size: 10px;">GS</a> <a href="http:/anhkgg.github.io/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="http:/anhkgg.github.io/tags/PE/" style="font-size: 10px;">PE</a> <a href="http:/anhkgg.github.io/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="http:/anhkgg.github.io/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="http:/anhkgg.github.io/tags/c/" style="font-size: 10px;">c++</a> <a href="http:/anhkgg.github.io/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="http:/anhkgg.github.io/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="http:/anhkgg.github.io/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="http:/anhkgg.github.io/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="http:/anhkgg.github.io/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="http:/anhkgg.github.io/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="http:/anhkgg.github.io/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="http:/anhkgg.github.io/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="http:/anhkgg.github.io/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="http:/anhkgg.github.io/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="http:/anhkgg.github.io/tags/upx/" style="font-size: 10px;">upx</a> <a href="http:/anhkgg.github.io/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="http:/anhkgg.github.io/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a>
 					</div>
 				</section>
 				
@@ -191,6 +191,71 @@
 </nav>
 
       <div class="body-wrap">
+  
+    <article id="post-precalculated-string-hashes-reverse-engineering-shellcode" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="http:/anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/" class="article-date">
+  	<time datetime="2016-07-11T10:29:16.000Z" itemprop="datePublished">2016-07-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="http:/anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/">precalculated-string-hashes-reverse-engineering-shellcode</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="j��"><a href="#j��" class="headerlink" title="ǰ��"></a>ǰ��</h1><p>��fireeye����ida��shellcode_hashes_search_plugin.py�����·��룬ԭ��������<a href="https://www.fireeye.com/blog/threat-research/2012/11/precalculated-string-hashes-reverse-engineering-shellcode.html">USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE</a></p>
+<p>������fireeye��<a href="https://www.fireeye.com/blog/threat-research.html/category/etc/tags/fireeye-blog-authors/cap-jay-smith">Jay Smith</a>д�ģ�����˵�����ڷ�����������������shellcode�����»�����shellcode���뼼���ı����Լ�������IDA�Զ�����������������shellcode</p>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/IDAPython/">IDAPython</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/shellcode/">shellcode</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="http:/anhkgg.github.io/categories/security/">security</a>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a  href="http:/anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/#more">more >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
   
     <article id="post-Windbg系列-RPC调试" class="article article-type-post" itemscope itemprop="blogPost">
   
@@ -751,70 +816,6 @@
       
         <p class="article-more-link">
           <a  href="http:/anhkgg.github.io/hctf-writeup/#more">more >></a>
-        </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-how-to-get-GS-cookie" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="http:/anhkgg.github.io/how-to-get-GS-cookie/" class="article-date">
-  	<time datetime="2014-11-05T03:32:29.000Z" itemprop="datePublished">2014-11-05</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="http:/anhkgg.github.io/how-to-get-GS-cookie/">how to get GS cookie</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Stack-cookie"><a href="#Stack-cookie" class="headerlink" title="Stack cookie"></a><strong>Stack cookie</strong></h1><p>Stack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，<a href="http://www.pediy.com/kssd/pediy12/102719/724039/39112.pdf">详见</a>。</p>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/GS/">GS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/PE/">PE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/cookie/">cookie</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="http:/anhkgg.github.io/categories/security/">security</a>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a  href="http:/anhkgg.github.io/how-to-get-GS-cookie/#more">more >></a>
         </p>
       
       <div class="clearfix"></div>
