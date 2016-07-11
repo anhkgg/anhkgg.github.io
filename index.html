@@ -79,7 +79,7 @@
 						<li>Links</li>
 						
 						
-						<li>About</li>
+						<li>Über</li>
 						
 					</ul>
 				</div>
@@ -218,8 +218,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="j��"><a href="#j��" class="headerlink" title="ǰ��"></a>ǰ��</h1><p>��fireeye����ida��shellcode_hashes_search_plugin.py�����·��룬ԭ��������<a href="https://www.fireeye.com/blog/threat-research/2012/11/precalculated-string-hashes-reverse-engineering-shellcode.html">USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE</a></p>
-<p>������fireeye��<a href="https://www.fireeye.com/blog/threat-research.html/category/etc/tags/fireeye-blog-authors/cap-jay-smith">Jay Smith</a>д�ģ�����˵�����ڷ�����������������shellcode�����»�����shellcode���뼼���ı����Լ�������IDA�Զ�����������������shellcode</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>对fireeye关于ida中shellcode_hashes_search_plugin.py的文章翻译，原文链接是<a href="https://www.fireeye.com/blog/threat-research/2012/11/precalculated-string-hashes-reverse-engineering-shellcode.html">USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE</a></p>
+<p>文章是fireeye的<a href="https://www.fireeye.com/blog/threat-research.html/category/etc/tags/fireeye-blog-authors/cap-jay-smith">Jay Smith</a>写的，介绍说经常在分析恶意样本中遇到shellcode，文章会介绍shellcode导入技术的背景以及如何是IDA自动化标记来更快分析shellcode</p>
       
     </div>
     
@@ -578,70 +578,6 @@
 
 
   
-    <article id="post-inject-process-analyze 2" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="http:/anhkgg.github.io/inject-process-analyze 2/" class="article-date">
-  	<time datetime="2014-11-25T09:45:00.000Z" itemprop="datePublished">2014-11-25</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="http:/anhkgg.github.io/inject-process-analyze 2/">inject process analyze 2</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="1-来源"><a href="#1-来源" class="headerlink" title="1. 来源"></a><strong>1. 来源</strong></h1><p>某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。<br>前面分析了一种进程注入方法，现在开始分析另外一种貌似更猥琐的方式，貌似说这种技术用在ramnit病毒中，下面这图是大致原理图（<a href="http://www.pctrojan.com/content/723-virus-blocks-itself">引用的</a>）<br>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/inject-process/">inject process</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/reverse/">reverse</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="http:/anhkgg.github.io/categories/security/">security</a>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a  href="http:/anhkgg.github.io/inject-process-analyze 2/#more">more >></a>
-        </p>
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
     <article id="post-inject-process-analyze-and-code" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -688,6 +624,70 @@
       
         <p class="article-more-link">
           <a  href="http:/anhkgg.github.io/inject-process-analyze-and-code/#more">more >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-inject-process-analyze 2" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="http:/anhkgg.github.io/inject-process-analyze 2/" class="article-date">
+  	<time datetime="2014-11-25T09:45:00.000Z" itemprop="datePublished">2014-11-25</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="http:/anhkgg.github.io/inject-process-analyze 2/">inject process analyze 2</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="1-来源"><a href="#1-来源" class="headerlink" title="1. 来源"></a><strong>1. 来源</strong></h1><p>某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。<br>前面分析了一种进程注入方法，现在开始分析另外一种貌似更猥琐的方式，貌似说这种技术用在ramnit病毒中，下面这图是大致原理图（<a href="http://www.pctrojan.com/content/723-virus-blocks-itself">引用的</a>）<br>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/inject-process/">inject process</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="http:/anhkgg.github.io/tags/reverse/">reverse</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="http:/anhkgg.github.io/categories/security/">security</a>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a  href="http:/anhkgg.github.io/inject-process-analyze 2/#more">more >></a>
         </p>
       
       <div class="clearfix"></div>

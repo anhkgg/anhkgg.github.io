@@ -6,24 +6,24 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>precalculated-string-hashes-reverse-engineering-shellcode | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="ǰ����fireeye����ida��shellcode_hashes_search_plugin.py�����·��룬ԭ��������USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
-������fireeye��Jay Smithд�ģ�����˵�����ڷ�����������������she">
+  <meta name="description" content="前言对fireeye关于ida中shellcode_hashes_search_plugin.py的文章翻译，原文链接是USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
+文章是fireeye的Jay Smith写的，介绍说经常在分析恶意样本中遇到shellcode，文章会介绍shellcode导入技术的背景以及">
 <meta property="og:type" content="article">
 <meta property="og:title" content="precalculated-string-hashes-reverse-engineering-shellcode">
 <meta property="og:url" content="http://anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/index.html">
 <meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
-<meta property="og:description" content="ǰ����fireeye����ida��shellcode_hashes_search_plugin.py�����·��룬ԭ��������USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
-������fireeye��Jay Smithд�ģ�����˵�����ڷ�����������������she">
+<meta property="og:description" content="前言对fireeye关于ida中shellcode_hashes_search_plugin.py的文章翻译，原文链接是USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
+文章是fireeye的Jay Smith写的，介绍说经常在分析恶意样本中遇到shellcode，文章会介绍shellcode导入技术的背景以及">
 <meta property="og:image" content="http://anhkgg.github.io/img/Figure-3-QT-GUI-view-300x185.png">
 <meta property="og:image" content="http://anhkgg.github.io/img/Figure-4-Comments-are-added-for-identified-hashes.png">
 <meta property="og:image" content="http://anhkgg.github.io/img/Figure-5-DWORD-array-of-hashes.png">
 <meta property="og:image" content="http://anhkgg.github.io/img/Figure-6-Generated-structure-of-function-pointers.png">
 <meta property="og:image" content="http://anhkgg.github.io/img/Figure-7-Sample-function-pointer-array-usage-300x199.png">
-<meta property="og:updated_time" content="2016-07-11T10:32:06.369Z">
+<meta property="og:updated_time" content="2016-07-11T10:34:32.931Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="precalculated-string-hashes-reverse-engineering-shellcode">
-<meta name="twitter:description" content="ǰ����fireeye����ida��shellcode_hashes_search_plugin.py�����·��룬ԭ��������USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
-������fireeye��Jay Smithд�ģ�����˵�����ڷ�����������������she">
+<meta name="twitter:description" content="前言对fireeye关于ida中shellcode_hashes_search_plugin.py的文章翻译，原文链接是USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE
+文章是fireeye的Jay Smith写的，介绍说经常在分析恶意样本中遇到shellcode，文章会介绍shellcode导入技术的背景以及">
 <meta name="twitter:image" content="http://anhkgg.github.io/img/Figure-3-QT-GUI-view-300x185.png">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
@@ -89,7 +89,7 @@
 						<li>Links</li>
 						
 						
-						<li>About</li>
+						<li>Über</li>
 						
 					</ul>
 				</div>
@@ -241,42 +241,42 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="j��"><a href="#j��" class="headerlink" title="ǰ��"></a>ǰ��</h1><p>��fireeye����ida��shellcode_hashes_search_plugin.py�����·��룬ԭ��������<a href="https://www.fireeye.com/blog/threat-research/2012/11/precalculated-string-hashes-reverse-engineering-shellcode.html" target="_blank" rel="external">USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE</a></p>
-<p>������fireeye��<a href="https://www.fireeye.com/blog/threat-research.html/category/etc/tags/fireeye-blog-authors/cap-jay-smith" target="_blank" rel="external">Jay Smith</a>д�ģ�����˵�����ڷ�����������������shellcode�����»�����shellcode���뼼���ı����Լ�������IDA�Զ�����������������shellcode</p>
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>对fireeye关于ida中shellcode_hashes_search_plugin.py的文章翻译，原文链接是<a href="https://www.fireeye.com/blog/threat-research/2012/11/precalculated-string-hashes-reverse-engineering-shellcode.html" target="_blank" rel="external">USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE</a></p>
+<p>文章是fireeye的<a href="https://www.fireeye.com/blog/threat-research.html/category/etc/tags/fireeye-blog-authors/cap-jay-smith" target="_blank" rel="external">Jay Smith</a>写的，介绍说经常在分析恶意样本中遇到shellcode，文章会介绍shellcode导入技术的背景以及如何是IDA自动化标记来更快分析shellcode</p>
 <a id="more"></a>
-<h1 id="����shellcode"><a href="#����shellcode" class="headerlink" title="����shellcode"></a>����shellcode</h1><p>�ж�һ��shellcode����ʲô�����򵥵ķ����ǽ�������һ�����ػ��������С���������shellcode�Ǳ�exploit���ز�����û�ж�Ӧ�汾�Ŀ����ó��������ַ�ʽ��ûʲô���ˡ��������о�shellcode�ľ����У����Ƿ��ֺܶ�������������һ��Ƕ����shellcode��������shellcodeע�뵽����������ִ�С�Ȼ������ȡ������Ƕ����shellcode�����������������������ǿ��õġ�����Щ�����£�����Ҫ��̬����shellcode����������Щʲô�����ˡ�</p>
-<p>Shellcode�Ķ������ļ�һ�㶼���Ǻܴ��������������ǲ����Ǻ��ѣ�����ͨ��shellcode���߻�ʹ��һЩ�����ֶ����谭��������������һ�ּ�������ʹ��API��������hash���ֹ����뺯����</p>
-<h1 id="shellcode���뼼��"><a href="#shellcode���뼼��" class="headerlink" title="shellcode���뼼��"></a>shellcode���뼼��</h1><p>�����߱�д�����ĳ���ͨ��ʹ��kernel32.dll��LoadLibraryA��GetProcAddress����������DLL�ͻ�ȡ���ǵĵ���������ַ����shllcode�����߾��������ڴ���С���ƣ����������ڴ�����ʹ��API�������������ַ����ǲ������ܵġ�������ʹ�������������ַ�����Ԥ�ȼ����ú�������hashֵ�����浽shellcode�У����Ѹ��ٵ��ڴ���С��ʹ�����ַ�ʽ�Ļ���shellcode�Ͳ���ʹ��GetProcAddress����ȡ������ַ�ˣ���Ҫ����DLL��PE�ļ��ҵ�����Ŀ¼�����������������顣��ÿ���������֣�����������hashֵ���Ա���ǰ������shellcode�е�hashֵ���������Ⱦ��ҵ��˶�Ӧ��API�������������ּ����ı������Ͽ�����Last Stage��<a href="http://lsd-pl.net/projects/winasm.zip" target="_blank" rel="external">winasm</a>��Ŀ�й�����paper���ҵ���</p>
-<p>���ּ������������ѣ��������˵���shellcode���ߴ󶼻�������֪��hash�㷨��ֵ���������������͸������ˡ����������Ĵ󲿷�shellcode������hash�㷨����metasploit��¼�ˡ������㷨���£�</p>
+<h1 id="逆向shellcode"><a href="#逆向shellcode" class="headerlink" title="逆向shellcode"></a>逆向shellcode</h1><p>判断一段shellcode做了什么，最简单的方法是将其放在一个监控环境中运行。但是如果shellcode是被exploit加载并且你没有对应版本的可利用程序，这种方式就没什么用了。在我们研究shellcode的经验中，我们发现很多恶意样本含有一段嵌入的shellcode，样本将shellcode注入到其他进程中执行。然而，获取到这段嵌入的shellcode，让他运行起来，并不总是可用的。在这些情况下，就需要静态分析shellcode来看看它有些什么功能了。</p>
+<p>Shellcode的二进制文件一般都不是很大，所以逆向它们并不是很难，但是通常shellcode作者会使用一些技术手段来阻碍逆向分析。其中一种技术就是使用API函数名的hash来手工导入函数。</p>
+<h1 id="shellcode导入技术"><a href="#shellcode导入技术" class="headerlink" title="shellcode导入技术"></a>shellcode导入技术</h1><p>开发者编写正常的程序通常使用kernel32.dll的LoadLibraryA和GetProcAddress来加载任意DLL和获取它们的到处函数地址。而shllcode的作者经常遇到内存大小限制，所以如果在代码中使用API函数名的完整字符串是不大可能的。相对于使用完整函数名字符串，预先计算好函数名的hash值，保存到shellcode中，花费更少的内存大小。使用这种方式的话，shellcode就不能使用GetProcAddress来获取函数地址了，需要解析DLL的PE文件找到导出目录，解析到处函数数组。对每个函数名字，计算出它的hash值，对比先前保存在shellcode中的hash值，如果相等就找到了对应的API函数。关于这种技术的背景资料可以在Last Stage的<a href="http://lsd-pl.net/projects/winasm.zip" target="_blank" rel="external">winasm</a>项目中公开的paper中找到。</p>
+<p>这种技术听起来很难，但是幸运的是shellcode作者大都会重用已知的hash算法和值，这样逆向分析就更简单了。我所见过的大部分shellcode样本的hash算法都被metasploit收录了。这个算法如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">acc := 0</div><div class="line">for c in input_string do</div><div class="line">    acc := ROR(acc, 13);</div><div class="line">    acc := acc + c;</div><div class="line">end</div></pre></td></tr></table></figure>
-<p>�����϶�����һ����ǿ��hash�㷨���������Ѿ���ȫ���Դﵽ�����ⳤ�ȵ������ַ���������һ��������Ŀ�ġ������㷨Ψһ�������ǿ�����ʹ�õ�ÿһ��API��������Ψһ��hashֵ���㷨�м򵥵�ROR-13�Ǻ���Ч�ġ��Ҽ����Ĳ�һ����hash�㷨ͨ��ֻ�ǽ������㷨��������΢���޸ģ�λ��һ����ͬ��ֵ�������ƻ������ƣ�����ʹ�����������������������ַ������ϳ�һ������ֵ��</p>
-<h1 id="�Զ�����shellcode����"><a href="#�Զ�����shellcode����" class="headerlink" title="�Զ�����shellcode����"></a>�Զ�����shellcode����</h1><p>������һ������shellcode��ʱ������ͨ������������������Щħ���������Լ�������Щֵ�������ı����Ժ�ʹ�á��ܳ�һ��ʱ�䣬�ҿ��˺ܶ�������������˼������һ���������ظ��Ĺ�������ʹ��IDA�ű������Զ�����</p>
-<p>����shellcode��������ͨ�õĴ��룬�Ҿ��ù����ҵ�IDA�ű����Զ������������а�����Ԥ������֪��hash�㷨����������API��������hash�����������µ�hash�㷨���֣��Ͳ���ʵ����������hashֵ�ˡ���Poison Ivy RAT���ַ���hash���й���������������ԭ�ģ�There has only been one instance, involving string hash from Poison Ivy RAT, in which this wasn’t the case����</p>
-<p>������<a href="https://github.com/mandiant/Reversing." target="_blank" rel="external">https://github.com/mandiant/Reversing</a>�ҵ��ű���</p>
-<p>���������֣�</p>
+<p>这个肯定不是一个很强的hash算法，但是它已经完全可以达到将任意长度的输入字符串计算成一个整数的目的。这个算法唯一的限制是开发者使用的每一个API函数都有唯一的hash值，算法中简单的ROR-13是很有效的。我见过的不一样的hash算法通常只是将这个算法进行了轻微的修改：位移一个不同的值，将右移换成左移，或者使用其他方法将输入的所有字符串混合成一个整数值。</p>
+<h1 id="自动标记shellcode导入"><a href="#自动标记shellcode导入" class="headerlink" title="自动标记shellcode导入"></a>自动标记shellcode导入</h1><p>当你第一次逆向shellcode的时候，你通常可能在网上搜搜这些魔数，或者自己计算这些值保存在文本中以后使用。很长一段时间，我看了很多的样本，我意思到这是一个烦人且重复的工作，该使用IDA脚本进行自动化。</p>
+<p>由于shellcode作者重用通用的代码，我觉得公开我的IDA脚本集对恶意代码分析有帮助。预先用已知的hash算法计算出重用API函数名的hash后，如果有新的hash算法出现，就不难实现它来产生hash值了。在Poison Ivy RAT的字符串hash，有过这种情况（这句原文：There has only been one instance, involving string hash from Poison Ivy RAT, in which this wasn’t the case）。</p>
+<p>可以在<a href="https://github.com/mandiant/Reversing." target="_blank" rel="external">https://github.com/mandiant/Reversing</a>找到脚本。</p>
+<p>有两个部分：</p>
 <ol>
-<li><code>make_sc_hash_db.py</code> ������Ԥ�ȼ��㺯�����ֵ�hashֵ������һ��ʵ��������ǰ��������hash�㷨��������python�ű�����������һ��Ŀ¼�е�����DLL��������ÿ������������hashֵ��������SQLite���ݿ��С�</li>
-<li><code>shellcode_hash_search.py</code> ��һ��IDAPython�ű�����������SQLite���ݿ⣬��ȡ����Ԥ�ȼ�����hashֵ���ڵ�ǰ�ļ���������֪��hashֵ��</li>
+<li><code>make_sc_hash_db.py</code> 是用于预先计算函数名字的hash值。这是一个实现了我以前遇到过的hash算法的命令行python脚本。它处理了一个目录中的所有DLL，计算了每个到处函数的hash值，保存在SQLite数据库中。</li>
+<li><code>shellcode_hash_search.py</code> 是一个IDAPython脚本，用来打开SQLite数据库，获取其中预先计算的hash值，在当前文件中搜索已知的hash值。</li>
 </ol>
-<p><code>make_sc_hash_db.py</code>��������������ʹ�ã���һ��������Ҫ���������ݿ����֣��ڶ��������Ǳ���DLL��Ŀ¼�������������������裬�����汾���Ѿ��и��򵥵����ݿ��ˡ�</p>
+<p><code>make_sc_hash_db.py</code>可以像下面那样使用，第一个参数是要创建的数据库名字，第二个参数是保存DLL的目录。如果你跳过这个步骤，发布版本中已经有个简单的数据库了。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python make_sc_hash_db.py sc_hashes.db /customer/microsoft/shellcode_dlls/</div></pre></td></tr></table></figure>
-<p>��<code>shellcode_hash_search.py</code>��������������ʾ�û�ʹ���ĸ����ݿ⣬Ȼ��ѯ���û���������������������ʾ���еı��������ݿ��е�hash�㷨��Ȼ���ṩһЩ�򵥵���֪��α���룬��ͼ��</p>
+<p>当<code>shellcode_hash_search.py</code>运行起来后，提示用户使用哪个数据库，然后询问用户其他的搜索参数。它显示所有的保存在数据库中的hash算法，然后提供一些简单的已知的伪代码，如图：</p>
 <p><img src="/img/Figure-3-QT-GUI-view-300x185.png" alt="Figure-3-QT-GUI-view-300x185"></p>
-<p>�ű��᳢��ʹ��HexRays����������QT��PySide(��������������<a href="http://www.hex-rays.com/products/ida/support/download.shtml" target="_blank" rel="external">http://www.hex-rays.com/products/ida/support/download.shtml)</a>))������HexRays��û��PySide����ʹ�ü򵥵ĶԻ�����������ͬ����Ϣ��</p>
-<p>����û���κ���Ϣ���������ű�������ǰ�λ��߸������򡣽ű���ѯÿ��DWORD��ѡ����DWORD Arrayѡ���ÿ��ָ����������ѡ����Instr Operandsѡ��������ǲ���ѡ���㷨��һ��hashֵ�������ҵ���һ��hashֵ����һ��line comment����ͼ��</p>
+<p>脚本会尝试使用HexRays发布的用于QT的PySide(可以在这里下载<a href="http://www.hex-rays.com/products/ida/support/download.shtml" target="_blank" rel="external">http://www.hex-rays.com/products/ida/support/download.shtml)</a>))。如果HexRays中没有PySide，它使用简单的对话框来或者相同的信息。</p>
+<p>如果没有任何信息被高亮，脚本搜索当前段或者高亮区域。脚本查询每个DWORD（选中了DWORD Array选项），每个指令操作数（选中了Instr Operands选项）来决定是不是选中算法的一个hash值。如果找到了一个hash值会有一个line comment。如图：</p>
 <p><img src="/img/Figure-4-Comments-are-added-for-identified-hashes.png" alt="Figure-4-Comments-are-added-for-identified-hashes-300x150.png"></p>
-<p>��Щshellcode����Ҳ����ʹ��hashֵ������DWORD�����У������ǽ�ÿ��ֵѹ�뺯����������ͼ��</p>
+<p>有些shellcode作者也经常使用hash值保存在DWORD数组中，而不是将每个值压入函数参数，如图：</p>
 <p><img src="/img/Figure-5-DWORD-array-of-hashes.png" alt="Figure-5-DWORD-array-of-hashes-300x149.png"></p>
-<p>����ѡ����Create Struct�������ҵ���hashֵ��һ��������ַ���ű����Զ�����һ���ṹ�壬��ͼ��</p>
+<p>如果选中了Create Struct，如果找到的hash值在一段连续地址，脚本会自动创建一个结构体，如图：</p>
 <p><img src="/img/Figure-6-Generated-structure-of-function-pointers.png" alt="Figure-6-Generated-structure-of-function-pointers-300x221.png"></p>
-<p>����shellcode����ʹ�ú���ָ�����飬�ṹ���ǳ����ã�����ת����<code>[base+index]</code>�Ľṹ�����á���ͼ��</p>
+<p>如果shellcode作者使用函数指针数组，结构体非常有用，它会转换成<code>[base+index]</code>的结构体引用。如图：</p>
 <p><img src="/img/Figure-7-Sample-function-pointer-array-usage-300x199.png" alt="Figure-7-Sample-function-pointer-array-usage-300x199 (1).png"></p>
-<p><code>shellcode_hashes_search_plugin.py</code>������ʾIDA�����˵��ġ�������<code>%PROGRAMFILES%IDAplugins</code>����������python�ļ���PATH����������ȷ���ɱ�ʹ�á�</p>
-<h1 id="�ܽ�"><a href="#�ܽ�" class="headerlink" title="�ܽ�"></a>�ܽ�</h1><p>ͨ������������һ��shellcode��������binary�ļ����ӷ�ζ��IDA�ĵ���������ȱ����һ���ӳ������ĺܴ�ԭ����ͨ��IDAPython�ű����Խ������������⣬�����Ѿ����ű�������githun��ϣ�����ǵ�shellcode�����ܹ��õ��Ľ���</p>
-<p><strong>�ο�:</strong></p>
+<p><code>shellcode_hashes_search_plugin.py</code>用来显示IDA插件菜单的。拷贝到<code>%PROGRAMFILES%IDAplugins</code>，设置其他python文件到PATH环境变量中确保可被使用。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>通常，逆向分析一个shellcode比正常的binary文件更加乏味。IDA的导入表分析缺陷是一个延长分析的很大原因。通过IDAPython脚本可以解决上面的问题，我们已经将脚本公开在githun，希望你们的shellcode分析能够得到改进。</p>
+<p><strong>参考:</strong></p>
 <p><a href="https://www.fireeye.com/blog/threat-research/2012/11/precalculated-string-hashes-reverse-engineering-shellcode.html" target="_blank" rel="external">USING PRECALCULATED STRING HASHES WHEN REVERSE ENGINEERING SHELLCODE</a></p>
 <hr>
-<p>ת����ע��������лл��</p>
+<p>转载请注明出处，谢谢！</p>
 
       
     </div>
