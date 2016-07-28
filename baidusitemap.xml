@@ -5,10 +5,10 @@
     
   <url>
     <loc>http://anhkgg.github.io/pin-use-note-function-analysis/</loc>
-    <lastmod>2016-07-28T05:31:51.874Z</lastmod>
+    <lastmod>2016-07-28T05:34:18.418Z</lastmod>
     <data>
         <display>
-        <title>pinʹ��С��-��������</title>
+        <title>pin使用小记-函数分析</title>
         <pubTime>2016-07-28T05:27:33.000Z</pubTime>
         
         <tag>pin</tag>
@@ -24,6 +24,12 @@
         <tag>instrument</tag>
          
         <tag>asm</tag>
+         
+        <tag>插桩</tag>
+         
+        <tag>钩子</tag>
+         
+        <tag>指令级</tag>
          
          
            
