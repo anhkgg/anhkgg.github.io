@@ -5,7 +5,7 @@
     
   <url>
     <loc>http://anhkgg.github.io/pin-use-note-function-analysis/</loc>
-    <lastmod>2016-07-28T05:30:18.413Z</lastmod>
+    <lastmod>2016-07-28T05:31:51.874Z</lastmod>
     <data>
         <display>
         <title>pinʹ��С��-��������</title>
@@ -19,11 +19,9 @@
          
         <tag>hook</tag>
          
-        <tag>��׮</tag>
+        <tag>insertcall</tag>
          
-        <tag>����</tag>
-         
-        <tag>ָ��</tag>
+        <tag>instrument</tag>
          
         <tag>asm</tag>
          
@@ -239,9 +237,9 @@
         <title>xctf sctf summary, little writeup</title>
         <pubTime>2014-12-07T13:02:23.000Z</pubTime>
         
-        <tag>sctf</tag>
-         
         <tag>ctf</tag>
+         
+        <tag>sctf</tag>
          
         <tag>writeup</tag>
          
