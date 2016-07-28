@@ -4,6 +4,40 @@
 
     
   <url>
+    <loc>http://anhkgg.github.io/pin-use-note-function-analysis/</loc>
+    <lastmod>2016-07-28T05:30:18.413Z</lastmod>
+    <data>
+        <display>
+        <title>pinʹ��С��-��������</title>
+        <pubTime>2016-07-28T05:27:33.000Z</pubTime>
+        
+        <tag>pin</tag>
+         
+        <tag>pintool</tag>
+         
+        <tag>function analysis</tag>
+         
+        <tag>hook</tag>
+         
+        <tag>��׮</tag>
+         
+        <tag>����</tag>
+         
+        <tag>ָ��</tag>
+         
+        <tag>asm</tag>
+         
+         
+           
+             
+              <breadCrumb title="security" url="http://anhkgg.github.io/categories/security/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/</loc>
     <lastmod>2016-07-11T10:38:41.611Z</lastmod>
     <data>
@@ -205,9 +239,9 @@
         <title>xctf sctf summary, little writeup</title>
         <pubTime>2014-12-07T13:02:23.000Z</pubTime>
         
-        <tag>ctf</tag>
-         
         <tag>sctf</tag>
+         
+        <tag>ctf</tag>
          
         <tag>writeup</tag>
          
