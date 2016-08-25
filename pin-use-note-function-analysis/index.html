@@ -6,8 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>pin使用小记-函数分析 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="概述相关：
-pin是什么  pin可以做什么  pin examples
+  <meta name="description" content="概述相关：pin是什么  pin可以做什么  pin examples
 此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能
 由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。
 下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。">
@@ -15,16 +14,14 @@ pin是什么  pin可以做什么  pin examples
 <meta property="og:title" content="pin使用小记-函数分析">
 <meta property="og:url" content="http://anhkgg.github.io/pin-use-note-function-analysis/index.html">
 <meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
-<meta property="og:description" content="概述相关：
-pin是什么  pin可以做什么  pin examples
+<meta property="og:description" content="概述相关：pin是什么  pin可以做什么  pin examples
 此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能
 由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。
 下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。">
-<meta property="og:updated_time" content="2016-07-28T05:37:50.533Z">
+<meta property="og:updated_time" content="2016-07-28T05:42:35.293Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="pin使用小记-函数分析">
-<meta name="twitter:description" content="概述相关：
-pin是什么  pin可以做什么  pin examples
+<meta name="twitter:description" content="概述相关：pin是什么  pin可以做什么  pin examples
 此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能
 由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。
 下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。">
@@ -87,12 +84,12 @@ pin是什么  pin可以做什么  pin examples
 					<div class="tips-arrow"></div>
 					<ul class="tips-inner">
 						<li>Menu</li>
-						<li>Tags</li>
+						<li>Тэги</li>
 						
 						<li>Links</li>
 						
 						
-						<li>Über</li>
+						<li>О сайте</li>
 						
 					</ul>
 				</div>
@@ -129,7 +126,7 @@ pin是什么  pin可以做什么  pin examples
 				
 				<section class="switch-part switch-part2">
 					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
 					</div>
 				</section>
 				
@@ -244,8 +241,7 @@ pin是什么  pin可以做什么  pin examples
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>相关：</p>
-<p><a href="https://software.intel.com/en-us/articles/pintool/" target="_blank" rel="external">pin是什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/" target="_blank" rel="external">pin可以做什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/index.html#EXAMPLES" target="_blank" rel="external">pin examples</a></p>
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>相关：<a href="https://software.intel.com/en-us/articles/pintool/" target="_blank" rel="external">pin是什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/" target="_blank" rel="external">pin可以做什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/index.html#EXAMPLES" target="_blank" rel="external">pin examples</a></p>
 <p>此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能</p>
 <p>由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。</p>
 <p>下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。</p>
@@ -329,6 +325,15 @@ pin是什么  pin可以做什么  pin examples
   
     
 <nav id="article-nav">
+  
+    <a href="/liburl-use-minihttp/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          libcurl小记-简单http封装使用-源码分析
+        
+      </div>
+    </a>
   
   
     <a href="/precalculated-string-hashes-reverse-engineering-shellcode/" id="article-nav-older" class="article-nav-link-wrap">

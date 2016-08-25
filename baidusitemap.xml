@@ -4,8 +4,34 @@
 
     
   <url>
+    <loc>http://anhkgg.github.io/liburl-use-minihttp/</loc>
+    <lastmod>2016-08-25T12:34:34.449Z</lastmod>
+    <data>
+        <display>
+        <title>libcurl小记-简单http封装使用-源码分析</title>
+        <pubTime>2016-08-25T12:32:06.000Z</pubTime>
+        
+        <tag>libcurl</tag>
+         
+        <tag>http</tag>
+         
+        <tag>minihttp</tag>
+         
+        <tag>get_post_ajax</tag>
+         
+         
+           
+             
+              <breadCrumb title="code" url="http://anhkgg.github.io/categories/code/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://anhkgg.github.io/pin-use-note-function-analysis/</loc>
-    <lastmod>2016-07-28T05:37:50.533Z</lastmod>
+    <lastmod>2016-07-28T05:42:35.293Z</lastmod>
     <data>
         <display>
         <title>pin使用小记-函数分析</title>

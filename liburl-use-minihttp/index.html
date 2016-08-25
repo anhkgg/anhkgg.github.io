@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>libcurl小记-简单http封装使用-源码分析 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="0x00. 前面以前用Wininet api包了一个简单易用的http请求的lib，但是居然会遇到系统不支持的情况，难道要我自己用socket写吗？no way！
+以前知道liburl，第一次使用，啥都不知道，反正感觉挺强大的
+&amp;lt; libcurl is a free and easy-to-use client-side URL transfer library, supporting DI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="libcurl小记-简单http封装使用-源码分析">
+<meta property="og:url" content="http://anhkgg.github.io/liburl-use-minihttp/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="0x00. 前面以前用Wininet api包了一个简单易用的http请求的lib，但是居然会遇到系统不支持的情况，难道要我自己用socket写吗？no way！
+以前知道liburl，第一次使用，啥都不知道，反正感觉挺强大的
+&amp;lt; libcurl is a free and easy-to-use client-side URL transfer library, supporting DI">
+<meta property="og:updated_time" content="2016-08-25T12:34:34.449Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="libcurl小记-简单http封装使用-源码分析">
+<meta name="twitter:description" content="0x00. 前面以前用Wininet api包了一个简单易用的http请求的lib，但是居然会遇到系统不支持的情况，难道要我自己用socket写吗？no way！
+以前知道liburl，第一次使用，啥都不知道，反正感觉挺强大的
+&amp;lt; libcurl is a free and easy-to-use client-side URL transfer library, supporting DI">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Тэги</li>
+						
+						<li>Links</li>
+						
+						
+						<li>О сайте</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-liburl-use-minihttp" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/liburl-use-minihttp/" class="article-date">
+  	<time datetime="2016-08-25T12:32:06.000Z" itemprop="datePublished">2016-08-25</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      libcurl小记-简单http封装使用-源码分析
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/get-post-ajax/">get_post_ajax</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/http/">http</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/libcurl/">libcurl</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/minihttp/">minihttp</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/code/">code</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-前面"><a href="#0x00-前面" class="headerlink" title="0x00. 前面"></a>0x00. 前面</h1><p>以前用Wininet api包了一个简单易用的http请求的lib，但是居然会遇到系统不支持的情况，难道要我自己用socket写吗？no way！</p>
+<p>以前知道liburl，第一次使用，啥都不知道，反正感觉挺强大的</p>
+<p>&lt; libcurl is a free and easy-to-use client-side URL transfer library, supporting DICT, FILE, FTP, FTPS, Gopher, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, Telnet and TFTP.</p>
+<p>须知，我这里只用到了HTTP</p>
+<p><a href="https://curl.haxx.se/" target="_blank" rel="external">home: https://curl.haxx.se/</a></p>
+<p><a href="https://curl.haxx.se/libcurl/" target="_blank" rel="external">document: https://curl.haxx.se/libcurl/</a></p>
+<p>其实使用比较简单，但对我没有认真看过文档，并且没有找到好资料的情况下，我遇到了很多弯路，并且想吐槽实例代码，搞那么复杂干嘛，还没有我想要的代码。</p>
+<a id="more"></a>
+<p>下面开始坑。</p>
+<h1 id="0x01-就这么简单"><a href="#0x01-就这么简单" class="headerlink" title="0x01. 就这么简单"></a>0x01. 就这么简单</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">/* curl stuff */ </div><div class="line">#include &lt;curl/curl.h&gt;</div><div class="line">//#pragma comment(lib, &quot;liburl.lib&quot;)</div><div class="line"></div><div class="line">int main(void)</div><div class="line">&#123;</div><div class="line">  CURL *curl;</div><div class="line">  CURLcode res;</div><div class="line"> </div><div class="line">  /* In windows, this will init the winsock stuff */ </div><div class="line">  curl_global_init(CURL_GLOBAL_ALL);</div><div class="line"> </div><div class="line">  /* get a curl handle */ </div><div class="line">  curl = curl_easy_init();</div><div class="line">  if(curl) &#123;</div><div class="line">    /* First set the URL that is about to receive our POST. This URL can</div><div class="line">       just as well be a https:// URL if that is what should receive the</div><div class="line">       data. */ </div><div class="line">    curl_easy_setopt(curl, CURLOPT_URL, &quot;http://postit.example.com/moo.cgi&quot;);</div><div class="line">    /* Now specify the POST data */ </div><div class="line">    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, &quot;name=daniel&amp;project=curl&quot;);</div><div class="line"> </div><div class="line">    /* Perform the request, res will get the return code */ </div><div class="line">    res = curl_easy_perform(curl);</div><div class="line">    /* Check for errors */ </div><div class="line">    if(res != CURLE_OK)</div><div class="line">      fprintf(stderr, &quot;curl_easy_perform() failed: %s\n&quot;,</div><div class="line">              curl_easy_strerror(res));</div><div class="line"> </div><div class="line">    /* always cleanup */ </div><div class="line">    curl_easy_cleanup(curl);</div><div class="line">  &#125;</div><div class="line">  curl_global_cleanup();</div><div class="line">  return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>简单应用就是这样子，关键在这两句<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">curl_easy_setopt(curl, CURLOPT_URL, &quot;http://postit.example.com/moo.cgi&quot;);</div><div class="line">    /* Now specify the POST data */ </div><div class="line">curl_easy_setopt(curl, CURLOPT_POSTFIELDS, &quot;name=daniel&amp;project=curl&quot;);</div></pre></td></tr></table></figure></p>
+<p>liburl通过设置各种回调函数来完成各种功能。</p>
+<h1 id="0x01-http请求"><a href="#0x01-http请求" class="headerlink" title="0x01. http请求"></a>0x01. http请求</h1><p>CURLOPT_URL ： 访问的目标url路径，如果是GET方式请求，需要将请求数据加到URL后面<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">www.baidu.com/login.asp?name=111&amp;password=111</div></pre></td></tr></table></figure></p>
+<p>CURLOPT_POSTFIELDS ： POST请求中发送的数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl_easy_setopt(curl, CURLOPT_POSTFIELDS, &quot;name=daniel&amp;project=curl&quot;);</div></pre></td></tr></table></figure></p>
+<p>并且POST请求中还需要设置CURLOPT_POST为1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">/* size of the POST data */</div><div class="line">curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.length());</div><div class="line">curl_easy_setopt(curl, CURLOPT_POST, 1);</div></pre></td></tr></table></figure></p>
+<p>另外，奇葩的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); //url在release可正常使用，debug去不行，只能使用url.c_str();</div></pre></td></tr></table></figure></p>
+<h1 id="0x02-接收数据"><a href="#0x02-接收数据" class="headerlink" title="0x02. 接收数据"></a>0x02. 接收数据</h1><p>接收数据需要注册CURLOPT_WRITEFUNCTION回调函数，在回调函数中进行数据处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, write_callback);</div></pre></td></tr></table></figure></p>
+<p>如果数据不能一次接收完成，需要利用回调中的参数来缓存数据，也就是通过CURLOPT_WRITEDATA设置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl_easy_setopt(*curl, CURLOPT_WRITEDATA, data);</div></pre></td></tr></table></figure></p>
+<p>回调函数处理中，最后一次参数就是设置的用于缓存的变量，需要注意的是数据长度，不是size，而是<code>size*nmemb</code>。 并且如果返回值不等于size*nmemb，libcurl会认为处理失败<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)</div><div class="line">&#123;</div><div class="line">	size_t all_size = size*nmemb;</div><div class="line">	PWRITE_CALLBACK_DATA data = (PWRITE_CALLBACK_DATA)userdata;</div><div class="line"></div><div class="line">	data-&gt;data.append(ptr);</div><div class="line">	data-&gt;size += all_size;</div><div class="line"></div><div class="line">	return all_size;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h1 id="0x03-cookie"><a href="#0x03-cookie" class="headerlink" title="0x03. cookie"></a>0x03. cookie</h1><p>通过cookie文件保存，读取cookie</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">curl_easy_setopt(*curl, CURLOPT_COOKIEJAR, &quot;cookie.txt&quot;);        //把服务器发过来的cookie保存到cookie.txt</div><div class="line">curl_easy_setopt(*curl, CURLOPT_COOKIEFILE, &quot;cookie.txt&quot;);        //读取本地存储的cookie</div><div class="line">```	</div><div class="line"></div><div class="line">直接设置cookie信息</div></pre></td></tr></table></figure>
+<p>//curl_easy_setopt(curl, CURLOPT_COOKIE, m_cookies.c_str());<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"># 0x04. 一点点分析</div><div class="line"></div><div class="line">下面是遇到坑时的一小点点源码翻阅，觉得有用的可以看看</div><div class="line"></div><div class="line">## 1. curl_easy_setopt调用中</div></pre></td></tr></table></figure></p>
+<p>//curl_easy_setopt调用中<br>CURLcode curl_easy_setopt(struct Curl_easy <em>data, CURLoption tag, …)//lib/easy.c<br>–&gt;<br>CURLcode Curl_setopt(struct Curl_easy </em>data, CURLoption option,<br>                     va_list param)//lib/url.c<br>{<br>    //根据option类型，设置不同回调<br>    //保存在data-&gt;set的不同字段中<br>    case CURLOPT_URL:<br>    if(data-&gt;change.url_alloc) {<br>      /<em> the already set URL is allocated, free it first! </em>/<br>      Curl_safefree(data-&gt;change.url);<br>      data-&gt;change.url_alloc = FALSE;<br>    }<br>    result = setstropt(&amp;data-&gt;set.str[STRING_SET_URL],<br>                       va_arg(param, char <em>));<br>    data-&gt;change.url = data-&gt;set.str[STRING_SET_URL];<br>    break;<br>    case CURLOPT_PORT:<br>    data-&gt;set.use_port = va_arg(param, long);<br>    break;<br>    case CURLOPT_WRITEFUNCTION:<br>    data-&gt;set.fwrite_func = va_arg(param, curl_write_callback);<br>    if(!data-&gt;set.fwrite_func) {<br>      data-&gt;set.is_fwrite_set = 0;<br>      /</em> When set to NULL, reset to our internal default function <em>/<br>      data-&gt;set.fwrite_func = (curl_write_callback)fwrite;<br>    }<br>    else<br>      data-&gt;set.is_fwrite_set = 1;<br>    break;<br>    case CURLOPT_WRITEDATA:<br>    data-&gt;set.out = va_arg(param, void </em>);<br>    break;<br>    case CURLOPT_HTTPHEADER:<br>    data-&gt;set.headers = va_arg(param, struct curl_slist <em>);<br>    break;<br>    case CURLOPT_COOKIEJAR:<br>    {<br>    struct CookieInfo </em>newcookies;<br>    result = setstropt(&amp;data-&gt;set.str[STRING_COOKIEJAR],<br>                       va_arg(param, char *));<br>    newcookies = Curl_cookie_init(data, NULL, data-&gt;cookies,<br>                                  data-&gt;set.cookiesession);<br>    if(!newcookies)<br>      result = CURLE_OUT_OF_MEMORY;<br>    data-&gt;cookies = newcookies;<br>    }<br>    break;</p>
+<p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 2. 请求中</div></pre></td></tr></table></figure></p>
+<p>CURLcode curl_easy_perform(struct Curl_easy <em>data)//lib/easy.c<br>-&gt;<br>static CURLcode easy_perform(struct Curl_easy </em>data, bool events)//lib/easy.c<br>-&gt;<br>static CURLcode easy_transfer(struct Curl_multi <em>multi)//lib/easy.c<br>-&gt;<br>CURLMcode curl_multi_perform(struct Curl_multi </em>multi, int <em>running_handles)//\lib\multi.c<br>{<br>  data=multi-&gt;easyp;//就是Curl_easy </em>data<br>  while(data) {<br>    CURLMcode result;<br>    SIGPIPE_VARIABLE(pipe_st);</p>
+<pre><code>sigpipe_ignore(data, &amp;pipe_st);
+result = multi_runsingle(multi, now, data);//一次请求
+sigpipe_restore(&amp;pipe_st);
+
+if(result)
+  returncode = result;
+
+data = data-&gt;next; /* operate on next handle */
+</code></pre><p>  }<br>}<br>-&gt;<br>static CURLMcode multi_runsingle(struct Curl_multi <em>multi,<br>                                 struct timeval now,<br>                                 struct Curl_easy </em>data)//\lib\multi.c<br>{<br>    //这里面有个重要的字段data-&gt;mstate，表示当前curl的状态<br>    //通过multistate(data, CURLM_STATE_PERFORM);=&gt;static void mstate(struct Curl_easy <em>data, CURLMstate state)赋值<br>    //CURLMcode curl_multi_add_handle(struct Curl_multi </em>multi, struct Curl_easy <em>data) =&gt; multistate(data, CURLM_STATE_INIT);<br>    //CURLMcode Curl_multi_add_perform(struct Curl_multi </em>multi, struct Curl_easy <em>data, struct connectdata </em>conn)=&gt;multistate(data, CURLM_STATE_PERFORM);<br>    //等等</p>
+<pre><code>//...
+do{
+    //本函数中，循环各种状态判断，处理不同逻辑
+    switch(data-&gt;mstate) {
+    //初始化
+    case CURLM_STATE_INIT:
+      /* init this transfer. */
+      result=Curl_pretransfer(data);//各种信息初始化，ssl，cookie
+
+      if(!result) {
+        /* after init, go CONNECT */
+        multistate(data, CURLM_STATE_CONNECT);//状态更改
+        Curl_pgrsTime(data, TIMER_STARTOP);
+        rc = CURLM_CALL_MULTI_PERFORM;
+      }
+      break;
+     case CURLM_STATE_CONNECT:
+      /* Connect. We want to get a connection identifier filled in. */
+      Curl_pgrsTime(data, TIMER_STARTSINGLE);
+      result = Curl_connect(data, &amp;data-&gt;easy_conn,
+                            &amp;async, &amp;protocol_connect);
+      if(CURLE_NO_CONNECTION_AVAILABLE == result) {
+        /* There was no connection available. We will go to the pending
+           state and wait for an available connection. */
+        multistate(data, CURLM_STATE_CONNECT_PEND);
+
+        /* add this handle to the list of connect-pending handles */
+        if(!Curl_llist_insert_next(multi-&gt;pending, multi-&gt;pending-&gt;tail, data))
+          result = CURLE_OUT_OF_MEMORY;
+        else
+          result = CURLE_OK;
+        break;
+      }
+
+      if(!result) {
+        /* Add this handle to the send or pend pipeline */
+        result = Curl_add_handle_to_pipeline(data, data-&gt;easy_conn);
+        if(result)
+          disconnect_conn = TRUE;
+        else {
+          if(async)
+            /* We&apos;re now waiting for an asynchronous name lookup */
+            multistate(data, CURLM_STATE_WAITRESOLVE);
+          else {
+            /* after the connect has been sent off, go WAITCONNECT unless the
+               protocol connect is already done and we can go directly to
+               WAITDO or DO! */
+            rc = CURLM_CALL_MULTI_PERFORM;
+
+            if(protocol_connect)
+              multistate(data, Curl_pipeline_wanted(multi, CURLPIPE_HTTP1)?
+                         CURLM_STATE_WAITDO:CURLM_STATE_DO);
+            else {
+#ifndef CURL_DISABLE_HTTP
+              if(data-&gt;easy_conn-&gt;tunnel_state[FIRSTSOCKET] == TUNNEL_CONNECT)
+                multistate(data, CURLM_STATE_WAITPROXYCONNECT);
+              else
+#endif
+                multistate(data, CURLM_STATE_WAITCONNECT);
+            }
+          }
+        }
+      }
+      break;
+    case CURLM_STATE_DO://开始发送
+        /* Perform the protocol&apos;s DO action */
+        result = multi_do(&amp;data-&gt;easy_conn, &amp;dophase_done);
+        //-&gt;
+        //详细的http请求封装，可以看看这个Curl_http
+        //CURLcode Curl_http(struct connectdata *conn, bool *done)//\lib\http.c
+
+    case CURLM_STATE_DONE:
+        /* post-transfer command */
+        res = multi_done(&amp;data-&gt;easy_conn, result, FALSE);
+
+    case CURLM_STATE_PERFORM:
+        /* read/write data if it is ready to do so */
+        result = Curl_readwrite(data-&gt;easy_conn, data, &amp;done);//接受数据中
+
+    //...
+
+}while((rc == CURLM_CALL_MULTI_PERFORM) || multi_ischanged(multi, FALSE));
+</code></pre><p>  data-&gt;result = result;<br>}</p>
+<p>//所有状态<br>/<em> NOTE: if you add a state here, add the name to the statename[] array as<br>   well!
+</em>/<br>typedef enum {<br>  CURLM_STATE_INIT,         /<em> 0 - start in this state </em>/<br>  CURLM_STATE_CONNECT_PEND, /<em> 1 - no connections, waiting for one </em>/<br>  CURLM_STATE_CONNECT,      /<em> 2 - resolve/connect has been sent off </em>/<br>  CURLM_STATE_WAITRESOLVE,  /<em> 3 - awaiting the resolve to finalize </em>/<br>  CURLM_STATE_WAITCONNECT,  /<em> 4 - awaiting the TCP connect to finalize </em>/<br>  CURLM_STATE_WAITPROXYCONNECT, /<em> 5 - awaiting proxy CONNECT to finalize </em>/<br>  CURLM_STATE_SENDPROTOCONNECT, /<em> 6 - initiate protocol connect procedure </em>/<br>  CURLM_STATE_PROTOCONNECT, /<em> 7 - completing the protocol-specific connect<br>                                   phase </em>/<br>  CURLM_STATE_WAITDO,       /<em> 8 - wait for our turn to send the request </em>/<br>  CURLM_STATE_DO,           /<em> 9 - start send off the request (part 1) </em>/<br>  CURLM_STATE_DOING,        /<em> 10 - sending off the request (part 1) </em>/<br>  CURLM_STATE_DO_MORE,      /<em> 11 - send off the request (part 2) </em>/<br>  CURLM_STATE_DO_DONE,      /<em> 12 - done sending off request </em>/<br>  CURLM_STATE_WAITPERFORM,  /<em> 13 - wait for our turn to read the response </em>/<br>  CURLM_STATE_PERFORM,      /<em> 14 - transfer data </em>/<br>  CURLM_STATE_TOOFAST,      /<em> 15 - wait because limit-rate exceeded </em>/<br>  CURLM_STATE_DONE,         /<em> 16 - post data transfer operation </em>/<br>  CURLM_STATE_COMPLETED,    /<em> 17 - operation complete </em>/<br>  CURLM_STATE_MSGSENT,      /<em> 18 - the operation complete message is sent </em>/<br>  CURLM_STATE_LAST          /<em> 19 - not a true state, never use this </em>/<br>} CURLMstate;</p>
+<p>//单独看connect<br>CURLcode Curl_connect(struct Curl_easy <em>data,<br>                      struct connectdata **in_connect,<br>                      bool </em>asyncp,<br>                      bool <em>protocol_done)<br>{<br>    static CURLcode create_conn(struct Curl_easy </em>data,<br>                            struct connectdata <em>*in_connect,<br>                            bool </em>async)<br>    -&gt;<br>    static CURLcode resolve_server(struct Curl_easy <em>data,<br>                               struct connectdata </em>conn,<br>                               bool *async)</p>
+<p>}  </p>
+<p>result = Curl_async_resolved(data-&gt;easy_conn, &amp;protocol_connect);-&gt;<br>result = Curl_setup_conn(conn, protocol_done);-&gt;<br>result = Curl_connecthost(conn, conn-&gt;dns_entry);-&gt;<br>result = singleipconnect(conn, conn-&gt;tempaddr[0], &amp;(conn-&gt;tempsock[0]));-&gt;<br>static CURLcode singleipconnect(struct connectdata <em>conn,<br>                                const Curl_addrinfo </em>ai,<br>                                curl_socket_t <em>sockp)<br>-&gt;<br>CURLcode Curl_socket(struct connectdata </em>conn,<br>                     const Curl_addrinfo <em>ai,<br>                     struct Curl_sockaddr_ex </em>addr,<br>                     curl_socket_t *sockfd)</p>
+<p>//Crul对socket等的封装<br>//\lib\connect.c<br>CURLcode Curl_socket(struct connectdata <em>conn,<br>                     const Curl_addrinfo </em>ai,<br>                     struct Curl_sockaddr_ex <em>addr,<br>                     curl_socket_t </em>sockfd)<br>CURLcode Curl_connecthost(struct connectdata <em>conn,  /</em> context <em>/<br>                          const struct Curl_dns_entry </em>remotehost)           int Curl_closesocket(struct connectdata <em>conn,<br>                      curl_socket_t sock)<br>curl_socket_t Curl_getconnectinfo(struct Curl_easy </em>data,<br>                                  struct connectdata **connp)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 3. 接受数据时</div></pre></td></tr></table></figure></p>
+<p>static CURLMcode multi_runsingle(struct Curl_multi <em>multi,<br>                                 struct timeval now,<br>                                 struct Curl_easy </em>data)//\lib\multi.c<br>-&gt;<br>CURLcode Curl_readwrite(struct connectdata <em>conn,<br>                        struct Curl_easy </em>data,<br>                        bool <em>done)//\lib\transfer.c<br>{<br> /</em> We go ahead and do a read if we have a readable socket or if<br>     the stream was rewound (in which case we have data in a<br>     buffer) */<br>  if((k-&gt;keepon &amp; KEEP_RECV) &amp;&amp;<br>     ((select_res &amp; CURL_CSELECT_IN) || conn-&gt;bits.stream_was_rewound)) {</p>
+<pre><code>result = readwrite_data(data, conn, k, &amp;didwhat, done);//
+if(result || *done)
+  return result;
+</code></pre><p>  }<br>}<br>-&gt;<br>static CURLcode readwrite_data(struct Curl_easy <em>data,<br>                               struct connectdata </em>conn,<br>                               struct SingleRequest <em>k,<br>                               int </em>didwhat, bool <em>done)//\lib\transfer.c<br>{<br>    //接受头部<br>    result = Curl_http_readwrite_headers(data, conn, &amp;nread, &amp;stop_reading);<br>    //-&gt;<br>    //CURLcode Curl_client_write(struct connectdata </em>conn,<br>    //                       int type,<br>    //                       char *ptr,<br>    //                       size_t len)//lib\sendf.c</p>
+<pre><code>//接受数据
+result = Curl_client_write(conn, CLIENTWRITE_BODY, k-&gt;str,
+                                       nread);
+//-》
+//Curl_client_write-&gt;Curl_client_chop_write-&gt; 调用回调函数
+//
+</code></pre><p>}</p>
+<p>//调用回调函数<br>CURLcode Curl_client_chop_write(struct connectdata <em>conn,<br>                                int type,<br>                                char </em> ptr,<br>                                size_t len)<br>{               </p>
+<pre><code>curl_write_callback writeheader = NULL;
+curl_write_callback writebody = NULL;
+//...
+
+/* Determine the callback(s) to use. */
+</code></pre><p>  if(type &amp; CLIENTWRITE_BODY)<br>    writebody = data-&gt;set.fwrite_func;</p>
+<pre><code>if(writebody) {
+    //调用回调函数
+  size_t wrote = writebody(ptr, 1, chunklen, data-&gt;set.out);
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 4. cookie相关</div></pre></td></tr></table></figure></p>
+<p>//解析指定的cookie文件<br>//支持# Netscape HTTP Cookie File和Mozilla cookie<br>CURLcode Curl_pretransfer(struct Curl_easy <em>data)//lib\transfer.c<br>{<br> /</em> If there is a list of cookie files to read, do it now! <em>/<br>  if(data-&gt;change.cookielist)//cookie文件列表<br>    Curl_cookie_loadfiles(data);<br>}<br>-&gt;<br>void Curl_cookie_loadfiles(struct Curl_easy </em>data)//lib\cookie.c<br>-&gt;<br>//读取cookie文件，初始化cookie结构<br>struct CookieInfo <em>Curl_cookie_init(struct Curl_easy </em>data,<br>                                    const char <em>file,<br>                                    struct CookieInfo </em>inc,<br>                                    bool newsession)//lib\cookie.c<br>-&gt;<br>//lineptr是从cookie.txt中读取的每行数据，解析数据，插入CookieInfo链<br>struct Cookie <em><br>Curl_cookie_add(struct Curl_easy </em>data,<br>                /<em> The ‘data’ pointer here may be NULL at times, and thus<br>                   must only be used very carefully for things that can deal<br>                   with data being NULL. Such as infof() and similar </em>/</p>
+<pre><code>struct CookieInfo *c,
+bool httpheader, /* TRUE if HTTP header-style line */
+char *lineptr,   /* first character of the line */
+const char *domain, /* default domain */
+const char *path)   /* full path used when this cookie is set,
+                       used to get default path for the cookie
+                       unless set */
+</code></pre><p>{<br>//…<br>clist = c-&gt;cookies;<br>  replace_old = FALSE;<br>  while(clist) {<br>    if(Curl_raw_equal(clist-&gt;name, co-&gt;name)) {<br>      /<em> the names are identical </em>/</p>
+<pre><code>  if(clist-&gt;domain &amp;&amp; co-&gt;domain) {
+    if(Curl_raw_equal(clist-&gt;domain, co-&gt;domain))
+      /* The domains are identical */
+      replace_old=TRUE;
+  }
+  else if(!clist-&gt;domain &amp;&amp; !co-&gt;domain)
+    replace_old = TRUE;
+
+  if(replace_old) {
+    /* the domains were identical */
+
+    if(clist-&gt;spath &amp;&amp; co-&gt;spath) {
+      if(Curl_raw_equal(clist-&gt;spath, co-&gt;spath)) {
+        replace_old = TRUE;
+      }
+      else
+        replace_old = FALSE;
+    }
+    else if(!clist-&gt;spath &amp;&amp; !co-&gt;spath)
+      replace_old = TRUE;
+    else
+      replace_old = FALSE;
+
+  }
+  //。。。
+
+  if(replace_old) {
+    co-&gt;next = clist-&gt;next; /* get the next-pointer first */
+
+    *clist = *co;  /* then store all the new data */
+
+    free(co);   /* free the newly alloced memory */
+    co = clist; /* point to the previous struct instead */
+
+    /* We have replaced a cookie, now skip the rest of the list but
+       make sure the &apos;lastc&apos; pointer is properly set */
+    do {
+      lastc = clist;
+      clist = clist-&gt;next;
+    } while(clist);
+    break;
+  }
+}
+lastc = clist;
+clist = clist-&gt;next;
+</code></pre><p>  }</p>
+<p>  if(c-&gt;running)<br>    /<em> Only show this when NOT reading the cookies from a file </em>/<br>    infof(data, “%s cookie %s=\”%s\” for domain %s, path %s, “<br>          “expire %” CURL_FORMAT_CURL_OFF_T “\n”,<br>          replace_old?”Replaced”:”Added”, co-&gt;name, co-&gt;value,<br>          co-&gt;domain, co-&gt;path, co-&gt;expires);</p>
+<p>  if(!replace_old) {<br>    /<em> then make the last item point on this new one </em>/<br>    if(lastc)<br>      lastc-&gt;next = co;<br>    else<br>      c-&gt;cookies = co;<br>    c-&gt;numcookies++; /<em> one more cookie in the jar </em>/<br>  }<br> //…<br>}<br>```</p>
+<h1 id="0x05-其他"><a href="#0x05-其他" class="headerlink" title="0x05. 其他"></a>0x05. 其他</h1><p>封装了一份简单的http类，支持GET、POST、ajax，代码比较简单，有需要的可以拿来用，后续可能会更新</p>
+<p>源码：<a href="https://github.com/anhkgg/minihttp" target="_blank" rel="external">https://github.com/anhkgg/minihttp</a></p>
+<p><a href="https://curl.haxx.se/libcurl/" target="_blank" rel="external">https://curl.haxx.se/libcurl/</a></p>
+<p><a href="http://www.liyuduo.com/?p=1103" target="_blank" rel="external">https://curl.haxx.se/libcurl/3</a></p>
+<p><a href="http://blog.csdn.net/breaksoftware/article/details/45874197" target="_blank" rel="external">http://blog.csdn.net/breaksoftware/article/details/45874197</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/pin-use-note-function-analysis/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">pin使用小记-函数分析</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="liburl-use-minihttp/" data-title="libcurl小记-简单http封装使用-源码分析" data-url="http://anhkgg.github.io/liburl-use-minihttp/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+  </div>
+</body>
+</html>
