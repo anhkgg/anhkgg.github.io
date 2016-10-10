@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>IDC脚本小试笔记 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="概述IDC是IDA扩展的一种脚本语言，用于自动化，或者扩展查询IDA数据库
+可以使用IDC或者python编写
+语法类似C、也应用了C++类似的对象特性和异常处理
+可以是单独的IDC文件，通过File-&amp;gt;Script File加载，也可以是简单的IDC命令，通过File-&amp;gt;Script Command来编写">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IDC脚本小试笔记">
+<meta property="og:url" content="http://anhkgg.github.io/idc-base-usage-test-note/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="概述IDC是IDA扩展的一种脚本语言，用于自动化，或者扩展查询IDA数据库
+可以使用IDC或者python编写
+语法类似C、也应用了C++类似的对象特性和异常处理
+可以是单独的IDC文件，通过File-&amp;gt;Script File加载，也可以是简单的IDC命令，通过File-&amp;gt;Script Command来编写">
+<meta property="og:updated_time" content="2016-10-10T07:58:20.270Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IDC脚本小试笔记">
+<meta name="twitter:description" content="概述IDC是IDA扩展的一种脚本语言，用于自动化，或者扩展查询IDA数据库
+可以使用IDC或者python编写
+语法类似C、也应用了C++类似的对象特性和异常处理
+可以是单独的IDC文件，通过File-&amp;gt;Script File加载，也可以是简单的IDC命令，通过File-&amp;gt;Script Command来编写">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>Über</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-idc-base-usage-test-note" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/idc-base-usage-test-note/" class="article-date">
+  	<time datetime="2016-10-10T07:56:17.000Z" itemprop="datePublished">2016-10-10</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      IDC脚本小试笔记
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IDAPro/">IDAPro</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IDC/">IDC</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/reverse/">reverse</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/security/">security</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>IDC是IDA扩展的一种脚本语言，用于自动化，或者扩展查询IDA数据库</p>
+<p>可以使用IDC或者python编写</p>
+<p>语法类似C、也应用了C++类似的对象特性和异常处理</p>
+<p>可以是单独的IDC文件，通过File-&gt;Script File加载，<br>也可以是简单的IDC命令，通过File-&gt;Script Command来编写</p>
+<a id="more"></a>
+<h1 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h1><p>包括字符串、整形、浮点型，后来又增加了对象、引用、函数指针等变量类型。</p>
+<p>字符串是IDC的本地数据类型。</p>
+<p>变量通过auto声明，在使用前都需要声明，没有知名明确的变量类型。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">auto addr, reg, val; /*xxxx*/</div><div class="line">auto count = 0; // xxx</div></pre></td></tr></table></figure>
+<p>注释使用//或者/**/，语句使用；作为结束</p>
+<p>不支持C风格数组（使用分片）、指针（使用引用）、结构体和联合体之类的复杂数据结构，之后引入了类的概念。</p>
+<p>extern引入全局变量声明，不能声明中初始化值，可以在任何函数内外声明。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">extern outglobal;</div><div class="line">static mian()</div><div class="line">&#123;</div><div class="line">    extern inglobal;</div><div class="line">    outglobal = &quot;xx&quot;;</div><div class="line">    inglobal = 1;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="表达式"><a href="#表达式" class="headerlink" title="表达式"></a>表达式</h1><p>支持几乎所有的C算术和逻辑运算符，除了几个特例外（？？）。包括三元运算？：，不支持op=(+=，*=， &gt;&gt;=)等复合运算符。后来可以支持逗号运算，</p>
+<p>所有整数操作都是有符号的值处理。所以在整数比较和右移运算（&gt;&gt;）收到影响。</p>
+<p>如果需要逻辑右移位，必须自己修改结果的最高位。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">result = (x &gt;&gt; 1)&amp;0x7fffffff;</div></pre></td></tr></table></figure></p>
+<p>字符串操作、分片（语法类似python字符串操作）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">auto str = &quot;string to slice&quot;;</div><div class="line">auto s1, s2, s3, s4;</div><div class="line">s1 = str[7:9];</div><div class="line">s2 = str[:6];</div><div class="line">s3 = str[10:];</div><div class="line">s4 = str[5];</div></pre></td></tr></table></figure></p>
+<h1 id="IDC语句"><a href="#IDC语句" class="headerlink" title="IDC语句"></a>IDC语句</h1><p>唯一不支持C中的switch语句<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">auto i;</div><div class="line">for(i = 0; i&lt;10; i = i+1) &#123;&#125;</div></pre></td></tr></table></figure></p>
+<p>可以在花括号开始声明变量，但是变量没有具体作用域，可以在外面使用。但是函数中不能使用其他函数内部声明的变量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if(1) &#123;</div><div class="line">    auto x; x = 10;</div><div class="line">&#125;</div><div class="line">Message(&quot;x = %d\n&quot;, x);</div></pre></td></tr></table></figure>
+<h1 id="IDC函数"><a href="#IDC函数" class="headerlink" title="IDC函数"></a>IDC函数</h1><p>只有独立IDC文件才支持函数，IDC命令框不支持函数。</p>
+<p>使用static引入一个函数定义。函数参数只有参数名列表，逗号分隔。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">static test(x, y, z) </div><div class="line">&#123;</div><div class="line">    auto a, b, c;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>IDA5.6之前，函数参数严格使用传值传递，之后引入了传地址参数传递机制。采用哪种方式传递参数，使用调用者来决定的，而不是函数声明决定的。<br>传地址方式在调用方参数前加入&amp;。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">auto q=1, r=0, s=2;</div><div class="line">test(q,r, s);</div><div class="line">test(q, &amp;r, s);//</div></pre></td></tr></table></figure></p>
+<p>函数声明不会指明要返回一个值，以及返回什么类型的值。</p>
+<p>如果需要返回值，使用return返回指定的值即可。</p>
+<p>可以在不同的路径返回不同类型的值。任何不显示返回值的函数默认返回为0.</p>
+<p>IDA5.6之后，函数离成为IDC中第一类对象更近了一布，函数引用可以作为参数传给另一个函数，也可以将函数引用作为函数返回值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static ret() &#123;</div><div class="line">    return Message;</div><div class="line">&#125;</div><div class="line">staic call(fun, arg) &#123;</div><div class="line">    fun(arg);</div><div class="line">&#125;</div><div class="line">static main() &#123;</div><div class="line">    auto f = ret();</div><div class="line">    call(f, &quot;Message Call&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="IDC对象"><a href="#IDC对象" class="headerlink" title="IDC对象"></a>IDC对象</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">class People</div><div class="line">&#123;</div><div class="line">    People(name, age) &#123;</div><div class="line">        this.name = name;</div><div class="line">        this.age = age;</div><div class="line">    &#125;</div><div class="line">    ~People() &#123;</div><div class="line">    &#125;</div><div class="line">    print() &#123;</div><div class="line">        Message(&quot;name: %s, age: %d&quot;, this.name, this.age);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">static main() &#123;</div><div class="line">    People p;//error</div><div class="line">    auto p = People(&quot;john&quot;, 12);</div><div class="line">    p.print();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="常用函数"><a href="#常用函数" class="headerlink" title="常用函数"></a>常用函数</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">//Array操作</div><div class="line">class MyArray</div><div class="line">&#123;</div><div class="line">	MyArray(name) &#123;</div><div class="line">		this.name = name;</div><div class="line">		this.id = CreateArray(name);</div><div class="line">		if(this.id == -1) &#123;</div><div class="line">			this.id = GetArrayId(name);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	~MyArray() &#123;</div><div class="line">		if(this.id != -1) &#123;</div><div class="line">			DeleteArray(this.id);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	SetArrayData(tag, idx, val) &#123;</div><div class="line">		if(tag == AR_LONG) &#123;</div><div class="line">			SetArrayLong(this.id, idx, val);</div><div class="line">		&#125;</div><div class="line">		else if(tag == AR_STR) &#123;</div><div class="line">			SetArrayString(this.id, idx, val);</div><div class="line">		&#125;else &#123;</div><div class="line">			return 0;</div><div class="line">		&#125;</div><div class="line">		return 1;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	GetArrayData(tag, idx) &#123;</div><div class="line">		return GetArrayElement(tag, this.id, idx);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	DelArrayData(tag, idx) &#123;</div><div class="line">		return DelArrayElement(tag, this.id, idx);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">auto val;</div><div class="line">val = Byte(0x00EEEC1A);</div><div class="line">Message(&quot;val = %08x \n&quot;, val);</div><div class="line">print(&quot;xxxxxxxxxxxxxxxxxxxxxxxxxx&quot;);</div><div class="line">//Warning(&quot;val = %08x\n&quot;, val);</div><div class="line"></div><div class="line">//交互</div><div class="line">val = AskStr(&quot;124&quot;, &quot;enter a val&quot;); //AskFile, AskYN</div><div class="line">if(val == 0) &#123;</div><div class="line">	print(&quot;no enter val&quot;);</div><div class="line">&#125;else &#123;</div><div class="line">	Message(&quot;val = %08x \n&quot;, val);</div><div class="line">&#125;</div><div class="line">Jump(0x400000);</div><div class="line">Message(&quot;cursor = %08x\n&quot;, ScreenEA());</div><div class="line"></div><div class="line">//字符串操作</div><div class="line">//val= 0000302d</div><div class="line">val = sprintf(&quot;%08x&quot;, 12333);//form</div><div class="line">Message(&quot;val = %s \n&quot;, val);</div><div class="line"></div><div class="line">////val = 0000302d 12333</div><div class="line">Message(&quot;val = %08x %d\n&quot;, xtol(val), xtol(val));//atol xtol </div><div class="line">Message(&quot;A = %d %02x\n&quot;, ord(&quot;A&quot;), ord(&quot;A&quot;)); //A = 65 41</div><div class="line">Message(&quot;val size = %d\n&quot;, strlen(val));//strstr, substr, str[s:e]</div><div class="line"></div><div class="line">//文件操作</div><div class="line">class MyFile</div><div class="line">&#123;</div><div class="line">	MyFile(name, mode) &#123;</div><div class="line">		this.h = fopen(name, mode);</div><div class="line">		if(this.h == 0) &#123;</div><div class="line">			//error</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	~MyFile() &#123;</div><div class="line">		if(this.h != 0) &#123;</div><div class="line">			fclose(this.h);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	length() &#123;</div><div class="line">		return filelength(this.h);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_fgetc() &#123;</div><div class="line">		return fgetc(this.h);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_fputc(val) &#123;</div><div class="line">		return fputs(val, this.h);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	//_fprintf(format, ...) &#123;</div><div class="line">		//return fprintf(this.h, format, ...);</div><div class="line">	//&#125;</div><div class="line">	</div><div class="line">	_writestr(str) &#123;</div><div class="line">		return writestr(this.h, str);</div><div class="line">	&#125;</div><div class="line">	_readstr() &#123;</div><div class="line">		return readstr(this.h);//-1=end</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writelongb(val) &#123;</div><div class="line">		return writelong(this.h, val, 1);//大端</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writelongs(val) &#123;</div><div class="line">		return writelong(this.h, val, 0);//小端</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readlongb() &#123;</div><div class="line">		return readlong(this.h, 1);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readlongs() &#123;</div><div class="line">		return readlong(this.h, 0);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writeshortb(val) &#123;</div><div class="line">		return writeshort(this.h, val, 1);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writeshorts(val) &#123;</div><div class="line">		return writeshort(this.h, val, 0);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readshortb() &#123;</div><div class="line">		return readshort(this.h, 1);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readshorts() &#123;</div><div class="line">		return readshort(this.h, 0);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_loadfile(pos, addr, length) &#123;</div><div class="line">		return loadfile(this.h, pos, addr, length);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_savefile(pos, addr, length) &#123;</div><div class="line">		return savefile(this.h, pos, addr, length);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">//file</div><div class="line">auto fn = AskFile(1, &quot;*.txt&quot;, &quot;save file&quot;);//1=save, 0=open</div><div class="line">Message(&quot;save file = %s\n&quot;, fn);</div><div class="line">auto mf = MyFile(fn, &apos;w&apos;);</div><div class="line">//mf._writelongb(122222);</div><div class="line">//mf._writestr(&quot;test file write data&quot;);</div><div class="line">//writestr(mf.h, &quot;test file write data&quot;);</div><div class="line">//mf._savefile(0, 0x400000, 50);</div><div class="line">Message(&quot;file data = %s&quot;, mf._readstr());</div><div class="line">//Message(&quot;file data = %s&quot;, mf._readlongb());</div><div class="line"></div><div class="line"></div><div class="line">//name, address</div><div class="line">Message(&quot;%08x, %s\n&quot;, 0x400016, Name(0x400016));</div><div class="line">//Message(&quot;xxx = %s\n&quot;, NameEx(0x0040BD14, 0x0040BD1C));</div><div class="line">MakeNameEx(0x0040BD1C, &quot;testxxxx&quot;, 1);</div><div class="line">Message(&quot;xxx = %08x\n&quot;, LocByName(&quot;testxxxx&quot;));</div><div class="line">Message(&quot;xxx = %08x\n&quot;, LocByNameEx(0x0040BD14, &quot;testxxxx&quot;));</div><div class="line"></div><div class="line">//function</div><div class="line">Message(&quot;end = %08x, start = %08x\n&quot;, GetFunctionAttr(0x0040BD14, FUNCATTR_END), GetFunctionAttr(0x0040BD14, FUNCATTR_START));</div><div class="line">Message(&quot;f = %s\n&quot;, GetFunctionName(0x0040BD1C));</div><div class="line">Message(&quot;f_next = %08x\n&quot;, NextFunction(0x0040BD1C));</div><div class="line">Message(&quot;f_prev = %08x\n&quot;, PrevFunction(0x0040BD1C));</div><div class="line"></div><div class="line">//代码xref</div><div class="line">auto cur = Rfirst(0x0040BD1C);//跳到哪里去，第一个</div><div class="line">Message(&quot;to = %08x\n&quot;, cur);</div><div class="line">Message(&quot;to = %08x\n&quot;, Rnext(0x0040BD1C, cur));//跳到哪里去，下一个</div><div class="line">Message(&quot;to = %08x\n&quot;, XrefType());//fl_CN, fl_CF, fl_JN, fl_JF, fl_F</div><div class="line">cur = RfirstB(0x40B928);//什么地方跳来的，第一个</div><div class="line">Message(&quot;from = %08x\n&quot;, cur );</div><div class="line">Message(&quot;from = %08x\n&quot;, RnextB(0x40B928, cur));//什么地方跳来的，下一个</div><div class="line"></div><div class="line">//数据xref</div><div class="line">cur = Dfirst(0x01410559);//改地址引用的第一个数据的地址</div><div class="line">Message(&quot;to d = %08x\n&quot;, cur);</div><div class="line">Message(&quot;to d = %08x\n&quot;, Dnext(0x01410559, cur));</div><div class="line">Message(&quot;to = %08x\n&quot;, XrefType());//dr_O偏移量, dr_W数据写入, dr_R数据读取</div><div class="line">cur = DfirstB(0x01411EF0);//引用该数据的第一个地址</div><div class="line">Message(&quot;from d = %08x\n&quot;, cur);</div><div class="line">Message(&quot;from d = %08x\n&quot;, DnextB(0x01411EF0, cur));//引用该数据的下一个地址</div><div class="line"></div><div class="line">//database</div><div class="line">MakeUnkn(0x0043DC57, DOUNK_SIMPLE);//undefine</div><div class="line">MakeCode(0x0043DC57);//转为code</div><div class="line">//MakeUnkn(0x0043DC57, DOUNK_SIMPLE);//undefine</div><div class="line">//MakeUnkn(0x0043DC58, DOUNK_SIMPLE);//</div><div class="line">//MakeWord(0x0043DC57);//转为数据 MakeWord, MakeDword</div><div class="line">MakeComm(0x0043DC57, &quot;just for test comment&quot;);//</div><div class="line">//MakeFunction(s, e);//</div><div class="line">//MakeStr(s, e);//</div><div class="line"></div><div class="line">//search SEARCH_DOWN, SEARCH_NEXT, SEARCH_CASE</div><div class="line">Message(&quot;code = %08x\n&quot;, FindCode(0x400000, 1));//从这开始搜索一条指令</div><div class="line">Message(&quot;data = %08x\n&quot;, FindData(0x400000, 1));//从这开始搜索一个数据</div><div class="line">//Message(&quot;find = %08x\n&quot;, FindBinary(0x400000, 1, &quot;FFAB3740&quot;));//从这开始搜索hex数据</div><div class="line">auto row = 0;</div><div class="line">auto column = 0;</div><div class="line">//Message(&quot;find = %08x\n&quot;, FindText(0x400000, 1, row, column, &quot;http://&quot;));</div><div class="line"></div><div class="line">//asm</div><div class="line">Message(&quot;asm = %s\n&quot;, GetDisasm(0x0043D7D8));//asm = push    ebp             ; xxxxxxxxxxxxxxxx</div><div class="line">Message(&quot;asm = %s\n&quot;, GetMnem(0x0043D7D8));//asm = push</div><div class="line">Message(&quot;asm = %s\n&quot;, GetOpnd(0x0043D7D8, 0));//asm = ebp</div><div class="line">Message(&quot;asm = %d\n&quot;, GetOpType(0x0043D7D8, 0));//asm = 1</div><div class="line">Message(&quot;asm = %08x\n&quot;, GetOperandValue(0x0043D7D8, 0));//asm = 00000005</div><div class="line">Message(&quot;asm = %s\n&quot;, CommentEx(0x0043D7D8, 0));//asm = xxxxxxxxxxxxxxxx</div></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总的来说，idc语法真的挺简单的，跟c基本一样，写起来不需要多大力气，就是需要熟悉idc提供的各类功能函数，应用起来才能得心应手。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/liburl-use-minihttp/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">libcurl小记-简单http封装使用-源码分析</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="idc-base-usage-test-note/" data-title="IDC脚本小试笔记" data-url="http://anhkgg.github.io/idc-base-usage-test-note/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+  </div>
+</body>
+</html>

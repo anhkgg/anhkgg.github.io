@@ -4,6 +4,30 @@
 
     
   <url>
+    <loc>http://anhkgg.github.io/idc-base-usage-test-note/</loc>
+    <lastmod>2016-10-10T07:58:20.270Z</lastmod>
+    <data>
+        <display>
+        <title>IDC脚本小试笔记</title>
+        <pubTime>2016-10-10T07:56:17.000Z</pubTime>
+        
+        <tag>IDAPro</tag>
+         
+        <tag>IDC</tag>
+         
+        <tag>reverse</tag>
+         
+         
+           
+             
+              <breadCrumb title="security" url="http://anhkgg.github.io/categories/security/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://anhkgg.github.io/liburl-use-minihttp/</loc>
     <lastmod>2016-08-26T00:29:49.952Z</lastmod>
     <data>
@@ -99,9 +123,9 @@
         <title>inject process analyze and code</title>
         <pubTime>2014-11-25T09:45:00.000Z</pubTime>
         
-        <tag>inject process</tag>
-         
         <tag>reverse</tag>
+         
+        <tag>inject process</tag>
          
          
            
@@ -225,9 +249,9 @@
         <title>inject process analyze 2</title>
         <pubTime>2014-11-25T09:45:00.000Z</pubTime>
         
-        <tag>inject process</tag>
-         
         <tag>reverse</tag>
+         
+        <tag>inject process</tag>
          
          
            
