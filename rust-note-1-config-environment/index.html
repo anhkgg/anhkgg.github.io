@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>Rust笔记（一）-- 环境配置 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="安装rustRust中文站下载rusthttps://www.rust-lang.org/zh-CN/install.htmlhttps://www.rust-lang.org/zh-CN/downloads.html 安装：  Windows平台下载https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi，然">
+<meta name="keywords" content="rust,linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rust笔记（一）-- 环境配置">
+<meta property="og:url" content="http://anhkgg.github.io/rust-note-1-config-environment/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="安装rustRust中文站下载rusthttps://www.rust-lang.org/zh-CN/install.htmlhttps://www.rust-lang.org/zh-CN/downloads.html 安装：  Windows平台下载https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi，然">
+<meta property="og:image" content="http://anhkgg.github.io/img/rust_note_one_1.png">
+<meta property="og:image" content="http://anhkgg.github.io/img/rust_note_one_2.png">
+<meta property="og:image" content="http://anhkgg.github.io/img/rust_note_one_3.png">
+<meta property="og:image" content="http://anhkgg.github.io/img/rust_note_one_1.png">
+<meta property="og:image" content="http://anhkgg.github.io/img/rust_note_one_4.png">
+<meta property="og:updated_time" content="2017-04-28T14:06:30.696Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rust笔记（一）-- 环境配置">
+<meta name="twitter:description" content="安装rustRust中文站下载rusthttps://www.rust-lang.org/zh-CN/install.htmlhttps://www.rust-lang.org/zh-CN/downloads.html 安装：  Windows平台下载https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi，然">
+<meta name="twitter:image" content="http://anhkgg.github.io/img/rust_note_one_1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/APC/" style="font-size: 10px;">APC</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/rust/" style="font-size: 10px;">rust</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/windows/" style="font-size: 10px;">windows</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-rust-note-1-config-environment" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/rust-note-1-config-environment/" class="article-date">
+  	<time datetime="2017-04-28T14:03:33.000Z" itemprop="datePublished">2017-04-28</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Rust笔记（一）-- 环境配置
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rust/">rust</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/rust/">rust</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="安装rust"><a href="#安装rust" class="headerlink" title="安装rust"></a>安装rust</h1><p>Rust中文站下载rust<br><a href="https://www.rust-lang.org/zh-CN/install.html" target="_blank" rel="external">https://www.rust-lang.org/zh-CN/install.html</a><br><a href="https://www.rust-lang.org/zh-CN/downloads.html" target="_blank" rel="external">https://www.rust-lang.org/zh-CN/downloads.html</a></p>
+<p>安装：</p>
+<ol>
+<li>Windows平台<br>下载<a href="https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi" target="_blank" rel="external">https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi</a>，然后双击运行即可，需要选上PATH环境变量配置</li>
+</ol>
+<a id="more"></a>
+<p>其实应该下载这个版本<a href="https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi" target="_blank" rel="external">https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi</a>，后面会说为什么</p>
+<ol>
+<li>Linux平台<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">//安装</div><div class="line">   $ curl -sf -L https://static.rust-lang.org/rustup.sh | sh</div><div class="line">//卸载</div><div class="line">  $ sudo /usr/local/lib/rustlib/uninstall.sh</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>下面命令成功表示安装成功</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">c:\&gt; rustc --version</div><div class="line">rustc 1.13.0 (2c6933acc 2016-11-07)</div><div class="line">C:\&gt; cargo --version</div><div class="line">cargo 0.13.0-nightly (eca9e15 2016-11-01)</div></pre></td></tr></table></figure>
+<h1 id="配置IDE"><a href="#配置IDE" class="headerlink" title="配置IDE"></a>配置IDE</h1><p>这里介绍的是微软的Visual Studio Code编辑器配置Rust的环境。</p>
+<p>Visual Studio Code支持windows、linux、mac等，所以在不同平台配置rust都是一样的步骤。</p>
+<p>下载地址： <a href="https://code.visualstudio.com/" target="_blank" rel="external">https://code.visualstudio.com/</a></p>
+<p>启动visual studio code，ctrl+shift+x切换到插件安装页面，输入rust。</p>
+<p><img src="/img/rust_note_one_1.png" alt="image"></p>
+<p>选择安装Rusty Code插件，支持自动完成、跳转到定义、符号等等功能。<br>安装完成后，重新加载即可启用。</p>
+<p>新建一个rs文件，visual studio code自动识别为rust语言。右下角有个Rust tool missing，点击后会提示插件缺少的库，选择安装即可（需要保证rust环境安装成功）</p>
+<p><img src="/img/rust_note_one_2.png" alt="image"></p>
+<p>会出现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">Executing &quot;cargo install racer&quot;</div><div class="line"> Updating registry `https://github.com/rust-lang/crates.io-index`</div><div class="line"> ···</div><div class="line">    Finished release [optimized + debuginfo] target(s) in 335.15 secs</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\racer.exe</div><div class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</div><div class="line">Executing &quot;cargo install rustfmt&quot;</div><div class="line">    Updating registry `https://github.com/rust-lang/crates.io-index`</div><div class="line"> ···</div><div class="line">    Finished release [optimized] target(s) in 270.41 secs</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\cargo-fmt.exe</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\rustfmt.exe</div><div class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</div><div class="line">Executing &quot;cargo install rustsym&quot;</div><div class="line">    Updating registry `https://github.com/rust-lang/crates.io-index`</div><div class="line"> ···</div><div class="line">    Finished release [optimized] target(s) in 203.64 secs</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\rustsym.exe</div><div class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</div></pre></td></tr></table></figure></p>
+<p>安装完成后即可。测试一下，ok。</p>
+<p><img src="/img/rust_note_one_3.png" alt="image"></p>
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>直接rustc xxx.rs编译程序，会出现缺少linker.exe（选择gnu版是不会出现这个错误，应该是不依赖msvc编译环境）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">error: could not exec the linker `link.exe`: 系统找不到指定的文件。 (os error 2)</div><div class="line">  |</div><div class="line">  = note: &quot;link.exe&quot;</div></pre></td></tr></table></figure></p>
+<p>因为在Windows平台，rust编译程序需要vs c++编译工具，可以安装vs2013或者更高版本工具，更简单的方式就是下载<br><a href="http://landinghub.visualstudio.com/visual-cpp-build-tools" target="_blank" rel="external">Microsoft Visual C++ Build Tools 2015</a></p>
+<blockquote>
+<p>Windows considerations</p>
+<p>On Windows, Rust additionally requires the C++ build tools for Visual Studio 2013 or later. The easiest way to acquire the build tools is by installing Microsoft Visual C++ Build Tools 2015 which provides just the Visual C++ build tools. Alternately, you can install Visual Studio 2015 or Visual Studio 2013 and during install select the “C++ tools”.</p>
+<p>For further information about configuring Rust on Windows see the Windows-specific rustup documentation.</p>
+</blockquote>
+<p>安装完之后，重新编译成功。（编译不需要重启，但是后面调试中需要重启，否则调试器异常）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Compiling hello_world v0.1.0 (file:///xxx/rust/hello_world)</div><div class="line">  Finished debug [unoptimized + debuginfo] target(s) in 0.28 secs</div></pre></td></tr></table></figure></p>
+<p>生成目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">D:\xxx\hello_world&gt;dir</div><div class="line"> 驱动器 D 中的卷没有标签。</div><div class="line"> 卷的序列号是 309A-078B</div><div class="line"></div><div class="line"> D:\xxx\hello_world 的目录</div><div class="line"></div><div class="line">2016/12/19  11:21    &lt;DIR&gt;          .</div><div class="line">2016/12/19  11:21    &lt;DIR&gt;          ..</div><div class="line">2016/12/19  10:59                 7 .gitignore</div><div class="line">2016/12/19  11:00                47 Cargo.lock</div><div class="line">2016/12/19  10:59                89 Cargo.toml</div><div class="line">2016/12/19  11:21           103,424 main.exe</div><div class="line">2016/12/19  11:21           487,424 main.pdb</div><div class="line">2016/12/19  10:59    &lt;DIR&gt;          src</div><div class="line">2016/12/19  11:00    &lt;DIR&gt;          target</div><div class="line">               5 个文件        590,991 字节</div><div class="line">               4 个目录 58,963,050,496 可用字节</div></pre></td></tr></table></figure></p>
+<p>在Visual Studio Code直接输入命令编译</p>
+<ol>
+<li>ctrl+`，打开集成终端窗口</li>
+<li>输入rust的编译命令即可</li>
+</ol>
+<h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><p>Rust目前支持使用LLDB和GDB调试，在Visual Studio Code可以安装lldb调试插件。</p>
+<p>但是目前lldb不支持windows平台，只能在linux平台配置lldb，配置步骤如下：</p>
+<p>依然ctrl+shift+x，然后输入rust，在列表中选择LLDB Debugger安装即可</p>
+<p><img src="/img/rust_note_one_1.png" alt="image"></p>
+<p>安装之后，重新加载窗口，调试插件生效。<br>打开之前的rs文件（vs code需要打开其目录作为工程目录），切换到调试窗口，点击调试开始按钮，会打开launch.json配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</div><div class="line">    &quot;configurations&quot;: [</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;Debug&quot;,</div><div class="line">            &quot;type&quot;: &quot;lldb&quot;,</div><div class="line">            &quot;request&quot;: &quot;launch&quot;,</div><div class="line">            &quot;program&quot;: &quot;$&#123;workspaceRoot&#125;/xxx&quot;, //main</div><div class="line">            &quot;args&quot;: []</div><div class="line">        &#125;</div><div class="line">    ]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>将program中xxx配置为编译后的文件名就可以进行调试了。</p>
+<p>在windows平台，需要使用gdb进行调试<br>使用TDM-GCC的GDB（需要支持Python扩展，MinGW64的GDB貌似不支持） </p>
+<ol>
+<li><p>下载<a href="https://sourceforge.net/projects/tdm-gcc/files/GDB/" target="_blank" rel="external">TDM-GCC-gdb</a>, 不需要安装，解压后，拷贝bin、gdb64、share目录到rust安装目录，修改gdb64\bin目录中gdbinit内容，文件末尾加上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">python</div><div class="line"></div><div class="line">print &quot;---- Loading Rust pretty-printers ----&quot; </div><div class="line"></div><div class="line">sys.path.insert(0, &quot;你的rust安装目录/lib/rustlib/etc&quot;) </div><div class="line">import gdb_rust_pretty_printing </div><div class="line">gdb_rust_pretty_printing.register_printers(gdb) </div><div class="line"></div><div class="line">end</div></pre></td></tr></table></figure>
+</li>
+<li><p>下载rust源码, <a href="https://github.com/rust-lang/rust" target="_blank" rel="external">https://github.com/rust-lang/rust</a>，拷贝etc目录到x\rust\lib\rustlib目录</p>
+</li>
+<li><p>测试gdb是否安装成功</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">C:\&gt;gdb</div><div class="line">GNU gdb (GDB) 7.9.1</div><div class="line">Copyright (C) 2015 Free Software Foundation, Inc.</div><div class="line">...</div><div class="line">---- Loading Rust pretty-printers ----</div></pre></td></tr></table></figure>
+</li>
+<li><p>在Visual Studio Code中搜搜安装native debug插件（不止支持gdb），重新加载后，打开rs文件目录，切换到调试页面，点击调试按钮，弹出调试器列表，选择gdb，然后配置好launch.json文件（同lldb），保存即可开始调试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</div><div class="line">    &quot;configurations&quot;: [</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;Debug&quot;,</div><div class="line">            &quot;type&quot;: &quot;gdb&quot;,</div><div class="line">            &quot;request&quot;: &quot;launch&quot;,</div><div class="line">            &quot;target&quot;: &quot;./target/debug/hello_world.exe&quot;,</div><div class="line">            &quot;cwd&quot;: &quot;$&#123;workspaceRoot&#125;&quot;</div><div class="line">        &#125;</div><div class="line">    ]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><ol>
+<li>在调试中遇到问题<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">---- Loading Rust pretty-printers ----</div><div class="line">No symbol table is loaded.  Use the &quot;file&quot; command.</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>经过一番周折发现是racer\rustfmt\rustsym没有安装成功，符号相关的是rustsym，<br>安装完成之后，依然无法识别符号，各种翻找资料，无果。</p>
+<p>最后在一篇<a href="https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/" target="_blank" rel="external">英文博客</a>中看到别人下载的rust版本是rust-nightly-x86_64-pc-windows-gnu.msi，突然想是不是跟版本有关，因为我下载的是msvc版，编译结果符号应该也是ms的，而调试其是gdb，是不是这样就识别不了了呢，而gnu版rust正好和gdb配套（猜测），所以应该会ok。</p>
+<p>果不其然，重新下载了<a href="https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi" target="_blank" rel="external">https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi</a>，配置之后，可以正常识别符号了。</p>
+<p>效果图：</p>
+<p><img src="/img/rust_note_one_4.png" alt="image"></p>
+<p>gnu版的rust在配置gdb时，不用下载rust源码添加etc目录的文件</p>
+<ol>
+<li>Visual Studio Code左下角出现racer crashed，点击之后看到<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Racer Output: </div><div class="line">RUST_SRC_PATH environment variable must be set to point to the src directory of a rust checkout. E.g. &quot;/home/foouser/src/rust/src&quot;</div><div class="line">Racer Error:</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>是因为安装racer步骤不完整，<br>需要将rust源码中src拷贝到rust安装目录中，然后设置环境变量<br>RUST_SRC_PATH = rust安装目录\src<br>验证racer是否成功：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">c:\&gt;racer complete std::io::B</div><div class="line">MATCH BufReader,50,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\buffered.rs,Struct,pub struct BufReader&lt;R&gt;</div><div class="line">MATCH BufWriter,309,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\buffered.rs,Struct,pub struct BufWriter&lt;W: Write&gt;</div><div class="line">MATCH BufRead,1208,10,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\mod.rs,Trait,pub trait BufRead: Read</div><div class="line">MATCH Bytes,1605,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\mod.rs,Struct,pub struct Bytes&lt;R&gt;</div><div class="line">MATCH BufReader,50,11,.\libstd\io\buffered.rs,Struct,pub struct BufReader&lt;R&gt;</div><div class="line">MATCH BufWriter,309,11,.\libstd\io\buffered.rs,Struct,pub struct BufWriter&lt;W: Write&gt;</div><div class="line">MATCH BufRead,1208,10,.\libstd\io\mod.rs,Trait,pub trait BufRead: Read</div><div class="line">MATCH Bytes,1605,11,.\libstd\io\mod.rs,Struct,pub struct Bytes&lt;R&gt;</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>在用户设置中配置如下参数：<br>（如果已经将rust\bin和.cargo\bin加入PATH，并且设置好了RUST_SRC_PATH的话，这一步可以省略）<br>{<br>“rust.racerPath”: null, // Specifies path to Racer binary if it’s not in PATH<br>“rust.rustLangSrcPath”: null, // Specifies path to /src directory of local copy of Rust sources<br>“rust.rustfmtPath”: null, // Specifies path to Rustfmt binary if it’s not in PATH<br>“rust.cargoPath”: null, // Specifies path to Cargo binary if it’s not in PATH<br>“rust.cargoHomePath”: null, // Path to Cargo home directory, mostly needed for racer. Needed only if using custom rust installation.<br>“rust.formatOnSave”: false, // Turn on/off autoformatting file on save (EXPERIMENTAL)<br>“rust.checkOnSave”: false, // Turn on/off <code>cargo check</code> project on save (EXPERIMENTAL)<br>“rust.checkWith”: “build” // Specifies the linter to use. (EXPERIMENTAL)<br>} </p>
+</blockquote>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://m.douban.com/group/topic/89086749/" target="_blank" rel="external">https://m.douban.com/group/topic/89086749/</a></li>
+<li><a href="https://www.douban.com/group/topic/63968269/" target="_blank" rel="external">https://www.douban.com/group/topic/63968269/</a></li>
+<li><a href="https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/" target="_blank" rel="external">https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/</a></li>
+</ol>
+<p>转载请注明出处，博客原文：<a href="http://anhkgg.github.io/rust-note-1-config-environment/">http://anhkgg.github.io/rust-note-1-config-environment/</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/win-apc-analyze1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          小Win，点一份APC（Apc机制详解）（一）
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="rust-note-1-config-environment/" data-title="Rust笔记（一）-- 环境配置" data-url="http://anhkgg.github.io/rust-note-1-config-environment/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+  </div>
+</body>
+</html>
