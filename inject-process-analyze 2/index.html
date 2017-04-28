@@ -1,15 +1,390 @@
-<%- partial('_partial/head') %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>inject process analyze 2 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1. 来源某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。前面分析了一种进程注入方法，现在开始分析另外一种貌似更猥琐的方式，貌似说这种技术用在ramnit病毒中，下面这图是大致原理图（引用的）">
+<meta name="keywords" content="reverse,inject process">
+<meta property="og:type" content="article">
+<meta property="og:title" content="inject process analyze 2">
+<meta property="og:url" content="http://anhkgg.github.io/inject-process-analyze 2/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="1. 来源某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。前面分析了一种进程注入方法，现在开始分析另外一种貌似更猥琐的方式，貌似说这种技术用在ramnit病毒中，下面这图是大致原理图（引用的）">
+<meta property="og:image" content="http://anhkgg.github.io/img/it_infection.png">
+<meta property="og:updated_time" content="2016-07-07T04:31:16.973Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="inject process analyze 2">
+<meta name="twitter:description" content="1. 来源某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。前面分析了一种进程注入方法，现在开始分析另外一种貌似更猥琐的方式，貌似说这种技术用在ramnit病毒中，下面这图是大致原理图（引用的）">
+<meta name="twitter:image" content="http://anhkgg.github.io/img/it_infection.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
 <body>
   <div id="container">
     <div class="left-col">
-    <%- partial('_partial/left-col', null, {cache: !config.relative_link}) %>
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/APC/" style="font-size: 10px;">APC</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/windows/" style="font-size: 10px;">windows</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
     </div>
     <div class="mid-col">
-      <%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %>
-      <div class="body-wrap"><%- body %></div>
-      <%- partial('_partial/footer') %>
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-inject-process-analyze 2" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/inject-process-analyze 2/" class="article-date">
+  	<time datetime="2014-11-25T09:45:00.000Z" itemprop="datePublished">2014-11-25</time>
+</a>
     </div>
-    <%- partial('_partial/after-footer') %>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      inject process analyze 2
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/inject-process/">inject process</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/reverse/">reverse</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/security/">security</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="1-来源"><a href="#1-来源" class="headerlink" title="1. 来源"></a><strong>1. 来源</strong></h1><p>某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。<br>前面分析了一种进程注入方法，现在开始分析另外一种貌似更猥琐的方式，貌似说这种技术用在ramnit病毒中，下面这图是大致原理图（<a href="http://www.pctrojan.com/content/723-virus-blocks-itself" target="_blank" rel="external">引用的</a>）<br><a id="more"></a><br><img src="/img/it_infection.png" alt="img"><br>简单测试了下，CreateProcess时，会多次调用ZwWriteVirtualMemroy，本以为是写入PE文件的，结果没有看到，所有有点不明白，钩住ZwWriteVirtualMemroy怎么用，文章中提到的是这样：<br>The hooked Windows native system service redirects the code execution flow to the module defined in the caller process to perform the code injection routine. The injected code in the new process includes the capability for file infection (Windows executable and HTML files), as well as backdoor and downloader functionalities.<br>大意可能是各位写入进程中一些代码，比如backdoor，downloader，但是就是不明白如何执行起来，所以需要找个样本来学习一下，如何利用</p>
+<h1 id="2-样本获取"><a href="#2-样本获取" class="headerlink" title="2. 样本获取"></a><strong>2. 样本获取</strong></h1><p>在卡饭中搜索到了几个可能是ramnit的样本，有两个没有解压密码，气死了，其他的都是upx3.0加壳，妹啊，脱不了啊，最后下了个交desktoplayer.exe，以为没壳了，结果弄了半天还是upx3.0.8，最后，直接OD吧，<br>断了几次CreateProcessA，可以看到创建了iexplorer.exe，但是参数貌似不是CREATE_SUSPENDED（后面才想起，这种方式不用），然后就想直接在ZwWriteVirtualMemory下断，od没法了，转到windbg吧，有了下面的分析</p>
+<h1 id="3-分析"><a href="#3-分析" class="headerlink" title="3. 分析"></a><strong>3. 分析</strong></h1><p>首先想到就是直接对zwwritevirtualmemory下断，然后回溯到inject代码中，结果居然会崩。。这。。不过还是找到了inject代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">0:000&gt; bp ntdll!zwwritevirtualmemory</div><div class="line">0:000&gt; g</div><div class="line">(7e8.af4): Break instruction exception - code 80000003 (first chance)</div><div class="line">eax=00960000 ebx=000009c6 ecx=0012f0b0 edx=7c92e4f4 esi=7c92df90 edi=0012f56c</div><div class="line">eip=00930005 esp=0012f094 ebp=0012f0b4 iopl=0         nv up ei pl nz na pe cy</div><div class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000207</div><div class="line">00930005 cc              int     3</div><div class="line">0:000&gt; g</div><div class="line">(7e8.af4): Access violation - code c0000005 (first chance)</div><div class="line">First chance exceptions are reported before any exception handling.</div><div class="line">This exception may be expected and handled.</div><div class="line">eax=ba960002 ebx=000009c6 ecx=0012f0b0 edx=7c92e4f4 esi=7c92df90 edi=0012f56c</div><div class="line">eip=7c92df96 esp=0012f094 ebp=0012f0b4 iopl=0         nv up ei ng nz na po nc</div><div class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00010282</div><div class="line">ntdll!ZwWriteVirtualMemory+0x6:</div><div class="line">7c92df96 0003            add     byte ptr [ebx],al          ds:0023:000009c6=??</div><div class="line">0:000&gt; kn</div><div class="line"> # ChildEBP RetAddr  </div><div class="line">00 0012f090 00402a74 ntdll!ZwWriteVirtualMemory+0x6</div><div class="line">WARNING: Stack unwind information not available. Following frames may be wrong.</div><div class="line">01 0012f0b4 7c81a636 image00400000+0x2a74//这里既是调用ZwWriteVirtualMemory的代码</div><div class="line">02 0012f3ac 7c819da8 kernel32!BasePushProcessParameters+0x281</div><div class="line">03 0012fe0c 7c81d627 kernel32!CreateProcessInternalW+0x184e</div><div class="line">04 0012fef8 7c802397 kernel32!CreateProcessInternalA+0x29c</div><div class="line">05 0012ff30 004013c0 kernel32!CreateProcessA+0x2c</div><div class="line">06 0012ffb4 00402cda image00400000+0x13c0</div><div class="line">07 0012fff0 00000000 image00400000+0x2cda</div><div class="line">0:000&gt; ub 7c81a636</div><div class="line">kernel32!BasePushProcessParameters+0x266:</div><div class="line">7c81a61b 6a00            push    0</div><div class="line">7c81a61d 53              push    ebx</div><div class="line">7c81a61e 56              push    esi</div><div class="line">7c81a61f 8b85ccfdffff    mov     eax,dword ptr [ebp-234h]</div><div class="line">7c81a625 ff7048          push    dword ptr [eax+48h]</div><div class="line">7c81a628 ffb580fdffff    push    dword ptr [ebp-280h]</div><div class="line">7c81a62e 8b350014807c    mov     esi,dword ptr [kernel32!_imp__NtWriteVirtualMemory (7c801400)]</div><div class="line">7c81a634 ffd6            call    esi//这里既是调用ZwWriteVirtualMemory的代码</div></pre></td></tr></table></figure></p>
+<p>对7c81a634 下断，重新加载程序，g<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">0:000&gt; bp 7c81a634</div><div class="line">0:000&gt; g</div><div class="line">ModLoad: 76300000 7631d000   C:\WINDOWS\system32\IMM32.DLL</div><div class="line">ModLoad: 62c20000 62c29000   C:\WINDOWS\system32\LPK.DLL</div><div class="line">ModLoad: 73fa0000 7400b000   C:\WINDOWS\system32\USP10.dll</div><div class="line">ModLoad: 77180000 77283000   C:\WINDOWS\WinSxS\x86_Microsoft.Windows.Common-Controls_6595b64144ccf1df_6.0.2600.5512_x-ww_35d4ce83\comctl32.dll</div><div class="line">ModLoad: 5d170000 5d20a000   C:\WINDOWS\system32\comctl32.dll</div><div class="line">(1ec.1f4): Access violation - code c0000005 (first chance)</div><div class="line">First chance exceptions are reported before any exception handling.</div><div class="line">This exception may be expected and handled.</div><div class="line">eax=00000001 ebx=84493bb9 ecx=7ffdf000 edx=00150608 esi=00150000 edi=84493bb1</div><div class="line">eip=7c98d811 esp=0012fc38 ebp=0012fc98 iopl=0         nv up ei pl zr na pe nc</div><div class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00010246</div><div class="line">ntdll!RtlDebugFreeHeap+0x82:</div><div class="line">7c98d811 0fb707          movzx   eax,word ptr [edi]       ds:0023:84493bb1=????</div><div class="line">0:000&gt; g</div><div class="line">Breakpoint 0 hit</div><div class="line">eax=00960000 ebx=000009c6 ecx=0012f0b0 edx=7c92e4f4 esi=7c92df90 edi=0012f56c</div><div class="line">eip=7c81a634 esp=0012f0bc ebp=0012f3ac iopl=0         nv up ei pl zr na pe nc</div><div class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246</div><div class="line">kernel32!BasePushProcessParameters+0x27f:</div><div class="line">7c81a634 ffd6            call    esi &#123;ntdll!ZwWriteVirtualMemory (7c92df90)&#125;</div></pre></td></tr></table></figure></p>
+<p>确认一下ZwWriteVirtualMemory被hook<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">0:000&gt; u 7c92df90</div><div class="line">ntdll!ZwWriteVirtualMemory:</div><div class="line">*** WARNING: Unable to verify checksum for image00400000</div><div class="line">*** ERROR: Module load completed but symbols could not be loaded for image00400000</div><div class="line">7c92df90 e9c44aad83      jmp     image00400000+0x2a59 (00402a59)</div><div class="line">7c92df95 ba0003fe7f      mov     edx,offset SharedUserData!SystemCallStub (7ffe0300)</div><div class="line">7c92df9a ff12            call    dword ptr [edx]</div><div class="line">7c92df9c c21400          ret     14h</div><div class="line">7c92df9f 90              nop</div></pre></td></tr></table></figure></p>
+<p>想着就在这把文件dump出来，在ida中看方便点，然后再od中下断，为了怕跑飞，也对CreateProcessA下断了，然后运行，现在CreateProcessA中断下来，回溯了一下，看着堆栈栈帧很少，就尝试看能够脱壳不<br>很笨的下断回溯了两次，到了00402C5B ，一点都不想c入口，但是上次没有，调用地址是0012FFC4   7C817067  返回到 kernel32.7C817067<br>也不像是壳进行了入口的patch，将就吧，dump出来，importrect修复了一下，嘿，在ida中一看，还不错，入口代码这样的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">00402C5B    68 00040000     push 0x400</div><div class="line">00402C60    68 D0DF4000     push DesktopL.0040DFD0</div><div class="line">00402C65    E8 AEEAFFFF     call DesktopL.00401718</div><div class="line">00402C6A    83F8 01         cmp eax,0x1</div><div class="line">00402C6D    75 70           jnz short DesktopL.00402CDF</div><div class="line">00402C6F    68 00404000     push DesktopL.00404000                                            ; ASCII &quot;KyUffThOkYwRRtgPP&quot;</div><div class="line">00402C74    E8 66EAFFFF     call DesktopL.004016DF</div></pre></td></tr></table></figure></p>
+<p>马上定位到image00400000+0x2a59，修复的还不错，这下子方便多了，可以直接f5，但是不能正常执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">__int64 __stdcall myHookZwWriteVirtualMemory(HANDLE hProcess, int a2, int a3, int a4, int a5) </div><div class="line">&#123; </div><div class="line">LODWORD(v5) = mySysZwWriteVirtualMemory(hProcess, a2, a3, a4, a5, NumberOfBytesWritten, flOldProtect, v12);// 调用原函数 </div><div class="line">NumberOfBytesWritten = (SIZE_T)&amp;v12;</div><div class="line">v9 = v5;</div><div class="line">if ( hProcess != (HANDLE)-1 )</div><div class="line">&#123;</div><div class="line">if ( !myInjectFlag )</div><div class="line">&#123;</div><div class="line">if ( !lpAddress ) // 初始化为0</div><div class="line">&#123;</div><div class="line">EOP = (void *)myGetEOP(hProcess); // 获取到宿主进程EOP</div><div class="line">if ( EOP )</div><div class="line">&#123;</div><div class="line">myInjectFlag = 1;</div><div class="line">lpAddress = EOP;</div><div class="line">dword_40DFA8 = myInjectMyExe(hProcess, (int)&quot;MZ, 0x9800u);</div><div class="line">dword_40DFAD = v7;</div><div class="line">if ( dword_40DFA8 )</div><div class="line">&#123;</div><div class="line">VirtualProtectEx(hProcess, lpAddress, 0xCu, 0x40u, &amp;flOldProtect);</div><div class="line">WriteProcessMemory(hProcess, lpAddress, &amp;byte_40DFA7, 0xCu, &amp;NumberOfBytesWritten); //入口感染</div><div class="line">VirtualProtectEx(hProcess, lpAddress, 0xCu, flOldProtect, &amp;flOldProtect);</div><div class="line">&#125;</div><div class="line">&#125;</div><div class="line">&#125;</div><div class="line">&#125;</div><div class="line">&#125;</div><div class="line">return v9;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在钩子函数中，工作很少，获取到宿主进程EOP，在宿主进程中加载自己的程序，然后对EOP进行感染，也就是跳转到自己的程序代码空间<br>代码基本就这么多了，最后怎么玩就靠自己的代码了。</p>
+<h1 id="3-技术总结"><a href="#3-技术总结" class="headerlink" title="3. 技术总结"></a><strong>3. 技术总结</strong></h1><p>其实和另一个中注入方式大同小异，目标都是为了将自己的程序映射到宿主进程空间中。<br>一个直接暴力suspend，读写，另一个在创建进程过程中进行读写。<br>由于两种方式都有远程进程读写操作，都应该会被主防拦住，貌似现在效果也不是很好了<br>是否可以再读写内存时，对主防进行欺骗呢，还需要研究….</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/010注册算法分析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          010注册算法分析
+        
+      </div>
+    </a>
+  
+  
+    <a href="/inject-process-analyze-and-code/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">inject process analyze and code</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="inject-process-analyze 2/" data-title="inject process analyze 2" data-url="http://anhkgg.github.io/inject-process-analyze 2/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
   </div>
 </body>
 </html>

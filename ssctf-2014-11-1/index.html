@@ -1,15 +1,379 @@
-<%- partial('_partial/head') %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>ssctf writeup by anhkgg | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="ssctf wirteup1. web8 U盘病毒UP_BOOT.img解压之后是两个文件autorun.txt和是男人你就下100层.exe，autorun.txt中的内容是”你真厉害都到这了，看看这个游戏你肯定会喜欢的，但是据说这个游戏是被加了后门的，找到后门操作的文件的内容，取文件内容的16位md5值作为key！祝你好运…….”。根据题目知道是男人你就下100层.exe添加了后门，那么在执行">
+<meta name="keywords" content="ssctf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ssctf writeup by anhkgg">
+<meta property="og:url" content="http://anhkgg.github.io/ssctf-2014-11-1/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="ssctf wirteup1. web8 U盘病毒UP_BOOT.img解压之后是两个文件autorun.txt和是男人你就下100层.exe，autorun.txt中的内容是”你真厉害都到这了，看看这个游戏你肯定会喜欢的，但是据说这个游戏是被加了后门的，找到后门操作的文件的内容，取文件内容的16位md5值作为key！祝你好运…….”。根据题目知道是男人你就下100层.exe添加了后门，那么在执行">
+<meta property="og:updated_time" content="2016-07-07T04:34:56.388Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ssctf writeup by anhkgg">
+<meta name="twitter:description" content="ssctf wirteup1. web8 U盘病毒UP_BOOT.img解压之后是两个文件autorun.txt和是男人你就下100层.exe，autorun.txt中的内容是”你真厉害都到这了，看看这个游戏你肯定会喜欢的，但是据说这个游戏是被加了后门的，找到后门操作的文件的内容，取文件内容的16位md5值作为key！祝你好运…….”。根据题目知道是男人你就下100层.exe添加了后门，那么在执行">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
 <body>
   <div id="container">
     <div class="left-col">
-    <%- partial('_partial/left-col', null, {cache: !config.relative_link}) %>
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/APC/" style="font-size: 10px;">APC</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/windows/" style="font-size: 10px;">windows</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
     </div>
     <div class="mid-col">
-      <%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %>
-      <div class="body-wrap"><%- body %></div>
-      <%- partial('_partial/footer') %>
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-ssctf-2014-11-1" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/ssctf-2014-11-1/" class="article-date">
+  	<time datetime="2014-11-03T08:01:09.000Z" itemprop="datePublished">2014-11-03</time>
+</a>
     </div>
-    <%- partial('_partial/after-footer') %>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ssctf writeup by anhkgg
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ssctf/">ssctf</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/ctf/">ctf</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="ssctf-wirteup"><a href="#ssctf-wirteup" class="headerlink" title="ssctf wirteup"></a><strong>ssctf wirteup</strong></h1><h3 id="1-web8-U盘病毒"><a href="#1-web8-U盘病毒" class="headerlink" title="1. web8 U盘病毒"></a><strong>1. web8 U盘病毒</strong></h3><p>UP_BOOT.img解压之后是两个文件autorun.txt和<code>是男人你就下100层.exe</code>，autorun.txt中的内容是”你真厉害都到这了，看看这个游戏你肯定会喜欢的，但是据说这个游戏是被加了后门的，找到后门操作的文件的内容，取文件内容的16位md5值作为key！祝你好运…….”。<br>根据题目知道<code>是男人你就下100层.exe</code>添加了后门，那么在执行的时候肯定要释放后门，所以找了一款 文件操作监控工具 进行监测，添加了文件创建，进程创建监测，然后发现在tmp目录中创建了RarSFX0目录，然后在RarSFX0中创建了1.exe, 1.vbs, 2.exe，以及test.txt，简单查看1.vbs启动1.exe和2.exe，1.exe是后门，2.exe是原始的<code>是男人你就下100层.exe</code>，test.txt时候后门生成的，题目中要后门操作文件的·内容·16位md5作为key，那么1.exe，2.exe不大可能，只有1.vbs和test.txt了，提交了两次，test.txt的内容md5成功。</p>
+<a id="more"></a>
+<h3 id="2-crack1"><a href="#2-crack1" class="headerlink" title="2.crack1"></a><strong>2.crack1</strong></h3><p>代码很简单，输入用户名密码之后，讲密码每个字符和408030所在内存的数据xor得到的值和用户名比较，相同则成功。用了个py脚本将用户名和408030内存的值xor得到密码，然后密码的md5即是key<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">k = [1, 2, 3, 4, 1, 5]#408030的值，还有其他的</div><div class="line">n = &quot;xxxxx&quot;#用户名</div><div class="line">a = &quot;&quot;</div><div class="line"></div><div class="line">for i in range(0, len(n)):</div><div class="line">    k1 = ord(n[i])</div><div class="line">    k1 = k[i] ^ k1</div><div class="line">    a = a + chr(k1)</div><div class="line">    </div><div class="line">print a</div></pre></td></tr></table></figure></p>
+<h3 id="3-crack2"><a href="#3-crack2" class="headerlink" title="3.crack2"></a><strong>3.crack2</strong></h3><p>反调试太多，没搞定</p>
+<h3 id="4-crack3"><a href="#4-crack3" class="headerlink" title="4.crack3"></a><strong>4.crack3</strong></h3><p>程序流程是，多次右键或者左键点击，会给403070写入R或者L字符，48次之后，点击确认，如果右键活左键点击姿势正确，就可以弹出正确的key。<br>验证过程是，通过48个L或者R可到key，如果通过48个L或者R的一个算法得到”查水表“三个字，那么点击姿势正确，key也正确，所以需要通过”查水表“的值逆推得到L和R的个数，具体算法是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">do</div><div class="line">  &#123;</div><div class="line">    v11[v2] = 0;</div><div class="line">    v3 = v1;</div><div class="line">    if ( __SETO__(v1, v1 + 8) ^ 1 )</div><div class="line">    &#123;</div><div class="line">      do</div><div class="line">      &#123;</div><div class="line">	v4 = 2 * v11[v2];</div><div class="line">	v5 = a1[v3] == 0x52;</div><div class="line">	v11[v2] = v4;</div><div class="line">	if ( v5 )</div><div class="line">	  v11[v2] = v4 + 1;</div><div class="line">	++v3;</div><div class="line">      &#125;</div><div class="line">      while ( v3 &lt; v1 + 8 );</div><div class="line">    &#125;</div><div class="line">    v1 += 8;</div><div class="line">    ++v2;                                      </div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<p>”查水表“的值是B2 E9 CB AE  B1 ED，通过上面算法和B2 E9 CB AE  B1 ED推得点击姿势是:<br>RLRRLLRLRRRLRLLRRRLLRLRRRLRLRRRLRLRRLLLRRRRLRRLR<br>然后，操作一次，或者调试器内存修改，都可以得到key</p>
+<h3 id="5-crack4"><a href="#5-crack4" class="headerlink" title="5.crack4"></a><strong>5.crack4</strong></h3><p>题目是<br>”输入正确的密码，会释放出文件。key就在文件中。<br>tips:第一层密码为6为纯数字，第二层密码也是6位。“<br>粗略分析，输入第一次密码，释放并解密得到encrypt.exe，是一个exe，运行这个exe，输入第二次密码，释放并解密得到一个gif，密码验证算法是md5(md5(“HOWMPxxxxxx”)) == 09B2F924C20C5CA427EED2C5B98BEFBF，xxxxxx就是密码，先前一直想md5算出来，，没可能，后面发现释放文件之后的解密算法是xor，那么，嘿嘿，exe和gif格式的开头几个字节都是固定的，那么通过加密文件和正常文件的前6个字节xor即可得到密码，分别是564987和w!q&amp;cs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">MZ...... =&gt;4D 5A 00 00 00 00 xor 78 6C 34 39 38 37 =&gt;35 36 34 49 48 47 =》564987</div><div class="line">GIF89aX =》47 49 46 38 39 61 58 xor 30 68 37 1E 5A 12 =&gt; w!q&amp;cs</div></pre></td></tr></table></figure></p>
+<p>最后得到解密之后的图片，图片就有key</p>
+<h3 id="6-crack5"><a href="#6-crack5" class="headerlink" title="6.crack5"></a><strong>6.crack5</strong></h3><p>这到题太坑，点击注册啥反应没有，以为是没有调用注册功能函数，后来通过网上的特征码定位到了注册按钮的函数，地址是：00401640，结果一看代码全是混淆，各种int 3，jmp，，完全无法正常执行，所以点击之后无反应，尝试恢复，大概流程得到，先UpdateData获取到输入，然后一段算法比较，MessageBox注册成功或者失败。。但是加密算法那部分，实在是无力恢复了。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/ssctf-crack5-study/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ssctf crack5详述</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="ssctf-2014-11-1/" data-title="ssctf writeup by anhkgg" data-url="http://anhkgg.github.io/ssctf-2014-11-1/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
   </div>
 </body>
 </html>

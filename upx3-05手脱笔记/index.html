@@ -1,15 +1,393 @@
-<%- partial('_partial/head') %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>upx3.05手脱笔记 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。">
+<meta name="keywords" content="upx,unpack">
+<meta property="og:type" content="article">
+<meta property="og:title" content="upx3.05手脱笔记">
+<meta property="og:url" content="http://anhkgg.github.io/upx3-05手脱笔记/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。">
+<meta property="og:image" content="http://anhkgg.github.io/img/fix.png">
+<meta property="og:updated_time" content="2015-01-07T07:14:13.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="upx3.05手脱笔记">
+<meta name="twitter:description" content="本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。">
+<meta name="twitter:image" content="http://anhkgg.github.io/img/fix.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
 <body>
   <div id="container">
     <div class="left-col">
-    <%- partial('_partial/left-col', null, {cache: !config.relative_link}) %>
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/APC/" style="font-size: 10px;">APC</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/windows/" style="font-size: 10px;">windows</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
     </div>
     <div class="mid-col">
-      <%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %>
-      <div class="body-wrap"><%- body %></div>
-      <%- partial('_partial/footer') %>
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-upx3-05手脱笔记" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/upx3-05手脱笔记/" class="article-date">
+  	<time datetime="2015-01-07T06:57:42.000Z" itemprop="datePublished">2015-01-07</time>
+</a>
     </div>
-    <%- partial('_partial/after-footer') %>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      upx3.05手脱笔记
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/unpack/">unpack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/upx/">upx</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/reverse/">reverse</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料<br>但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。</p>
+<a id="more"></a>
+<p>#<strong>1. 查壳</strong><br><strong>[!] UPX 3.05 compressed !</strong><br>查出来是3.05，也不知道是不是误报，比[1]中版本高了点，所以也就是尝试尝试esp定律拖一下</p>
+<p>#<strong>2. 脱壳</strong><br>OD加载（是个dll，通过load.exe加载），在DllMain断下，看到熟悉的pushad，感觉方法可能靠谱了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">103432E0 &gt;  807C24 08 01    cmp byte ptr ss:[esp+0x8],0x1</div><div class="line">103432E5    0F85 9D0B0000   jnz xxx.10343E88</div><div class="line">103432EB    60              pushad</div><div class="line">103432EC    BE 00C02C10     mov esi,xxx.102CC000</div></pre></td></tr></table></figure></p>
+<p>f8到103432EC ，在数据窗口显示esp值，然后右键下了个硬件访问断点（其实以前尝试过，但是下的是内存访问断点，失败了，也不知道是不是这个原因，待会儿试试）。接着F9，断在了下面的代码中，看不出啥，就有个 jmp xxx.100C3C71，地址离当前地址还算较远，可能是另一个节<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">10343E7B    8D4424 80       lea eax,dword ptr ss:[esp-0x80] //这个就是先前pushad压入的吗？？</div><div class="line">10343E7F    6A 00           push 0x0</div><div class="line">10343E81    39C4            cmp esp,eax</div><div class="line">10343E83  ^ 75 FA           jnz short xxx.10343E7F //循环了多次，F4直接到10343E85  ，应该是在清理堆栈吧？？  </div><div class="line">10343E85    83EC 80         sub esp,-0x80</div><div class="line">10343E88  - E9 E4FDD7FF     jmp xxx.100C3C71</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">100C3C71   /E9 CA371100     jmp xxx.101D7440</div><div class="line">100C3C76   |E9 15311700     jmp xxx.10236D90                           ; jmp 到 kernel32.UnlockFile</div></pre></td></tr></table></figure>
+<p>单步到jmp，F8跟到其代码中，看到了熟悉的一段入口代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">101D7440    8BFF            mov edi,edi</div><div class="line">101D7442    55              push ebp</div><div class="line">101D7443    8BEC            mov ebp,esp</div><div class="line">101D7445    837D 0C 01      cmp dword ptr ss:[ebp+0xC],0x1</div><div class="line">101D7449    75 05           jnz short xxx.101D7450</div><div class="line">101D744B    E8 32DFEEFF     call xxx.100C5382</div><div class="line">101D7450    8B45 10         mov eax,dword ptr ss:[ebp+0x10]</div><div class="line">101D7453    50              push eax</div><div class="line">101D7454    8B4D 0C         mov ecx,dword ptr ss:[ebp+0xC]</div><div class="line">101D7457    51              push ecx</div><div class="line">101D7458    8B55 08         mov edx,dword ptr ss:[ebp+0x8]</div><div class="line">101D745B    52              push edx</div><div class="line">101D745C    E8 1F000000     call xxx.101D7480</div><div class="line">101D7461    83C4 0C         add esp,0xC</div><div class="line">101D7464    5D              pop ebp</div><div class="line">101D7465    C2 0C00         retn 0xC</div></pre></td></tr></table></figure></p>
+<p>通过堆栈参数，进一步确认了下，这是DllMain函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">0006F880   7C92118A  返回到 ntdll.7C92118A</div><div class="line">0006F884   10000000  xxx.10000000</div><div class="line">0006F888   00000001</div><div class="line">0006F88C   00000000</div></pre></td></tr></table></figure></p>
+<p>然后在101D7440地址，尝试dump，成功之后在检测壳信息<br><strong>[CompilerDetect] -&gt; Visual C++ 9.0 (Visual Studio 2008)</strong><br>应该是脱壳成功了，但是iat没有修复，先ida看看是否需要修复</p>
+<p>#<strong>3. 修复</strong><br>如果需要修复，使用importRec工具<br><img src="/img/fix.png" alt="img"><br>找到进程，选择目标dll，然后填入OEP，修复即可</p>
+<p>#<strong>4. 参考</strong></p>
+<p>[1]: <a href="http://bbs.pediy.com/showthread.php?t=44125" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=44125</a> 【原创】手脱 UPX3.0<br>[2]: <a href="http://bbs.pediy.com/showthread.php?t=140312" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=140312</a> 【原创】UPX3.03脱壳机-学习版[代码更新]</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/sctf-summary/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          xctf sctf summary, little writeup
+        
+      </div>
+    </a>
+  
+  
+    <a href="/linux-pyspider-learning/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">linux pyspider learning</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="upx3-05手脱笔记/" data-title="upx3.05手脱笔记" data-url="http://anhkgg.github.io/upx3-05手脱笔记/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
   </div>
 </body>
 </html>

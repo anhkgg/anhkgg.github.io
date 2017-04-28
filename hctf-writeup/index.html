@@ -1,15 +1,394 @@
-<%- partial('_partial/head') %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>hctf writeup | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1. 丘比龙的最爱传说，丘比龙是丘比特的弟弟，丘比龙是一只小爱神，虽然有两只翅膀，但因为吃多了，导致身体太胖，所以飞不起来~那么问题来了?!丘比龙吃什么食物吃多了变胖了百度之：甜甜圈">
+<meta name="keywords" content="hctf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hctf writeup">
+<meta property="og:url" content="http://anhkgg.github.io/hctf-writeup/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="1. 丘比龙的最爱传说，丘比龙是丘比特的弟弟，丘比龙是一只小爱神，虽然有两只翅膀，但因为吃多了，导致身体太胖，所以飞不起来~那么问题来了?!丘比龙吃什么食物吃多了变胖了百度之：甜甜圈">
+<meta property="og:image" content="http://www.taihainet.com/news/UploadFiles_6334/201306/20130618160811617.jpg">
+<meta property="og:updated_time" content="2014-11-10T02:15:50.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="hctf writeup">
+<meta name="twitter:description" content="1. 丘比龙的最爱传说，丘比龙是丘比特的弟弟，丘比龙是一只小爱神，虽然有两只翅膀，但因为吃多了，导致身体太胖，所以飞不起来~那么问题来了?!丘比龙吃什么食物吃多了变胖了百度之：甜甜圈">
+<meta name="twitter:image" content="http://www.taihainet.com/news/UploadFiles_6334/201306/20130618160811617.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
 <body>
   <div id="container">
     <div class="left-col">
-    <%- partial('_partial/left-col', null, {cache: !config.relative_link}) %>
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/APC/" style="font-size: 10px;">APC</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/windows/" style="font-size: 10px;">windows</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
     </div>
     <div class="mid-col">
-      <%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %>
-      <div class="body-wrap"><%- body %></div>
-      <%- partial('_partial/footer') %>
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-hctf-writeup" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/hctf-writeup/" class="article-date">
+  	<time datetime="2014-11-10T01:08:58.000Z" itemprop="datePublished">2014-11-10</time>
+</a>
     </div>
-    <%- partial('_partial/after-footer') %>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      hctf writeup
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hctf/">hctf</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/ctf/">ctf</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>1. 丘比龙的最爱</strong><br>传说，丘比龙是丘比特的弟弟，丘比龙是一只小爱神，虽然有两只翅膀，但因为吃多了，导致身体太胖，所以飞不起来~那么问题来了?!丘比龙吃什么食物吃多了变胖了<br>百度之：甜甜圈</p>
+<a id="more"></a>
+<p><strong>1. nvshen</strong><br>猫流大大发现一个女神，你能告诉我女神的名字么（名字即是flag） <a href="http://107.189.158.112/0aab9b20410fdd880c53922048023266/nvshen.zip" target="_blank" rel="external">http://107.189.158.112/0aab9b20410fdd880c53922048023266/nvshen.zip</a><br>打开大量数据，感觉是base64，解密了前一部分数据看到PNG, IHDR字符，应该就是png图片了，然后python写了段脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">import base64</div><div class="line">f1 = open(&quot;nvshen.txt&quot;, &quot;r&quot;)</div><div class="line">f2 = open(&quot;nvshen.png&quot;, &quot;wb&quot;)</div><div class="line"></div><div class="line">while 1:</div><div class="line">	buf = f1.read(12)</div><div class="line">	if not buf:</div><div class="line">		break;</div><div class="line">	#print buf, base64.decodestring(buf)</div><div class="line">	f2.write(base64.decodestring(buf))	</div><div class="line"></div><div class="line">f1.close()</div><div class="line">f2.close()</div></pre></td></tr></table></figure></p>
+<p>得到一张女神照片，纠结了会，google图片之，找到女神名字“爱新觉罗·启星”，被中间的点坑了几次，然后flag是“爱新觉罗启星”， 出题人原来喜欢她啊<br><img src="http://www.taihainet.com/news/UploadFiles_6334/201306/20130618160811617.jpg" alt="img"></p>
+<p><strong>3. babyCrack</strong><br>107.189.158.112/d55757a7ccf958399789e18e1d8199de/babyCrack.zip<br>PEID查了下，是.net，马上祭出神奇.net reflector， 结果工具过期，重新下了个注册机，搞定，几个函数，翻了下，看到flag：hctf{bABy<em>CtsvlmE</em>!}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">private void button1_Click(object sender, EventArgs e)</div><div class="line">&#123;</div><div class="line">	bool flag = false;</div><div class="line">	Config.user = this.textBox1.Text;</div><div class="line">	string user = Config.user;</div><div class="line">	string str2 = &quot;hctf&#123;bABy_CtsvlmE_!&#125;&quot;;</div><div class="line">	if (str2.CompareTo(user) == 0)</div><div class="line">	&#123;</div><div class="line">		flag = true;</div><div class="line">	&#125;</div><div class="line">	if (flag)</div><div class="line">	&#123;</div><div class="line">		MessageBox.Show(&quot;good !!!&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>4. stego_final</strong><br>图片隐写题，Stegsolve各种通道翻了一下，看到张二维码，用手机一扫，识别不了，背影有些黑点，又不会图片处理，ps一番，终于找到flag：flag{hctf_3xF$235#^3}</p>
+<p><strong>5. wzwzDingDing</strong><br>被坑的最惨的一道题，是个64位驱动，代码真不多，只有30多个函数，翻了一个遍，流程分析清楚，最后有个字符串提示 “OK!YOU ARE REALLY GOOD!Also, there is a } left!”<br>就是说代码执行到这，应该会得到flag，然后这个是在IRP_MJ_DEVICE_CONTROL函数中，函数对应多个ctl code，分别是：<br>0x88102004，0x88102008, 0x8810200C, 0x88102014, 0x88102010，以及都不是前面的一个ctl code，每个ctl code对应分支都会对偏移0x48E0的一个标志进行操作，最后得到0xFFFFFF，执行提示字符串的分支。<br>下面是触发的ring3代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">HANDLE hDev = CreateFileA(DRV_SYM, GENERIC_ALL, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);</div><div class="line">if(hDev == INVALID_HANDLE_VALUE)</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] open dev error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line">printf(&quot;[+] open dev success!\n&quot;);</div><div class="line">char buf[20] = &quot;^lejAJ]O&quot;;</div><div class="line">DWORD dwReturn = 0;</div><div class="line">if(! DeviceIoControl(hDev, 0x88102004, buf, strlen(buf), buf, strlen(buf),  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line">char buf1[20] = &quot;MNIII&quot;;</div><div class="line">if(! DeviceIoControl(hDev, 0x88102004, buf1, strlen(buf1), buf1, strlen(buf1),  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">if(! DeviceIoControl(hDev, 0x88102008, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line">//8810200C</div><div class="line">if(! DeviceIoControl(hDev, 0x8810200C, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;	</div><div class="line"></div><div class="line">if(! DeviceIoControl(hDev, 0x88102014, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;	</div><div class="line">//88102010</div><div class="line">if(! DeviceIoControl(hDev,  0x88102010, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最后就进入了提示字符分支，结果在这里 <code>text:0000000000012361 call    [rsp+0C8h+ShellCode]</code>，就崩了，被坑了好久，这里需要结合题目提示flag: HCTF{‘intput’.encode(‘hex’)}<br>就是需要修复那段shellcode，让其正确执行，然后顺利执行到提示字符串位置，分支中还有代码提示需要修复的代码字节位置，然后就是根据一个堆栈平衡就能修复（开始明显看不懂题意啊，坑）<br>修复前代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">fffff880`02f85d90 l5b</div><div class="line">wzwzDingDing+0x2d90:</div><div class="line">fffff880`02f85d90 （10） 5152          adc     byte ptr [rcx+52h],dl =&gt;(50 //push rax push rcx</div><div class="line">fffff880`02f85d93 53              push    rbx</div><div class="line">fffff880`02f85d94 55              push    rbp</div><div class="line">fffff880`02f85d95 56              push    rsi</div><div class="line">fffff880`02f85d96 57              push    rdi</div><div class="line">fffff880`02f85d97 （90）              nop</div><div class="line">fffff880`02f85d98 （90）              nop//push r8  (41 50</div><div class="line">fffff880`02f85d99 4151            push    r9</div><div class="line">fffff880`02f85d9b 4152            push    r10</div><div class="line">fffff880`02f85d9d 4153            push    r11</div><div class="line">fffff880`02f85d9f 4154            push    r12</div><div class="line">fffff880`02f85da1 4155            push    r13</div><div class="line">fffff880`02f85da3 4156            push    r14</div><div class="line">fffff880`02f85da5 4157            push    r15</div><div class="line">fffff880`02f85da7 90              nop</div><div class="line">fffff880`02f85da8 （90）              nop//(48 83 EC 28 sub rsp,28h</div><div class="line">fffff880`02f85da9 (90              nop</div><div class="line">fffff880`02f85daa (90              nop</div><div class="line">fffff880`02f85dab (90              nop</div><div class="line">fffff880`02f85dac 90              nop</div><div class="line">fffff880`02f85dad 48c7c600000000  mov     rsi,0</div><div class="line">fffff880`02f85db4 488b040e        mov     rax,qword ptr [rsi+rcx]</div><div class="line">fffff880`02f85db8 4883f007        xor     rax,7</div><div class="line">fffff880`02f85dbc 4889040e        mov     qword ptr [rsi+rcx],rax</div><div class="line">fffff880`02f85dc0 90              nop</div><div class="line">fffff880`02f85dc1 90              nop</div><div class="line">fffff880`02f85dc2 90              nop</div><div class="line">fffff880`02f85dc3 90              nop</div><div class="line">fffff880`02f85dc4 48ffc6          inc     rsi</div><div class="line">fffff880`02f85dc7 4883fe0b        cmp     rsi,0Bh</div><div class="line">fffff880`02f85dcb 74e0            je      wzwzDingDing+0x2dad (fffff880`02f85dad)</div><div class="line">fffff880`02f85dcd 90              nop</div><div class="line">fffff880`02f85dce 4883c428        add     rsp,28h</div><div class="line">fffff880`02f85dd2 415f            pop     r15</div><div class="line">fffff880`02f85dd4 415e            pop     r14</div><div class="line">fffff880`02f85dd6 415d            pop     r13</div><div class="line">fffff880`02f85dd8 415c            pop     r12</div><div class="line">fffff880`02f85dda 415b            pop     r11</div><div class="line">fffff880`02f85ddc 415a            pop     r10</div><div class="line">fffff880`02f85dde 4159            pop     r9</div><div class="line">fffff880`02f85de0 4158            pop     r8</div><div class="line">fffff880`02f85de2 5f              pop     rdi</div><div class="line">fffff880`02f85de3 5e              pop     rsi</div><div class="line">fffff880`02f85de4 5d              pop     rbp</div><div class="line">fffff880`02f85de5 5b              pop     rbx</div><div class="line">fffff880`02f85de6 5a              pop     rdx</div><div class="line">fffff880`02f85de7 (90)              nop //59 pop rcx </div><div class="line">fffff880`02f85de8 58              pop     rax</div><div class="line">fffff880`02f85de9 (90)              nop//ret C3</div><div class="line">fffff880`02f85dea 00cc            add     ah,cl</div></pre></td></tr></table></figure>
+<p>修复后代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">kd&gt; u fffff880`02f85d90 l5b</div><div class="line">wzwzDingDing+0x2d90:</div><div class="line">fffff880`02f85d90 50              push    rax</div><div class="line">fffff880`02f85d91 51              push    rcx</div><div class="line">fffff880`02f85d92 52              push    rdx</div><div class="line">fffff880`02f85d93 53              push    rbx</div><div class="line">fffff880`02f85d94 55              push    rbp</div><div class="line">fffff880`02f85d95 56              push    rsi</div><div class="line">fffff880`02f85d96 57              push    rdi</div><div class="line">fffff880`02f85d97 4150            push    r8</div><div class="line">fffff880`02f85d99 4151            push    r9</div><div class="line">fffff880`02f85d9b 4152            push    r10</div><div class="line">fffff880`02f85d9d 4153            push    r11</div><div class="line">fffff880`02f85d9f 4154            push    r12</div><div class="line">fffff880`02f85da1 4155            push    r13</div><div class="line">fffff880`02f85da3 4156            push    r14</div><div class="line">fffff880`02f85da5 4157            push    r15</div><div class="line">fffff880`02f85da7 90              nop</div><div class="line">fffff880`02f85da8 4883ec28        sub     rsp,28h</div><div class="line">fffff880`02f85dac 90              nop</div><div class="line">fffff880`02f85dad 48c7c600000000  mov     rsi,0</div><div class="line">fffff880`02f85db4 488b040e        mov     rax,qword ptr [rsi+rcx]</div><div class="line">fffff880`02f85db8 4883f007        xor     rax,7</div><div class="line">fffff880`02f85dbc 4889040e        mov     qword ptr [rsi+rcx],rax</div><div class="line">fffff880`02f85dc0 90              nop</div><div class="line">fffff880`02f85dc1 90              nop</div><div class="line">fffff880`02f85dc2 90              nop</div><div class="line">fffff880`02f85dc3 90              nop</div><div class="line">fffff880`02f85dc4 48ffc6          inc     rsi</div><div class="line">fffff880`02f85dc7 4883fe0b        cmp     rsi,0Bh</div><div class="line">fffff880`02f85dcb 74e0            je      wzwzDingDing+0x2dad (fffff880`02f85dad)</div><div class="line">fffff880`02f85dcd 90              nop</div><div class="line">fffff880`02f85dce 4883c428        add     rsp,28h</div><div class="line">fffff880`02f85dd2 415f            pop     r15</div><div class="line">fffff880`02f85dd4 415e            pop     r14</div><div class="line">fffff880`02f85dd6 415d            pop     r13</div><div class="line">fffff880`02f85dd8 415c            pop     r12</div><div class="line">fffff880`02f85dda 415b            pop     r11</div><div class="line">fffff880`02f85ddc 415a            pop     r10</div><div class="line">fffff880`02f85dde 4159            pop     r9</div><div class="line">fffff880`02f85de0 4158            pop     r8</div><div class="line">fffff880`02f85de2 5f              pop     rdi</div><div class="line">fffff880`02f85de3 5e              pop     rsi</div><div class="line">fffff880`02f85de4 5d              pop     rbp</div><div class="line">fffff880`02f85de5 5b              pop     rbx</div><div class="line">fffff880`02f85de6 5a              pop     rdx</div><div class="line">fffff880`02f85de7 59              pop     rcx</div><div class="line">fffff880`02f85de8 58              pop     rax</div><div class="line">fffff880`02f85de9 c3              ret</div><div class="line">fffff880`02f85dea 00cc            add     ah,cl</div></pre></td></tr></table></figure></p>
+<p>然后flag：HCTF{5041504883ec2859c3}，注意大小写啊</p>
+<p><strong>6. 其他</strong></p>
+<p>就这么多了，经验太少，就各路大牛路过指导</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/how-to-get-GS-cookie/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          how to get GS cookie
+        
+      </div>
+    </a>
+  
+  
+    <a href="/010注册算法分析/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">010注册算法分析</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="hctf-writeup/" data-title="hctf writeup" data-url="http://anhkgg.github.io/hctf-writeup/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
   </div>
 </body>
 </html>

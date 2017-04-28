@@ -1,15 +1,455 @@
-<%- partial('_partial/head') %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>pin使用小记-函数分析 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="概述相关：pin是什么  pin可以做什么  pin examples 此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能 由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。 下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。">
+<meta name="keywords" content="pin,pintool,function analysis,hook,insertcall,instrument,asm,插桩,钩子,指令级">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pin使用小记-函数分析">
+<meta property="og:url" content="http://anhkgg.github.io/pin-use-note-function-analysis/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="概述相关：pin是什么  pin可以做什么  pin examples 此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能 由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。 下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。">
+<meta property="og:updated_time" content="2016-07-28T05:42:35.293Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="pin使用小记-函数分析">
+<meta name="twitter:description" content="概述相关：pin是什么  pin可以做什么  pin examples 此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能 由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。 下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
 <body>
   <div id="container">
     <div class="left-col">
-    <%- partial('_partial/left-col', null, {cache: !config.relative_link}) %>
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/APC/" style="font-size: 10px;">APC</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/windows/" style="font-size: 10px;">windows</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
     </div>
     <div class="mid-col">
-      <%- partial('_partial/mobile-nav', null, {cache: !config.relative_link}) %>
-      <div class="body-wrap"><%- body %></div>
-      <%- partial('_partial/footer') %>
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-pin-use-note-function-analysis" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/pin-use-note-function-analysis/" class="article-date">
+  	<time datetime="2016-07-28T05:27:33.000Z" itemprop="datePublished">2016-07-28</time>
+</a>
     </div>
-    <%- partial('_partial/after-footer') %>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      pin使用小记-函数分析
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/asm/">asm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/function-analysis/">function analysis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hook/">hook</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/insertcall/">insertcall</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/instrument/">instrument</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pin/">pin</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pintool/">pintool</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/指令级/">指令级</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/插桩/">插桩</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/钩子/">钩子</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/security/">security</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>相关：<a href="https://software.intel.com/en-us/articles/pintool/" target="_blank" rel="external">pin是什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/" target="_blank" rel="external">pin可以做什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/index.html#EXAMPLES" target="_blank" rel="external">pin examples</a></p>
+<p>此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能</p>
+<p>由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。</p>
+<p>下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。</p>
+<a id="more"></a>
+<h1 id="函数分析"><a href="#函数分析" class="headerlink" title="函数分析"></a>函数分析</h1><h2 id="RTN"><a href="#RTN" class="headerlink" title="RTN"></a>RTN</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">PIN_CALLBACK 	LEVEL_PINCLIENT::RTN_AddInstrumentFunction (RTN_INSTRUMENT_CALLBACK fun, VOID *val)</div></pre></td></tr></table></figure>
+<p>使用<code>RTN_AddInstrumentFunction</code>即可对分析目标添加函数级插桩，在设置的回调中可以获取函数的各种信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typedef VOID(*) LEVEL_PINCLIENT::RTN_INSTRUMENT_CALLBACK(RTN rtn, VOID *v)</div></pre></td></tr></table></figure>
+<p>回调函数中rtn就表示被插桩的该函数，通过RTN_XXX相关函数可以获取函数的名字、地址、大小、范围等等</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">const string &amp; 	LEVEL_PINCLIENT::RTN_Name (RTN x)</div><div class="line">ADDRINT 	LEVEL_PINCLIENT::RTN_Address (RTN rtn)</div><div class="line">USIZE 	LEVEL_PINCLIENT::RTN_Size (RTN rtn)</div><div class="line">USIZE 	LEVEL_PINCLIENT::RTN_Range (RTN rtn)</div></pre></td></tr></table></figure>
+<p>不得不提一个函数，<code>RTN_FindByName</code>类似于GetProcAddress，可以获取img(模块对象)中指定名字的rtn对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">RTN 	LEVEL_PINCLIENT::RTN_FindByName (IMG img, const CHAR *name)</div></pre></td></tr></table></figure>
+<p>也可以通过地址来获取对应的rtn对象，但是如果对应函数没有符号信息，获取到的rtn是不对的，会找到最小范围内满足的rtn对象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">RTN 	LEVEL_PINCLIENT::RTN_FindByAddress (ADDRINT address)</div></pre></td></tr></table></figure>
+<h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h3><p>初以为RTN表示所有函数对象，像IDA一样能将基本所有函数分析出来，哪知吃了不看文档的亏(虽然知道使用RTN之前需要调用符号相关初始化)。</p>
+<blockquote>
+<p>A RTN represents the functions/routines/procedures typically produced by a compiler for a procedural programming language such as C. Pin finds routines by using the symbol table information. You must call PIN_InitSymbols() so that symbol table information will be available. Can be accessed at instrumentation time and analysis time.</p>
+</blockquote>
+<p>也就是说pin是根据符号信息来分析函数，生成RTN对象。那么没有符号信息的函数，像IDA中的是那么<code>sub_xxxx</code>也就没有可能这么方便的使用了。</p>
+<p>当然，如果需求是对有符号信息的函数，比如对系统函数的分析，那么RTN还是能够提供相当nb的功能的。记得调用<code>PIN_InitSymbols()</code>初始化符号信息。</p>
+<h3 id="maybe-hook"><a href="#maybe-hook" class="headerlink" title="maybe hook"></a>maybe hook</h3><p>pin可以实现类似于对函数hook的功能，有两类，第一类用在JIT模式下，另一类用在Probe模式下。</p>
+<p>先说JIT模式下使用的<code>RTN_InsertCall</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">VOID LEVEL_PINCLIENT::RTN_InsertCall	(	RTN 	rtn,</div><div class="line">IPOINT 	action,</div><div class="line">AFUNPTR 	funptr,</div><div class="line"> 	...	 </div><div class="line">)</div></pre></td></tr></table></figure>
+<blockquote>
+<p>Insert call relative to a rtn.</p>
+</blockquote>
+<p>使用这个函数注册一个回调函数，该回调函数可以在rtn调用前（IPOINT_BEFORE）或者调用后（IPOINT_AFTER）被调用。可以给回调函数传递各种信息，使用第三个参数之后的内容传递。</p>
+<p>pin中各种XXX_InsertCall传递参数有一个统一的类型<code>IARG_TYPE</code>。这里简单说一下传递方法，具体要根据<code>IARG_TYPE</code>说明来使用，大致分为两种：</p>
+<ol>
+<li>只需要指定IARG_XXX类型，pin自己传递具体值给回调函数</li>
+<li>指定IARG_XXX类型，开发者传递类型对应的具体值</li>
+</ol>
+<p>必须以IARG_END表示参数结束。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">//pin传递值，只需要指定类型即可</div><div class="line">IARG_RETURN_IP 	Type: ADDRINT. Return address for function call, valid only at the function entry point.</div><div class="line">IARG_ORIG_FUNCPTR 	Type: AFUNPTR. Function pointer to the relocated entry of the original uninstrumented function.</div><div class="line">IARG_PROTOTYPE 	Type: PROTO. The function prototype of the application function. See Prototypes.</div><div class="line">IARG_THREAD_ID 	Type: THREADID. Application thread id.</div><div class="line">//开发者需要自己传递具体值</div><div class="line">IARG_ADDRINT 	Type: ADDRINT. Constant value (additional arg required).</div><div class="line">IARG_PTR 	Type: &quot;VOID *&quot;. Constant value (additional pointer arg required).</div><div class="line">IARG_BOOL 	Type: BOOL. Constant (additional BOOL arg required).</div><div class="line">IARG_UINT32 	Type: UINT32. Constant (additional integer arg required).</div><div class="line">IARG_INST_PTR 	Type: ADDRINT. The address of the instrumented instruction. This value does not change at IPOINT_AFTER. This is simply shorthand for IARG_ADDRINT, INS_Address(ins).</div><div class="line">IARG_REG_VALUE 	Type: ADDRINT for integer register. Value of a register (additional register arg required) REG: Register Object Basically, this cannot be used to retrieve the value of registers whose size is different than ADDRINT&apos;s (i.e.: x87/XMM/YMM/ZMM registers) or registeres which are not architectural (REG_PIN_*), but there are some exceptions for this rule.</div></pre></td></tr></table></figure>
+<p>举个例子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">char* p = &quot;this is log info.&quot;;</div><div class="line">BOOL log_falg = TRUE;</div><div class="line">ADDRINT addr = RTN_Address(rtn);</div><div class="line">RTN_InsertCall(rtn, IPOINT_BEFORE, RtnClk, </div><div class="line">                IARG_ORIG_FUNCPTR, </div><div class="line">                IARG_RETURN_IP, </div><div class="line">                IARG_ADDRINT, addr, </div><div class="line">                IARG_PTR, p,</div><div class="line">                IARG_BOOL, log_falg,</div><div class="line">                IARG_END);</div><div class="line">                </div><div class="line">VOID RtnClk(ADDRINT OrigFunc, ADDRINT retIp, ADDRINT addr, void* log, BOOL log_falg)</div><div class="line">&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Probe模式下使用下面两个函数，其实没有弄明白这两个函数和JIT模式下RTN_InserCall的区别，暂时就不做深入了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">VOID 	LEVEL_PINCLIENT::RTN_InsertCallProbed (RTN orgRtn, IPOINT action, AFUNPTR funptr,...)</div><div class="line">VOID 	LEVEL_PINCLIENT::RTN_InsertCallProbedEx (RTN orgRtn, IPOINT action, PROBE_MODE mode, AFUNPTR funptr,...)</div></pre></td></tr></table></figure>
+<blockquote>
+<p>Insert a call to an analysis routine relative to a RTN.</p>
+</blockquote>
+<p>其他<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">RTN_ReplaceProbed</div><div class="line">RTN_ReplaceProbedEx</div></pre></td></tr></table></figure></p>
+<p>下面一个示例，可能更符合对函数hook的理解，这里使用到的是RTN_ReplaceSignatureProbed</p>
+<p>这种方式需要向函数hook一样指定函数原型，也就是需要知道函数需要哪些参数，调用方式等等。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line">typedef VOID * ( *FP_MALLOC )( size_t );</div><div class="line"></div><div class="line">// This is the replacement routine.</div><div class="line">//</div><div class="line">VOID * NewMalloc( FP_MALLOC orgFuncptr, UINT32 arg0, ADDRINT returnIp )</div><div class="line">&#123;</div><div class="line">    // Normally one would do something more interesting with this data.</div><div class="line">    //</div><div class="line">    cout &lt;&lt; &quot;NewMalloc (&quot;</div><div class="line">         &lt;&lt; hex &lt;&lt; ADDRINT ( orgFuncptr ) &lt;&lt; &quot;, &quot; </div><div class="line">         &lt;&lt; dec &lt;&lt; arg0 &lt;&lt; &quot;, &quot; </div><div class="line">         &lt;&lt; hex &lt;&lt; returnIp &lt;&lt; &quot;)&quot;</div><div class="line">         &lt;&lt; endl &lt;&lt; flush;</div><div class="line"></div><div class="line">    // Call the relocated entry point of the original (replaced) routine.</div><div class="line">    //</div><div class="line">    VOID * v = orgFuncptr( arg0 );</div><div class="line"></div><div class="line">    return v;</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">// Pin calls this function every time a new img is loaded.</div><div class="line">// It is best to do probe replacement when the image is loaded,</div><div class="line">// because only one thread knows about the image at this time.</div><div class="line">//</div><div class="line">VOID ImageLoad( IMG img, VOID *v )</div><div class="line">&#123;</div><div class="line">    // See if malloc() is present in the image.  If so, replace it.</div><div class="line">    //</div><div class="line">    RTN rtn = RTN_FindByName( img, &quot;malloc&quot; );</div><div class="line">    </div><div class="line">    if (RTN_Valid(rtn))</div><div class="line">    &#123;</div><div class="line">        cout &lt;&lt; &quot;Replacing malloc in &quot; &lt;&lt; IMG_Name(img) &lt;&lt; endl;</div><div class="line">        </div><div class="line">        // Define a function prototype that describes the application routine</div><div class="line">        // that will be replaced.</div><div class="line">        //</div><div class="line">        PROTO proto_malloc = PROTO_Allocate( PIN_PARG(void *), CALLINGSTD_DEFAULT,</div><div class="line">                                             &quot;malloc&quot;, PIN_PARG(int), PIN_PARG_END() );</div><div class="line">        </div><div class="line">        // Replace the application routine with the replacement function.</div><div class="line">        // Additional arguments have been added to the replacement routine.</div><div class="line">        //</div><div class="line">        RTN_ReplaceSignatureProbed(rtn, AFUNPTR(NewMalloc),</div><div class="line">                                   IARG_PROTOTYPE, proto_malloc,</div><div class="line">                                   IARG_ORIG_FUNCPTR,</div><div class="line">                                   IARG_FUNCARG_ENTRYPOINT_VALUE, 0,</div><div class="line">                                   IARG_RETURN_IP,</div><div class="line">                                   IARG_END);</div><div class="line"></div><div class="line">        // Free the function prototype.</div><div class="line">        //</div><div class="line">        PROTO_Free( proto_malloc );</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="can-be-hook"><a href="#can-be-hook" class="headerlink" title="can be hook"></a>can be hook</h3><p>另外pin还提供对任意地址做hook的函数，也就是PIN_InsertCallProbed。</p>
+<p>显然这也是用于Probe模式下的函数，顺便就说一下Probe模式下需要注意，调用PIN_StartProgramProbed()启动目标进程，这样子之后，JIT模式的很多函数就不能使用了。正是因为这个，如RTN、INS、Trace插桩函数不能使用，只能通过IMG插桩，在回调中进行函数的分析，想下面的实例代码中一样。</p>
+<p>这样就给我要实现的功能带来了麻烦，无法通过INS插桩分析call xxx的目标地址，更别说后续的使用PIN_InsertCallProbed来对函数hook了，这样子PIN_InsertCallProbed对我来说显得很鸡肋。</p>
+<blockquote>
+<p>PIN_StartProgramProbed() must be used when using this API.<br>Use RTN_IsSafeForProbedInsertion() to determine if a function is a suitable candidate for probed function insertion.</p>
+</blockquote>
+<p>不过，我觉得这种模式更类似于函数hook，不会像上面指定IPOINT_BEFORE，它更像hook一样只是对函数进行inline hook（或者其他方式）。</p>
+<p>使用示例(代码来自于pin例子源码<code>source\tools\Probes\insert_call_probed.cpp</code>)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">void Notification(ADDRINT val)</div><div class="line">&#123;</div><div class="line">    char buff[80];</div><div class="line"></div><div class="line">    if (!writeFun)</div><div class="line">    &#123;</div><div class="line">        fprintf(stderr, &quot;Write Function was not initialized ...\n&quot;);</div><div class="line">        exit(1);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    sprintf(buff, &quot;Notification value: %p&quot;, Addrint2VoidStar(val));</div><div class="line">    writeFun(buff);</div><div class="line">&#125;</div><div class="line"></div><div class="line">VOID ImageLoad(IMG img, VOID *v)</div><div class="line">&#123;</div><div class="line">    const ANNOTATION *ann = 0;</div><div class="line">    USIZE num = 0;</div><div class="line"></div><div class="line">    printf(&quot;Processing %s\n&quot;, IMG_Name(img).c_str());</div><div class="line">    </div><div class="line">    for (SEC sec = IMG_SecHead(img); SEC_Valid(sec); sec = SEC_Next(sec))</div><div class="line">    &#123;</div><div class="line">        if (SEC_Name(sec) == &quot;MyAnnot&quot;)</div><div class="line">        &#123;</div><div class="line">            ann = reinterpret_cast&lt;const ANNOTATION*&gt;(SEC_Data(sec));</div><div class="line">            num = SEC_Size(sec) / sizeof(ANNOTATION);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (ann)</div><div class="line">    &#123;</div><div class="line">        printf(&quot;Found annotations: \n&quot;);</div><div class="line">        for (UINT32 i = 0; i &lt; num; i++)</div><div class="line">        &#123;</div><div class="line">            ADDRINT addr = ann[i].addr + IMG_LoadOffset(img);</div><div class="line">            ADDRINT val = ann[i].value;</div><div class="line">            printf(&quot;\t%p %p\t&quot;, Addrint2VoidStar(addr), Addrint2VoidStar(val));</div><div class="line">            if (PIN_IsSafeForProbedInsertion(addr)) //检查addr对应指令是否可以做hook</div><div class="line">            &#123;</div><div class="line">                PIN_InsertCallProbed(addr, AFUNPTR(Notification), IARG_ADDRINT, val, IARG_END);</div><div class="line">                printf(&quot; - OK\n&quot;);</div><div class="line">            &#125;</div><div class="line">            else</div><div class="line">            &#123;</div><div class="line">                printf(&quot; - Failed\n&quot;);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Set the write line function, from the image of the annotations (i.e. the main executable).</div><div class="line">        RTN writeRtn = RTN_FindByName(img, &quot;write_line&quot;);</div><div class="line">        if (RTN_Valid(writeRtn))</div><div class="line">        &#123;</div><div class="line">            writeFun = (void (*)(char *))RTN_Funptr(writeRtn);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    printf(&quot;Completed %s\n&quot;, IMG_Name(img).c_str());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="INS"><a href="#INS" class="headerlink" title="INS"></a>INS</h2><p>INS表示某地址对应的指令对象，通过INS_XXX函数可以获取指令对应汇编代码，可以判断指令时什么类型，也可以对INS进行插桩。</p>
+<blockquote>
+<p>An INS represents an instruction. Can only be accessed at instrumentation time.</p>
+</blockquote>
+<p>下面列出一部分函数，看名字就知道干什么的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">string 	LEVEL_CORE::INS_Disassemble (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsLea (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsNop (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsCall (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsProcedureCall (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsRet (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsSysret (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsSyscall (INS ins)</div><div class="line"></div><div class="line">ADDRINT 	LEVEL_PINCLIENT::INS_Address (INS ins)</div><div class="line">USIZE 	LEVEL_PINCLIENT::INS_Size (INS ins)</div><div class="line">RTN 	LEVEL_PINCLIENT::INS_Rtn (INS x)</div><div class="line"></div><div class="line">BOOL 	LEVEL_CORE::INS_IsBranch (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsDirectBranch (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsDirectCall (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsDirectBranchOrCall (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsBranchOrCall (INS ins)</div><div class="line">BOOL 	LEVEL_CORE::INS_IsIndirectBranchOrCall (INS ins)</div><div class="line"></div><div class="line">ADDRINT 	LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress (INS ins)</div></pre></td></tr></table></figure>
+<p>下面主要对用到的几个函数，对其理解做一下笔记。</p>
+<h3 id="call-branch"><a href="#call-branch" class="headerlink" title="call/branch"></a>call/branch</h3><p>上面提到我要对call xxx中xxx的信息进行获取，就需要用到对INS的分析，进而通过插桩来获取地址。</p>
+<p>用到了下面几个函数对指令进行判断，是否是call。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">BOOL 	LEVEL_CORE::INS_IsCall (INS ins)</div><div class="line">//call，不管目标是不是地址，或者寄存器等</div><div class="line"></div><div class="line">BOOL 	LEVEL_CORE::INS_IsBranch (INS ins) </div><div class="line">//jmp,jz,jnz等等，不管目标是不是地址，或者寄存器等</div><div class="line"></div><div class="line">BOOL 	LEVEL_CORE::INS_IsDirectBranch (INS ins)</div><div class="line">//jmp,jz,jnz等等，目标是地址</div><div class="line"></div><div class="line">BOOL 	LEVEL_CORE::INS_IsDirectCall (INS ins)</div><div class="line">//call xxx，目标是地址</div><div class="line"></div><div class="line">BOOL 	LEVEL_CORE::INS_IsDirectBranchOrCall (INS ins)</div><div class="line">//call,jmp,jz,jnz等等，目标是地址</div><div class="line"></div><div class="line">BOOL 	LEVEL_CORE::INS_IsBranchOrCall (INS ins)</div><div class="line">//call,jmp,jz,jnz等等，不管目标是不是地址，或者寄存器等</div><div class="line"></div><div class="line">BOOL 	LEVEL_CORE::INS_IsIndirectBranchOrCall (INS ins)</div><div class="line">//call,jmp,jz,jnz等等，目标是寄存器</div></pre></td></tr></table></figure>
+<h3 id="目标地址"><a href="#目标地址" class="headerlink" title="目标地址"></a>目标地址</h3><p>如果INS满足INS_IsDirectBranchOrCall，可以直接通过<code>INS_DirectBranchOrCallTargetAddress</code>获取到目标地址。</p>
+<p>如果INS是<code>INS_IsIndirectBranchOrCall</code>，那么只有通过插桩来获取目标地址。插桩是必须使用<code>IPOINT_TAKEN_BRANCH</code>类型的action，然后再回调函数中可以通过寄存器来获取目标地址。</p>
+<p>如下所示代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">INS_InsertCall(ins, IPOINT_TAKEN_BRANCH, (AFUNPTR)RttiCall, IARG_CONTEXT, IARG_INST_PTR, IARG_END);</div><div class="line"></div><div class="line">void RttiCall(CONTEXT* ctx, ADDRINT addr)</div><div class="line">&#123;</div><div class="line">    ADDRINT TakenIP = (ADDRINT)PIN_GetContextReg(ctx, REG_INST_PTR);</div><div class="line">	ADDRINT RIP = (ADDRINT)PIN_GetContextReg(ctx, REG_RIP);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>通过上面对RNT，INS使用的相关总结，已经可以拿到call xxx的目标地址，也可以对任意地址进行插桩（hook），但是就在JIT\Probe两个模式中找不到可以以结合的地方。</p>
+<ol>
+<li>JIT模式下，可以通过INS拿到目标地址，但是不能对目标地址进行插桩</li>
+<li>Probe模式下，可以对目标地址插桩，但是拿不到目标地址</li>
+</ol>
+<p>不知道pin是否可以满足这种需求，但在我目前看到的东西里，是没法实现了。</p>
+<p>如果有过路的高人，想可以指点一二，不甚感激。</p>
+<p>另外总结一下pin中各对象的关系：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">IMG-&gt;SEC-&gt;BBL-&gt;RTN-&gt;INS</div></pre></td></tr></table></figure></p>
+<p>完结。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/precalculated-string-hashes-reverse-engineering-shellcode/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          使用预先算好的字符串hash逆向分析shellcode
+        
+      </div>
+    </a>
+  
+  
+    <a href="/liburl-use-minihttp/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">libcurl小记-简单http封装使用-源码分析</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="pin-use-note-function-analysis/" data-title="pin使用小记-函数分析" data-url="http://anhkgg.github.io/pin-use-note-function-analysis/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
   </div>
 </body>
 </html>
