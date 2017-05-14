@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>微信(WeChat)电脑端多开研究+源码 | Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！">
+<meta name="keywords" content="wechat,handle,patch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微信(WeChat)电脑端多开研究+源码">
+<meta property="og:url" content="http://anhkgg.github.io/wechat-multi-pc/index.html">
+<meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
+<meta property="og:description" content="0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！">
+<meta property="og:image" content="d:/note/webchat.png">
+<meta property="og:updated_time" content="2017-05-14T07:11:15.902Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="微信(WeChat)电脑端多开研究+源码">
+<meta name="twitter:description" content="0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！">
+<meta name="twitter:image" content="d:/note/webchat.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Anhkgg</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						<div class="icon-wrap icon-link hide" data-idx="2">
+							<div class="loopback_l"></div>
+							<div class="loopback_r"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>Menu</li>
+						<li>Tags</li>
+						
+						<li>Links</li>
+						
+						
+						<li>About</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+					        
+								<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+					        
+								<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+					        
+						</div>
+						
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud" id="js-tagcloud">
+						<a href="/tags/010editor/" style="font-size: 10px;">010editor</a> <a href="/tags/APC/" style="font-size: 10px;">APC</a> <a href="/tags/GS/" style="font-size: 10px;">GS</a> <a href="/tags/HOOK/" style="font-size: 10px;">HOOK</a> <a href="/tags/IDAPro/" style="font-size: 10px;">IDAPro</a> <a href="/tags/IDAPython/" style="font-size: 10px;">IDAPython</a> <a href="/tags/IDC/" style="font-size: 10px;">IDC</a> <a href="/tags/PE/" style="font-size: 10px;">PE</a> <a href="/tags/RPC/" style="font-size: 10px;">RPC</a> <a href="/tags/WM-KEYBOARD-LL/" style="font-size: 10px;">WM_KEYBOARD_LL</a> <a href="/tags/Windbg调试/" style="font-size: 10px;">Windbg调试</a> <a href="/tags/asm/" style="font-size: 10px;">asm</a> <a href="/tags/c/" style="font-size: 10px;">c++</a> <a href="/tags/cookie/" style="font-size: 10px;">cookie</a> <a href="/tags/ctf/" style="font-size: 15px;">ctf</a> <a href="/tags/freepiano/" style="font-size: 10px;">freepiano</a> <a href="/tags/function-analysis/" style="font-size: 10px;">function analysis</a> <a href="/tags/get-post-ajax/" style="font-size: 10px;">get_post_ajax</a> <a href="/tags/handle/" style="font-size: 10px;">handle</a> <a href="/tags/hctf/" style="font-size: 10px;">hctf</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/http/" style="font-size: 10px;">http</a> <a href="/tags/inject/" style="font-size: 10px;">inject</a> <a href="/tags/inject-process/" style="font-size: 15px;">inject process</a> <a href="/tags/insertcall/" style="font-size: 10px;">insertcall</a> <a href="/tags/instrument/" style="font-size: 10px;">instrument</a> <a href="/tags/libcurl/" style="font-size: 10px;">libcurl</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/minihttp/" style="font-size: 10px;">minihttp</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/pin/" style="font-size: 10px;">pin</a> <a href="/tags/pintool/" style="font-size: 10px;">pintool</a> <a href="/tags/pyspider/" style="font-size: 10px;">pyspider</a> <a href="/tags/reverse/" style="font-size: 20px;">reverse</a> <a href="/tags/rust/" style="font-size: 10px;">rust</a> <a href="/tags/sctf/" style="font-size: 10px;">sctf</a> <a href="/tags/shellcode/" style="font-size: 10px;">shellcode</a> <a href="/tags/ssctf/" style="font-size: 15px;">ssctf</a> <a href="/tags/unpack/" style="font-size: 10px;">unpack</a> <a href="/tags/upx/" style="font-size: 10px;">upx</a> <a href="/tags/wechat/" style="font-size: 10px;">wechat</a> <a href="/tags/windows/" style="font-size: 10px;">windows</a> <a href="/tags/writeup/" style="font-size: 10px;">writeup</a> <a href="/tags/指令级/" style="font-size: 10px;">指令级</a> <a href="/tags/插桩/" style="font-size: 10px;">插桩</a> <a href="/tags/远程过程调用/" style="font-size: 10px;">远程过程调用</a> <a href="/tags/钩子/" style="font-size: 10px;">钩子</a>
+					</div>
+				</section>
+				
+				
+				
+				<section class="switch-part switch-part3">
+					<div id="js-friends">
+					
+			          <a target="_blank" class="main-nav-link switch-friends-link" href="http://navisec.it/">NaviSec.it – 纳威安全导航</a>
+			        
+			        </div>
+				</section>
+				
+
+				
+				
+				<section class="switch-part switch-part4">
+				
+					<div id="js-aboutme">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</div>
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"></div>
+  		<h1 class="header-author js-mobile-header hide">Anhkgg</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+			
+				<img lazy-src="https://avatars0.githubusercontent.com/u/9443285?v=3&amp;s=460" class="js-avatar">
+			
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Anhkgg</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/anhkgg" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/u/5829043072" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+			        
+						<a class="mail" target="_blank" href="mailto:anhkgg@163.com" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap"><article id="post-wechat-multi-pc" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/wechat-multi-pc/" class="article-date">
+  	<time datetime="2017-05-14T07:07:51.000Z" itemprop="datePublished">2017-05-14</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      微信(WeChat)电脑端多开研究+源码
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/handle/">handle</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/patch/">patch</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wechat/">wechat</a></li></ul>
+	</div>
+
+        
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/security/">security</a>
+	</div>
+
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>不知道大家有没有多个微信号，我反正有一两三个。</p>
+<p>现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。</p>
+<p>哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个…</p>
+<p>不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！</p>
+<a id="more"></a>
+<h1 id="0x01-分析"><a href="#0x01-分析" class="headerlink" title="0x01 分析"></a>0x01 分析</h1><p>了解过单实例的同学，应该都知道大概是怎么实现的单开。</p>
+<p>简单说下，大都通过判断Mutex、Event、File等等是否已经存在，存在则退出当前开启进程（说明已经有一个进程了），这样也就是单实例了。</p>
+<p>那只要找到微信是通过什么标志来实现单实例的，然后干掉这个标志即可。</p>
+<p>然后…基于这个思路，我们上工具。</p>
+<p>使用procexp找到微信进程，然后翻了一遍句柄。</p>
+<p>找到疑是的一段句柄。</p>
+<p><img src="d:/note/webchat.png" alt="img"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">\Sessions\1\BaseNamedObjects\_WeChat_App_Instance_Identity_Mutex_Name</div><div class="line">\Sessions\1\BaseNamedObjects\WeChat_GlobalConfig_Multi_Process_Mutex</div></pre></td></tr></table></figure>
+<p>感觉这两个都像，不管了，上pchunter，kill掉句柄试一下。</p>
+<p>经过尝试，发现<code>_WeChat_App_Instance_Identity_Mutex_Name</code>是单实例标志（kill句柄后可以开第二个客户端），<code>WeChat_GlobalConfig_Multi_Process_Mutex</code>没用。</p>
+<p>既然如此，那开始码代码吧。</p>
+<h1 id="0x02-代码"><a href="#0x02-代码" class="headerlink" title="0x02 代码"></a>0x02 代码</h1><p>可能的方案：</p>
+<ol>
+<li>找微信判断标识的代码位置，然后直接patch掉，或者整个dll进去patch。然后大致去翻了一下，貌似代码在wechatwin.dll，然后加了vmp壳，所以就不折腾这个了。</li>
+<li>直接通过代码kill掉这个Mutex的句柄（类似Pchunter操作），然后就可以开启第二个实例了，貌似明显更有优势啊。</li>
+<li>额，如果觉得无所谓，每次开之前用pchunter关一次句柄也行，下面就不用看了…</li>
+</ol>
+<p>这里选择第二个方案，开始代码。</p>
+<p>流程：</p>
+<ol>
+<li>枚举句柄，找到_WeChat_App_Instance_Identity_Mutex_Name的mutant</li>
+<li>duplicate句柄到本进程，然后close</li>
+<li>启动微信</li>
+</ol>
+<p>下面是主要代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">//步骤1和2的代码</div><div class="line">//获取到微信所有进程句柄</div><div class="line">DWORD Num = GetProcIds(L&quot;WeChat.exe&quot;, Pids);</div><div class="line">...</div><div class="line"></div><div class="line">Status = ZwQuerySystemInformation(SystemHandleInformation, pbuffer, 0x1000, &amp;dwSize);</div><div class="line"></div><div class="line">PSYSTEM_HANDLE_INFORMATION1 pHandleInfo = (PSYSTEM_HANDLE_INFORMATION1)pbuffer;</div><div class="line"></div><div class="line">	for(nIndex = 0; nIndex &lt; pHandleInfo-&gt;NumberOfHandles; nIndex++)</div><div class="line">	&#123;</div><div class="line">	    //句柄在Pids中，就是微信进程的句柄信息</div><div class="line">		if(IsTargetPid(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, Pids, Num))</div><div class="line">		&#123;</div><div class="line">		    HANDLE hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </div><div class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</div><div class="line">						DUPLICATE_SAME_ACCESS</div><div class="line">						);</div><div class="line">						</div><div class="line">			//对象名</div><div class="line">			Status = NtQueryObject(hHandle, ObjectNameInformation, szName, 512, &amp;dwFlags);</div><div class="line">			//对象类型名</div><div class="line">			Status = NtQueryObject(hHandle,  ObjectTypeInformation, szType, 128, &amp;dwFlags);</div><div class="line">			</div><div class="line">			//找到微信的标志</div><div class="line">			if (0 == wcscmp(TypName, L&quot;Mutant&quot;))</div><div class="line">			&#123;</div><div class="line">				if (wcsstr(Name, L&quot;_WeChat_App_Instance_Identity_Mutex_Name&quot;))</div><div class="line">				&#123;</div><div class="line">				    </div><div class="line">				    //DUPLICATE_CLOSE_SOURCE标志很重要，不明白的查一查</div><div class="line">    				hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </div><div class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</div><div class="line">						DUPLICATE_CLOSE_SOURCE</div><div class="line">						);</div><div class="line">					if(hHandle)</div><div class="line">					&#123;</div><div class="line">						printf(&quot;+ Patch wechat success!\n&quot;);</div><div class="line">						CloseHandle(hHandle);</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">步骤3的代码</div><div class="line"></div><div class="line">//通过注册表找到微信安装目录</div><div class="line">if(ERROR_SUCCESS != RegOpenKey(HKEY_CURRENT_USER, L&quot;Software\\Tencent\\WeChat&quot;, &amp;hKey))</div><div class="line">&#123;</div><div class="line">	return;</div><div class="line">&#125;</div><div class="line"></div><div class="line">DWORD Type = REG_SZ;</div><div class="line">WCHAR Path[MAX_PATH] = &#123;0&#125;;</div><div class="line">DWORD cbData = MAX_PATH*sizeof(WCHAR);</div><div class="line">if(ERROR_SUCCESS != RegQueryValueEx(hKey, L&quot;InstallPath&quot;, 0, &amp;Type, (LPBYTE)Path, &amp;cbData))</div><div class="line">&#123;</div><div class="line">	goto __exit;</div><div class="line">&#125;</div><div class="line"></div><div class="line">PathAppend(Path, L&quot;WeChat.exe&quot;);</div><div class="line"></div><div class="line">//启动微信客户端</div><div class="line">ShellExecute(NULL, L&quot;Open&quot;, Path, NULL, NULL, SW_SHOW);</div></pre></td></tr></table></figure>
+<p>代码就这样，有注释，就不再啰嗦。</p>
+<p>完整代码，请看后面的地址。</p>
+<h1 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h1><p>一个小玩意，供大家一笑。</p>
+<p>编译好的可执行文件：</p>
+<p><a href="https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe" target="_blank" rel="external">https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe</a></p>
+<p>源码地址：</p>
+<p><a href="https://github.com/anhkgg/multi_wechat_pc" target="_blank" rel="external">https://github.com/anhkgg/multi_wechat_pc</a></p>
+<p>博客原文：</p>
+<p><a href="anhkgg.github.io/wechat-multi-pc">anhkgg.github.io/wechat-multi-pc</a></p>
+<p>转载请注明出处：<a href="anhkgg.github.io/wechat-multi-pc">anhkgg.github.io/wechat-multi-pc</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/coding-piano-hook/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          让代码飞出一段钢琴曲(freepiano小助手)
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+    <a class="jiathis_button_twitter"></a>
+    <a class="jiathis_button_plus"></a> 
+    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="wechat-multi-pc/" data-title="微信(WeChat)电脑端多开研究+源码" data-url="http://anhkgg.github.io/wechat-multi-pc/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"anhkgg"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+</div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Anhkgg
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+
+<script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: true,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false
+	}
+</script>
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F1356cee6585113888657f9b35b0a8295' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+
+  </div>
+</body>
+</html>
