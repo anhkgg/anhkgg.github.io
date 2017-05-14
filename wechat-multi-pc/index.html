@@ -13,12 +13,12 @@
 <meta property="og:url" content="http://anhkgg.github.io/wechat-multi-pc/index.html">
 <meta property="og:site_name" content="Anhkgg's website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit">
 <meta property="og:description" content="0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！">
-<meta property="og:image" content="d:/note/webchat.png">
-<meta property="og:updated_time" content="2017-05-14T07:11:15.902Z">
+<meta property="og:image" content="http://anhkgg.github.io/img/webchat.png">
+<meta property="og:updated_time" content="2017-05-14T07:13:41.312Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="微信(WeChat)电脑端多开研究+源码">
 <meta name="twitter:description" content="0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！">
-<meta name="twitter:image" content="d:/note/webchat.png">
+<meta name="twitter:image" content="http://anhkgg.github.io/img/webchat.png">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;s website | 内核研究 | 逆向分析 | 漏洞分析挖掘 | Windows Kernel | Rootkit | Reverse Engineer | Expolit" type="application/atom+xml">
   
@@ -83,7 +83,7 @@
 						<li>Links</li>
 						
 						
-						<li>About</li>
+						<li>Über</li>
 						
 					</ul>
 				</div>
@@ -247,7 +247,7 @@
 <p>然后…基于这个思路，我们上工具。</p>
 <p>使用procexp找到微信进程，然后翻了一遍句柄。</p>
 <p>找到疑是的一段句柄。</p>
-<p><img src="d:/note/webchat.png" alt="img"></p>
+<p><img src="/img/webchat.png" alt="img"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">\Sessions\1\BaseNamedObjects\_WeChat_App_Instance_Identity_Mutex_Name</div><div class="line">\Sessions\1\BaseNamedObjects\WeChat_GlobalConfig_Multi_Process_Mutex</div></pre></td></tr></table></figure>
 <p>感觉这两个都像，不管了，上pchunter，kill掉句柄试一下。</p>
 <p>经过尝试，发现<code>_WeChat_App_Instance_Identity_Mutex_Name</code>是单实例标志（kill句柄后可以开第二个客户端），<code>WeChat_GlobalConfig_Multi_Process_Mutex</code>没用。</p>
