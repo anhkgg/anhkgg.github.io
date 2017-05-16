@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Anhkgg研究室</title>
+  <title>Anhkgg安全研究室</title>
   <subtitle>Windows Kernel/Rootkit/Reverse Engineer/Expolit/内核研究/逆向分析/漏洞分析挖掘</subtitle>
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://anhkgg.github.io/"/>
+  <link href="https://anhkgg.github.io/"/>
   <updated>2017-05-14T07:15:06.722Z</updated>
-  <id>http://anhkgg.github.io/</id>
+  <id>https://anhkgg.github.io/</id>
   
   <author>
     <name>Anhkgg</name>
@@ -17,8 +17,8 @@
   
   <entry>
     <title>微信(WeChat)电脑端多开研究+源码</title>
-    <link href="http://anhkgg.github.io/wechat-multi-pc/"/>
-    <id>http://anhkgg.github.io/wechat-multi-pc/</id>
+    <link href="https://anhkgg.github.io/wechat-multi-pc/"/>
+    <id>https://anhkgg.github.io/wechat-multi-pc/</id>
     <published>2017-05-14T07:07:51.000Z</published>
     <updated>2017-05-14T07:15:06.722Z</updated>
     
@@ -75,21 +75,21 @@
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="wechat" scheme="http://anhkgg.github.io/tags/wechat/"/>
+      <category term="wechat" scheme="https://anhkgg.github.io/tags/wechat/"/>
     
-      <category term="handle" scheme="http://anhkgg.github.io/tags/handle/"/>
+      <category term="handle" scheme="https://anhkgg.github.io/tags/handle/"/>
     
-      <category term="patch" scheme="http://anhkgg.github.io/tags/patch/"/>
+      <category term="patch" scheme="https://anhkgg.github.io/tags/patch/"/>
     
   </entry>
   
   <entry>
     <title>让代码飞出一段钢琴曲(freepiano小助手)</title>
-    <link href="http://anhkgg.github.io/coding-piano-hook/"/>
-    <id>http://anhkgg.github.io/coding-piano-hook/</id>
+    <link href="https://anhkgg.github.io/coding-piano-hook/"/>
+    <id>https://anhkgg.github.io/coding-piano-hook/</id>
     <published>2017-05-01T07:11:42.000Z</published>
     <updated>2017-05-01T07:27:41.473Z</updated>
     
@@ -169,23 +169,23 @@
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="WM_KEYBOARD_LL" scheme="http://anhkgg.github.io/tags/WM-KEYBOARD-LL/"/>
+      <category term="WM_KEYBOARD_LL" scheme="https://anhkgg.github.io/tags/WM-KEYBOARD-LL/"/>
     
-      <category term="HOOK" scheme="http://anhkgg.github.io/tags/HOOK/"/>
+      <category term="HOOK" scheme="https://anhkgg.github.io/tags/HOOK/"/>
     
-      <category term="freepiano" scheme="http://anhkgg.github.io/tags/freepiano/"/>
+      <category term="freepiano" scheme="https://anhkgg.github.io/tags/freepiano/"/>
     
-      <category term="inject" scheme="http://anhkgg.github.io/tags/inject/"/>
+      <category term="inject" scheme="https://anhkgg.github.io/tags/inject/"/>
     
   </entry>
   
   <entry>
     <title>小Win，点一份APC（Apc机制详解）（一）</title>
-    <link href="http://anhkgg.github.io/win-apc-analyze1/"/>
-    <id>http://anhkgg.github.io/win-apc-analyze1/</id>
+    <link href="https://anhkgg.github.io/win-apc-analyze1/"/>
+    <id>https://anhkgg.github.io/win-apc-analyze1/</id>
     <published>2017-04-28T10:20:47.000Z</published>
     <updated>2017-04-28T14:11:51.775Z</updated>
     
@@ -429,19 +429,19 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="windows" scheme="http://anhkgg.github.io/tags/windows/"/>
+      <category term="windows" scheme="https://anhkgg.github.io/tags/windows/"/>
     
-      <category term="APC" scheme="http://anhkgg.github.io/tags/APC/"/>
+      <category term="APC" scheme="https://anhkgg.github.io/tags/APC/"/>
     
   </entry>
   
   <entry>
     <title>Rust笔记（一）-- 环境配置</title>
-    <link href="http://anhkgg.github.io/rust-note-1-config-environment/"/>
-    <id>http://anhkgg.github.io/rust-note-1-config-environment/</id>
+    <link href="https://anhkgg.github.io/rust-note-1-config-environment/"/>
+    <id>https://anhkgg.github.io/rust-note-1-config-environment/</id>
     <published>2017-04-25T14:03:33.000Z</published>
     <updated>2017-05-01T07:24:48.342Z</updated>
     
@@ -540,19 +540,19 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="rust" scheme="http://anhkgg.github.io/categories/rust/"/>
+      <category term="rust" scheme="https://anhkgg.github.io/categories/rust/"/>
     
     
-      <category term="rust" scheme="http://anhkgg.github.io/tags/rust/"/>
+      <category term="rust" scheme="https://anhkgg.github.io/tags/rust/"/>
     
-      <category term="linux" scheme="http://anhkgg.github.io/tags/linux/"/>
+      <category term="linux" scheme="https://anhkgg.github.io/tags/linux/"/>
     
   </entry>
   
   <entry>
     <title>IDC脚本小试笔记</title>
-    <link href="http://anhkgg.github.io/idc-base-usage-test-note/"/>
-    <id>http://anhkgg.github.io/idc-base-usage-test-note/</id>
+    <link href="https://anhkgg.github.io/idc-base-usage-test-note/"/>
+    <id>https://anhkgg.github.io/idc-base-usage-test-note/</id>
     <published>2016-10-10T07:56:17.000Z</published>
     <updated>2016-10-10T07:58:20.270Z</updated>
     
@@ -599,21 +599,21 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="IDAPro" scheme="http://anhkgg.github.io/tags/IDAPro/"/>
+      <category term="IDAPro" scheme="https://anhkgg.github.io/tags/IDAPro/"/>
     
-      <category term="IDC" scheme="http://anhkgg.github.io/tags/IDC/"/>
+      <category term="IDC" scheme="https://anhkgg.github.io/tags/IDC/"/>
     
-      <category term="reverse" scheme="http://anhkgg.github.io/tags/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
     
   </entry>
   
   <entry>
     <title>libcurl小记-简单http封装使用-源码分析</title>
-    <link href="http://anhkgg.github.io/liburl-use-minihttp/"/>
-    <id>http://anhkgg.github.io/liburl-use-minihttp/</id>
+    <link href="https://anhkgg.github.io/liburl-use-minihttp/"/>
+    <id>https://anhkgg.github.io/liburl-use-minihttp/</id>
     <published>2016-08-25T12:32:06.000Z</published>
     <updated>2016-08-26T00:29:49.952Z</updated>
     
@@ -671,23 +671,23 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="code" scheme="http://anhkgg.github.io/categories/code/"/>
+      <category term="code" scheme="https://anhkgg.github.io/categories/code/"/>
     
     
-      <category term="libcurl" scheme="http://anhkgg.github.io/tags/libcurl/"/>
+      <category term="libcurl" scheme="https://anhkgg.github.io/tags/libcurl/"/>
     
-      <category term="http" scheme="http://anhkgg.github.io/tags/http/"/>
+      <category term="http" scheme="https://anhkgg.github.io/tags/http/"/>
     
-      <category term="minihttp" scheme="http://anhkgg.github.io/tags/minihttp/"/>
+      <category term="minihttp" scheme="https://anhkgg.github.io/tags/minihttp/"/>
     
-      <category term="get_post_ajax" scheme="http://anhkgg.github.io/tags/get-post-ajax/"/>
+      <category term="get_post_ajax" scheme="https://anhkgg.github.io/tags/get-post-ajax/"/>
     
   </entry>
   
   <entry>
     <title>pin使用小记-函数分析</title>
-    <link href="http://anhkgg.github.io/pin-use-note-function-analysis/"/>
-    <id>http://anhkgg.github.io/pin-use-note-function-analysis/</id>
+    <link href="https://anhkgg.github.io/pin-use-note-function-analysis/"/>
+    <id>https://anhkgg.github.io/pin-use-note-function-analysis/</id>
     <published>2016-07-28T05:27:33.000Z</published>
     <updated>2016-07-28T05:42:35.293Z</updated>
     
@@ -778,35 +778,35 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="pin" scheme="http://anhkgg.github.io/tags/pin/"/>
+      <category term="pin" scheme="https://anhkgg.github.io/tags/pin/"/>
     
-      <category term="pintool" scheme="http://anhkgg.github.io/tags/pintool/"/>
+      <category term="pintool" scheme="https://anhkgg.github.io/tags/pintool/"/>
     
-      <category term="function analysis" scheme="http://anhkgg.github.io/tags/function-analysis/"/>
+      <category term="function analysis" scheme="https://anhkgg.github.io/tags/function-analysis/"/>
     
-      <category term="hook" scheme="http://anhkgg.github.io/tags/hook/"/>
+      <category term="hook" scheme="https://anhkgg.github.io/tags/hook/"/>
     
-      <category term="insertcall" scheme="http://anhkgg.github.io/tags/insertcall/"/>
+      <category term="insertcall" scheme="https://anhkgg.github.io/tags/insertcall/"/>
     
-      <category term="instrument" scheme="http://anhkgg.github.io/tags/instrument/"/>
+      <category term="instrument" scheme="https://anhkgg.github.io/tags/instrument/"/>
     
-      <category term="asm" scheme="http://anhkgg.github.io/tags/asm/"/>
+      <category term="asm" scheme="https://anhkgg.github.io/tags/asm/"/>
     
-      <category term="插桩" scheme="http://anhkgg.github.io/tags/%E6%8F%92%E6%A1%A9/"/>
+      <category term="插桩" scheme="https://anhkgg.github.io/tags/%E6%8F%92%E6%A1%A9/"/>
     
-      <category term="钩子" scheme="http://anhkgg.github.io/tags/%E9%92%A9%E5%AD%90/"/>
+      <category term="钩子" scheme="https://anhkgg.github.io/tags/%E9%92%A9%E5%AD%90/"/>
     
-      <category term="指令级" scheme="http://anhkgg.github.io/tags/%E6%8C%87%E4%BB%A4%E7%BA%A7/"/>
+      <category term="指令级" scheme="https://anhkgg.github.io/tags/%E6%8C%87%E4%BB%A4%E7%BA%A7/"/>
     
   </entry>
   
   <entry>
     <title>使用预先算好的字符串hash逆向分析shellcode</title>
-    <link href="http://anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/"/>
-    <id>http://anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/</id>
+    <link href="https://anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/"/>
+    <id>https://anhkgg.github.io/precalculated-string-hashes-reverse-engineering-shellcode/</id>
     <published>2016-07-11T10:29:16.000Z</published>
     <updated>2016-07-11T10:38:41.611Z</updated>
     
@@ -855,21 +855,21 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="reverse" scheme="http://anhkgg.github.io/tags/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
     
-      <category term="shellcode" scheme="http://anhkgg.github.io/tags/shellcode/"/>
+      <category term="shellcode" scheme="https://anhkgg.github.io/tags/shellcode/"/>
     
-      <category term="IDAPython" scheme="http://anhkgg.github.io/tags/IDAPython/"/>
+      <category term="IDAPython" scheme="https://anhkgg.github.io/tags/IDAPython/"/>
     
   </entry>
   
   <entry>
     <title>Windbg系列-RPC调试</title>
-    <link href="http://anhkgg.github.io/Windbg%E7%B3%BB%E5%88%97-RPC%E8%B0%83%E8%AF%95/"/>
-    <id>http://anhkgg.github.io/Windbg%E7%B3%BB%E5%88%97-RPC%E8%B0%83%E8%AF%95/</id>
+    <link href="https://anhkgg.github.io/Windbg%E7%B3%BB%E5%88%97-RPC%E8%B0%83%E8%AF%95/"/>
+    <id>https://anhkgg.github.io/Windbg%E7%B3%BB%E5%88%97-RPC%E8%B0%83%E8%AF%95/</id>
     <published>2016-01-04T12:16:10.000Z</published>
     <updated>2016-07-06T23:46:33.472Z</updated>
     
@@ -951,21 +951,21 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="debug" scheme="http://anhkgg.github.io/categories/debug/"/>
+      <category term="debug" scheme="https://anhkgg.github.io/categories/debug/"/>
     
     
-      <category term="Windbg调试" scheme="http://anhkgg.github.io/tags/Windbg%E8%B0%83%E8%AF%95/"/>
+      <category term="Windbg调试" scheme="https://anhkgg.github.io/tags/Windbg%E8%B0%83%E8%AF%95/"/>
     
-      <category term="RPC" scheme="http://anhkgg.github.io/tags/RPC/"/>
+      <category term="RPC" scheme="https://anhkgg.github.io/tags/RPC/"/>
     
-      <category term="远程过程调用" scheme="http://anhkgg.github.io/tags/%E8%BF%9C%E7%A8%8B%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8/"/>
+      <category term="远程过程调用" scheme="https://anhkgg.github.io/tags/%E8%BF%9C%E7%A8%8B%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8/"/>
     
   </entry>
   
   <entry>
     <title>linux pyspider learning</title>
-    <link href="http://anhkgg.github.io/linux-pyspider-learning/"/>
-    <id>http://anhkgg.github.io/linux-pyspider-learning/</id>
+    <link href="https://anhkgg.github.io/linux-pyspider-learning/"/>
+    <id>https://anhkgg.github.io/linux-pyspider-learning/</id>
     <published>2015-01-24T10:54:17.000Z</published>
     <updated>2016-07-07T04:27:03.432Z</updated>
     
@@ -987,17 +987,17 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="python" scheme="http://anhkgg.github.io/categories/python/"/>
+      <category term="python" scheme="https://anhkgg.github.io/categories/python/"/>
     
     
-      <category term="pyspider" scheme="http://anhkgg.github.io/tags/pyspider/"/>
+      <category term="pyspider" scheme="https://anhkgg.github.io/tags/pyspider/"/>
     
   </entry>
   
   <entry>
     <title>upx3.05手脱笔记</title>
-    <link href="http://anhkgg.github.io/upx3-05%E6%89%8B%E8%84%B1%E7%AC%94%E8%AE%B0/"/>
-    <id>http://anhkgg.github.io/upx3-05%E6%89%8B%E8%84%B1%E7%AC%94%E8%AE%B0/</id>
+    <link href="https://anhkgg.github.io/upx3-05%E6%89%8B%E8%84%B1%E7%AC%94%E8%AE%B0/"/>
+    <id>https://anhkgg.github.io/upx3-05%E6%89%8B%E8%84%B1%E7%AC%94%E8%AE%B0/</id>
     <published>2015-01-07T06:57:42.000Z</published>
     <updated>2015-01-07T07:14:13.000Z</updated>
     
@@ -1021,19 +1021,19 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="reverse" scheme="http://anhkgg.github.io/categories/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/categories/reverse/"/>
     
     
-      <category term="upx" scheme="http://anhkgg.github.io/tags/upx/"/>
+      <category term="upx" scheme="https://anhkgg.github.io/tags/upx/"/>
     
-      <category term="unpack" scheme="http://anhkgg.github.io/tags/unpack/"/>
+      <category term="unpack" scheme="https://anhkgg.github.io/tags/unpack/"/>
     
   </entry>
   
   <entry>
     <title>xctf sctf summary, little writeup</title>
-    <link href="http://anhkgg.github.io/sctf-summary/"/>
-    <id>http://anhkgg.github.io/sctf-summary/</id>
+    <link href="https://anhkgg.github.io/sctf-summary/"/>
+    <id>https://anhkgg.github.io/sctf-summary/</id>
     <published>2014-12-07T13:02:23.000Z</published>
     <updated>2016-07-07T04:28:44.869Z</updated>
     
@@ -1056,21 +1056,21 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="ctf" scheme="http://anhkgg.github.io/categories/ctf/"/>
+      <category term="ctf" scheme="https://anhkgg.github.io/categories/ctf/"/>
     
     
-      <category term="ctf" scheme="http://anhkgg.github.io/tags/ctf/"/>
+      <category term="ctf" scheme="https://anhkgg.github.io/tags/ctf/"/>
     
-      <category term="sctf" scheme="http://anhkgg.github.io/tags/sctf/"/>
+      <category term="sctf" scheme="https://anhkgg.github.io/tags/sctf/"/>
     
-      <category term="writeup" scheme="http://anhkgg.github.io/tags/writeup/"/>
+      <category term="writeup" scheme="https://anhkgg.github.io/tags/writeup/"/>
     
   </entry>
   
   <entry>
     <title>some thing in c++ reverse</title>
-    <link href="http://anhkgg.github.io/some-thing-in-c-reverse/"/>
-    <id>http://anhkgg.github.io/some-thing-in-c-reverse/</id>
+    <link href="https://anhkgg.github.io/some-thing-in-c-reverse/"/>
+    <id>https://anhkgg.github.io/some-thing-in-c-reverse/</id>
     <published>2014-12-05T09:10:20.000Z</published>
     <updated>2016-07-07T04:29:20.554Z</updated>
     
@@ -1087,19 +1087,19 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="reverse" scheme="http://anhkgg.github.io/categories/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/categories/reverse/"/>
     
     
-      <category term="reverse" scheme="http://anhkgg.github.io/tags/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
     
-      <category term="c++" scheme="http://anhkgg.github.io/tags/c/"/>
+      <category term="c++" scheme="https://anhkgg.github.io/tags/c/"/>
     
   </entry>
   
   <entry>
     <title>inject process analyze 2</title>
-    <link href="http://anhkgg.github.io/inject-process-analyze%202/"/>
-    <id>http://anhkgg.github.io/inject-process-analyze%202/</id>
+    <link href="https://anhkgg.github.io/inject-process-analyze%202/"/>
+    <id>https://anhkgg.github.io/inject-process-analyze%202/</id>
     <published>2014-11-25T09:45:00.000Z</published>
     <updated>2016-07-07T04:31:16.973Z</updated>
     
@@ -1120,19 +1120,19 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="reverse" scheme="http://anhkgg.github.io/tags/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
     
-      <category term="inject process" scheme="http://anhkgg.github.io/tags/inject-process/"/>
+      <category term="inject process" scheme="https://anhkgg.github.io/tags/inject-process/"/>
     
   </entry>
   
   <entry>
     <title>inject process analyze and code</title>
-    <link href="http://anhkgg.github.io/inject-process-analyze-and-code/"/>
-    <id>http://anhkgg.github.io/inject-process-analyze-and-code/</id>
+    <link href="https://anhkgg.github.io/inject-process-analyze-and-code/"/>
+    <id>https://anhkgg.github.io/inject-process-analyze-and-code/</id>
     <published>2014-11-25T09:45:00.000Z</published>
     <updated>2017-05-16T13:36:00.771Z</updated>
     
@@ -1155,19 +1155,19 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="reverse" scheme="http://anhkgg.github.io/tags/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
     
-      <category term="inject process" scheme="http://anhkgg.github.io/tags/inject-process/"/>
+      <category term="inject process" scheme="https://anhkgg.github.io/tags/inject-process/"/>
     
   </entry>
   
   <entry>
     <title>010注册算法分析</title>
-    <link href="http://anhkgg.github.io/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/"/>
-    <id>http://anhkgg.github.io/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/</id>
+    <link href="https://anhkgg.github.io/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/"/>
+    <id>https://anhkgg.github.io/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/</id>
     <published>2014-11-17T02:13:19.000Z</published>
     <updated>2016-07-07T04:32:12.042Z</updated>
     
@@ -1195,17 +1195,17 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="reverse" scheme="http://anhkgg.github.io/categories/reverse/"/>
+      <category term="reverse" scheme="https://anhkgg.github.io/categories/reverse/"/>
     
     
-      <category term="010editor" scheme="http://anhkgg.github.io/tags/010editor/"/>
+      <category term="010editor" scheme="https://anhkgg.github.io/tags/010editor/"/>
     
   </entry>
   
   <entry>
     <title>hctf writeup</title>
-    <link href="http://anhkgg.github.io/hctf-writeup/"/>
-    <id>http://anhkgg.github.io/hctf-writeup/</id>
+    <link href="https://anhkgg.github.io/hctf-writeup/"/>
+    <id>https://anhkgg.github.io/hctf-writeup/</id>
     <published>2014-11-10T01:08:58.000Z</published>
     <updated>2014-11-10T02:15:50.000Z</updated>
     
@@ -1230,17 +1230,17 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="ctf" scheme="http://anhkgg.github.io/categories/ctf/"/>
+      <category term="ctf" scheme="https://anhkgg.github.io/categories/ctf/"/>
     
     
-      <category term="hctf" scheme="http://anhkgg.github.io/tags/hctf/"/>
+      <category term="hctf" scheme="https://anhkgg.github.io/tags/hctf/"/>
     
   </entry>
   
   <entry>
     <title>how to get GS cookie</title>
-    <link href="http://anhkgg.github.io/how-to-get-GS-cookie/"/>
-    <id>http://anhkgg.github.io/how-to-get-GS-cookie/</id>
+    <link href="https://anhkgg.github.io/how-to-get-GS-cookie/"/>
+    <id>https://anhkgg.github.io/how-to-get-GS-cookie/</id>
     <published>2014-11-05T03:32:29.000Z</published>
     <updated>2016-07-07T04:33:15.101Z</updated>
     
@@ -1266,21 +1266,21 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="security" scheme="http://anhkgg.github.io/categories/security/"/>
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="PE" scheme="http://anhkgg.github.io/tags/PE/"/>
+      <category term="PE" scheme="https://anhkgg.github.io/tags/PE/"/>
     
-      <category term="GS" scheme="http://anhkgg.github.io/tags/GS/"/>
+      <category term="GS" scheme="https://anhkgg.github.io/tags/GS/"/>
     
-      <category term="cookie" scheme="http://anhkgg.github.io/tags/cookie/"/>
+      <category term="cookie" scheme="https://anhkgg.github.io/tags/cookie/"/>
     
   </entry>
   
   <entry>
     <title>ctf认识</title>
-    <link href="http://anhkgg.github.io/known-ctf/"/>
-    <id>http://anhkgg.github.io/known-ctf/</id>
+    <link href="https://anhkgg.github.io/known-ctf/"/>
+    <id>https://anhkgg.github.io/known-ctf/</id>
     <published>2014-11-04T07:08:11.000Z</published>
     <updated>2016-07-07T04:35:08.046Z</updated>
     
@@ -1324,17 +1324,17 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="ctf" scheme="http://anhkgg.github.io/categories/ctf/"/>
+      <category term="ctf" scheme="https://anhkgg.github.io/categories/ctf/"/>
     
     
-      <category term="ctf" scheme="http://anhkgg.github.io/tags/ctf/"/>
+      <category term="ctf" scheme="https://anhkgg.github.io/tags/ctf/"/>
     
   </entry>
   
   <entry>
     <title>ssctf crack5详述</title>
-    <link href="http://anhkgg.github.io/ssctf-crack5-study/"/>
-    <id>http://anhkgg.github.io/ssctf-crack5-study/</id>
+    <link href="https://anhkgg.github.io/ssctf-crack5-study/"/>
+    <id>https://anhkgg.github.io/ssctf-crack5-study/</id>
     <published>2014-11-04T02:13:37.000Z</published>
     <updated>2016-07-07T04:35:06.621Z</updated>
     
@@ -1361,10 +1361,10 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     </summary>
     
-      <category term="ctf" scheme="http://anhkgg.github.io/categories/ctf/"/>
+      <category term="ctf" scheme="https://anhkgg.github.io/categories/ctf/"/>
     
     
-      <category term="ssctf" scheme="http://anhkgg.github.io/tags/ssctf/"/>
+      <category term="ssctf" scheme="https://anhkgg.github.io/tags/ssctf/"/>
     
   </entry>
   
