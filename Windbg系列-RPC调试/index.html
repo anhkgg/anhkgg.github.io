@@ -6,21 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://anhkgg.github.io">
-  <title>Windbg系列-RPC调试 | Anhkgg安全研究室</title>
+  <title>Windbg系列-RPC调试 | Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="概述最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧算是自己的笔记，有看客的话，可以多多指出问题，提提建议，不吝赐教！ 微软的远程过程调用（RPC）可以轻松越过进程和机器的界限并且进行数据通信。这种网络通信标准是微软Window网络通信如此强大的原因（….太绕了，翻不来，也不重要）。然而，因为RPC对进程隐藏了网络调用，所以隐藏了计算机之间">
 <meta name="keywords" content="Windbg调试,RPC,远程过程调用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Windbg系列-RPC调试">
 <meta property="og:url" content="https://anhkgg.github.io/Windbg系列-RPC调试/index.html">
-<meta property="og:site_name" content="Anhkgg安全研究室">
+<meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="概述最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧算是自己的笔记，有看客的话，可以多多指出问题，提提建议，不吝赐教！ 微软的远程过程调用（RPC）可以轻松越过进程和机器的界限并且进行数据通信。这种网络通信标准是微软Window网络通信如此强大的原因（….太绕了，翻不来，也不重要）。然而，因为RPC对进程隐藏了网络调用，所以隐藏了计算机之间">
 <meta property="og:updated_time" content="2016-07-06T23:46:33.472Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Windbg系列-RPC调试">
 <meta name="twitter:description" content="概述最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧算是自己的笔记，有看客的话，可以多多指出问题，提提建议，不吝赐教！ 微软的远程过程调用（RPC）可以轻松越过进程和机器的界限并且进行数据通信。这种网络通信标准是微软Window网络通信如此强大的原因（….太绕了，翻不来，也不重要）。然而，因为RPC对进程隐藏了网络调用，所以隐藏了计算机之间">
   
-    <link rel="alternative" href="/atom.xml" title="Anhkgg安全研究室" type="application/atom+xml">
+    <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -536,6 +536,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">IDC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">WM_KEYBOARD_LL</a>
               </li>
              
@@ -549,34 +577,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">inject</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -596,14 +596,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
               </li>
              
@@ -617,6 +609,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -660,6 +660,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">sctf</a>
               </li>
              
@@ -676,15 +684,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">c++</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">ssctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -693,10 +697,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">unpack</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">ssctf</a>
               </li>
              
               <li class="article-tag-list-item">
