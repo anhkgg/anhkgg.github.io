@@ -555,7 +555,7 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
   
   
   
-  
+  <!--
 <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
 <script>
   var cloudTieConfig = {
@@ -566,6 +566,7 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
   };
 </script>
 <script src="https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+-->
 
 <!--
 <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
@@ -580,6 +581,19 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
 <script src="https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
 
 -->
+
+<div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+<script src="https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+<script>
+var cloudTieConfig = {
+  url: document.location.href, 
+  sourceId: "",
+  productKey: "8826b7b0b2974a38ae576da179105941",
+  target: "cloud-tie-wrapper"
+};
+var yunManualLoad = true;
+Tie.loader("aHR0cHM6Ly9hcGkuZ2VudGllLjE2My5jb20vcGMvbGl2ZXNjcmlwdC5odG1s", true);
+</script>
   
 
   
