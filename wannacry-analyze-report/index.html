@@ -45,7 +45,7 @@
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_8.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_9.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_10.png">
-<meta property="og:updated_time" content="2017-05-26T01:42:37.644Z">
+<meta property="og:updated_time" content="2017-05-26T01:57:14.467Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="WannaCry深度详细分析报告">
 <meta name="twitter:description" content="0x00. 前言最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。 趁着这个热度，我也来跟风一把。 前前后后把WannaCry详细分析了一遍。 从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。">
@@ -326,14 +326,9 @@
 <p>上面提到的作方式具体定义如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">//返回0表示未作处理，或者处理未完成，需要插入链表或者不从链表中删除</div><div class="line">enum FILE_OP_TYPE&#123;</div><div class="line">    FOT_NULL_0 = 0,     //0 未操作，返回1</div><div class="line">    FOT_NULL_1,         //1,default 未操作，返回0</div><div class="line">    FOT_DELETE_FILE_2,    //2 //删除文件，返回1</div><div class="line">    FOT_ENCRYPT_WRITESRC_3, //3 改源文件，返回0</div><div class="line">    FOT_ENCRYPT_NORMAL_4, //4 只加密，返回1</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>代码如下：</p>
 <p><img src="/img\wannacry\4_1.png" alt="img"></p>
-<p>对加密策略做一下总结：</p>
-<ol>
-<li>在枚举文件中，cmd=1，会对普通文件直接加密为.WNCRY，不再加入链表，大文件处理为.WNCYR，以及其他未作处理文件继续加入链表等待处理。</li>
-</ol>
+<p>对加密策略做一下总结：<br>a). 在枚举文件中，cmd=1，会对普通文件直接加密为.WNCRY，不再加入链表，大文件处理为.WNCYR，以及其他未作处理文件继续加入链表等待处理。</p>
 <p><img src="/img\wannacry\4_2.png" alt="img"></p>
-<ol>
-<li>枚举完成后，cmd从2-4，每个cmd遍历都遍历加密文件。</li>
-</ol>
+<p>b). 枚举完成后，cmd从2-4，每个cmd遍历都遍历加密文件。</p>
 <ul>
 <li>cmd=2，加密FILE_TYPE_DOCEX普通文件为.WNCRY（移出链表），以及FILE_TYPE_DOCEX大文件为.WNCYR。</li>
 <li>cmd=2, 删除.WNCRYT</li>
