@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://anhkgg.github.io/"/>
-  <updated>2017-05-26T01:57:14.467Z</updated>
+  <updated>2017-05-26T05:27:07.176Z</updated>
   <id>https://anhkgg.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="https://anhkgg.github.io/wannacry-analyze-report/"/>
     <id>https://anhkgg.github.io/wannacry-analyze-report/</id>
     <published>2017-05-26T01:29:07.000Z</published>
-    <updated>2017-05-26T01:57:14.467Z</updated>
+    <updated>2017-05-26T05:27:07.176Z</updated>
     
     <content type="html"><![CDATA[<h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00. 前言"></a>0x00. 前言</h1><p>最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。</p>
 <p>趁着这个热度，我也来跟风一把。</p>
@@ -110,11 +110,11 @@
 <p>更新00000000.res</p>
 <p>cmd.exe /c start /b @WanaDecryptor@.exe vs</p>
 <p>每个磁盘(fixed)创建x:/$Recycle/hibsys.WNCRYT（系统盘写在temp目录，x:/$Recycle被设置为系统隐藏属性），读取分区可用空间大小，大于0x40000000（1GB）的话，每10微秒循环写入0xa00000个字节的’U’，写20次，然后删除该文件，并且设置了重启后删除。</p>
-<p>每隔60s重复工作B，知道退出标志为真。</p>
+<p>每隔60s重复工作B，直到退出标志为真。</p>
 <h2 id="文件枚举"><a href="#文件枚举" class="headerlink" title="文件枚举"></a>文件枚举</h2><p>枚举文件采用方式为：</p>
 <ol>
 <li>枚举当前目录中所有文件(排除文件看下文)，加入文件链表，记录所有子目录（排除目录看下文）到目录链表。</li>
-<li>本目录文件有加密操作（具体看下文件）</li>
+<li>本目录文件有加密操作（具体看下文）</li>
 <li>分析目录层级，少于等于6层的，拷贝lease_Read_Me@.txt到目录，5-6层的拷贝@WanaDecryptor@.exe.lnk，1-4层拷贝@WanaDecryptor@.exe到目录。</li>
 <li>然后遍历目录链表，枚举子目录，重复1操作。</li>
 <li>子目录枚举完成，所有文件记录到链表，进行后续操作。</li>
@@ -159,7 +159,7 @@
 <p><img src="/img\wannacry\4_8.png" alt="img"><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">//加密文件头部数据结构</div><div class="line">struct </div><div class="line">&#123;</div><div class="line">    char magic[8];//WANACRY!&apos;</div><div class="line">    int size;//0x100</div><div class="line">    char key[size];//</div><div class="line">    int type;//加密文件类型3,4</div><div class="line">    __int64 datasize;// &lt;=0x6400000 源文件大小</div><div class="line">    char data[1];//</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>对于.WNCYR文件（FOT_ENCRYPT_WRITESRC_3处理过一次），读取尾部0x10000的数据加密写入文件。</p>
 <p><img src="/img\wannacry\4_9.png" alt="img"></p>
-<p>然后每0x1000读取加密，写入.WNCRYT文件，循环知道所有数据加密。移动.WNCRYT为.WNCRT。</p>
+<p>然后每0x1000读取加密，写入.WNCRYT文件，循环直到所有数据加密。移动.WNCRYT为.WNCRT。</p>
 <p><img src="/img\wannacry\4_10.png" alt="img"></p>
 <p>对于FOT_ENCRYPT_NORMAL_4，加密完成后会将源文件加入删除链表，在删除线程中文件会被复写删除。</p>
 <p>复写通过生成随机值或者一片’U’，循环写入文件，细节不再阐述（桌面我的文档目录文件目录会被复写，其他目录文件不会）。</p>
