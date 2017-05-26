@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/2_11.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_9.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_10.png">
-<meta property="og:updated_time" content="2017-05-26T01:34:33.006Z">
+<meta property="og:updated_time" content="2017-05-26T01:38:06.822Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="WannaCry深度详细分析报告">
 <meta name="twitter:description" content="0x00. 前言最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。 趁着这个热度，我也来跟风一把。 前前后后把WannaCry详细分析了一遍。 从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。">
@@ -253,13 +253,9 @@
 <p>检查00000000.dky和00000000.pky是否存在，存在是否配对的密钥，是则加密相关准备工作已经完成，不在进行，没有则进行后续工作。</p>
 <p><img src="/img\wannacry\3_6.png" alt="img"></p>
 <p>如果加密相关准备工作已经完成，创建一个线程，完成如下工作（记为工作A）：</p>
-<ol>
-<li>如果不是管理员权限，并且不是SYSTEM账户，通过taskse.exe提权启动@WanaDecryptor@.exe，是则普通方式启动@WanaDecryptor@.exe</li>
-</ol>
+<p>a). 如果不是管理员权限，并且不是SYSTEM账户，通过taskse.exe提权启动@WanaDecryptor@.exe，是则普通方式启动@WanaDecryptor@.exe</p>
 <p><img src="/img\wannacry\3_3.png" alt="img"></p>
-<ol>
-<li>安装tasksche.exe启动项（注册表Run），键名随机</li>
-</ol>
+<p>b). 安装tasksche.exe启动项（注册表Run），键名随机</p>
 <p><img src="/img\wannacry\3_4.png" alt="img"></p>
 <p>如果加密准备未完成，初始化密钥，保存到00000000.pky, 00000000.eky。</p>
 <blockquote>
@@ -267,24 +263,14 @@
 </blockquote>
 <p>然后是如果00000000.res不存在，通过CryptGenRandom产生8字节随机值，后续会写入00000000.res</p>
 <p>接着创建5个工作线程，完成不同的工作。</p>
-<ol>
-<li>线程1每隔25秒循环写入数据到00000000.res，包括前面CryptGenRandom生成的随机值，已经更新的当前时间，直到线程退出标记为真退出</li>
-</ol>
+<p>a). 线程1每隔25秒循环写入数据到00000000.res，包括前面CryptGenRandom生成的随机值，已经更新的当前时间，直到线程退出标记为真退出</p>
 <p><img src="/img\wannacry\3_5.png" alt="img"></p>
-<ol>
-<li>线程2每5秒检查00000000.dky和00000000.pky是否存在，存在是否配对的密钥，是则设置全局标志，然后退出线程</li>
-</ol>
+<p>b). 线程2每5秒检查00000000.dky和00000000.pky是否存在，存在是否配对的密钥，是则设置全局标志，然后退出线程</p>
 <p><img src="/img\wannacry\3_7.png" alt="img"></p>
-<ol>
-<li>线程3监测新增磁盘，加密新磁盘的文件（和其他磁盘加密相同）</li>
-</ol>
+<p>c). 线程3监测新增磁盘，加密新磁盘的文件（和其他磁盘加密相同）</p>
 <p><img src="/img\wannacry\3_8.png" alt="img"></p>
-<ol>
-<li><p>线程4每30秒启动taskdl.exe清除所有磁盘的回收站文件</p>
-</li>
-<li><p>线程5完成的也是前面提到的工作A的内容，不再详述</p>
-</li>
-</ol>
+<p>d). 线程4每30秒启动taskdl.exe清除所有磁盘的回收站文件</p>
+<p>e). 线程5完成的也是前面提到的工作A的内容，不再详述</p>
 <p>然后就是重点了，加密文件部分了。</p>
 <h2 id="加密文件部分"><a href="#加密文件部分" class="headerlink" title="加密文件部分"></a>加密文件部分</h2><p>拷贝u.wnry为@WanaDecryptor@.exe，通过写一个bat创建@WanaDecryptor@.exe.lnk快捷方式。</p>
 <p><img src="/img\wannacry\3_9.png" alt="img"></p>
