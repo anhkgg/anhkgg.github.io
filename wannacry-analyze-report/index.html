@@ -15,14 +15,14 @@
 <meta property="og:url" content="https://anhkgg.github.io/wannacry-analyze-report/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="0x00. 前言最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。 趁着这个热度，我也来跟风一把。 前前后后把WannaCry详细分析了一遍。 从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。">
-<meta property="og:image" content="d:/note/wannacry/00.png">
-<meta property="og:image" content="d:/note/wannacry/1_0.png">
-<meta property="og:image" content="d:/note/wannacry/1_1.png">
-<meta property="og:image" content="d:/note/wannacry/1_3.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/wannacry/00.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_0.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_1.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_3.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_6.png">
-<meta property="og:image" content="d:/note/wannacry/1_2.png">
-<meta property="og:image" content="d:/note/wannacry/1_4.png">
-<meta property="og:image" content="d:/note/wannacry/1_5.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_2.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_4.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_5.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/3_0.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/3_1.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/3_2.png">
@@ -36,11 +36,11 @@
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/2_11.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_9.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_10.png">
-<meta property="og:updated_time" content="2017-05-26T01:32:41.281Z">
+<meta property="og:updated_time" content="2017-05-26T01:34:33.006Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="WannaCry深度详细分析报告">
 <meta name="twitter:description" content="0x00. 前言最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。 趁着这个热度，我也来跟风一把。 前前后后把WannaCry详细分析了一遍。 从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。">
-<meta name="twitter:image" content="d:/note/wannacry/00.png">
+<meta name="twitter:image" content="https://anhkgg.github.io/img/wannacry/00.png">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
@@ -223,25 +223,25 @@
 <li>启动解密器</li>
 </ol>
 <p>大致流程图如图：</p>
-<p><img src="d:/note/wannacry/00.png" alt="img"></p>
+<p><img src="/img/wannacry/00.png" alt="img"></p>
 <p>下面开始详细分析各个部分细节。</p>
 <h1 id="0x02-释放文件"><a href="#0x02-释放文件" class="headerlink" title="0x02. 释放文件"></a>0x02. 释放文件</h1><p>设置当前目录为工作目录，然后查找PE中资源(XIA)。</p>
-<p><img src="d:/note/wannacry/1_0.png" alt="img"></p>
+<p><img src="/img/wannacry/1_0.png" alt="img"></p>
 <p>直接用资源工具看一下，发现是PK开头的，多半是个压缩文件了，导出来试试。</p>
-<p><img src="d:/note/wannacry/1_1.png" alt="img"></p>
+<p><img src="/img/wannacry/1_1.png" alt="img"></p>
 <p>解压还要密码，看代码密码是WNcry@2ol7，解压成功。</p>
-<p><img src="d:/note/wannacry/1_3.png" alt="img"></p>
+<p><img src="/img/wannacry/1_3.png" alt="img"></p>
 <p>读取资源数据后，解压释放文件到当前目录。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">//部分释放文件说明：</div><div class="line">b.wnry      //桌面背景图片</div><div class="line">c.wnry      //加密相关</div><div class="line">msg/*.wnry  //语言相关文件</div><div class="line">r.wnry      //@Please_Read_Me@.txt</div><div class="line">s.wnry      //是压缩文件，打包的是Tor相关组件</div><div class="line"></div><div class="line">taskdl.exe  //删除回收站文件</div><div class="line">taskse.exe  //用于启动其他session的@WanaDecryptor@.exe</div><div class="line"></div><div class="line">u.wnry      //@WanaDecryptor@.exe 解密器 </div><div class="line">t.wnry      //解密后是加密器</div></pre></td></tr></table></figure>
 <p>在三个比特币交易地址中随机选择一个，写入c.wnry</p>
 <p><img src="/img\wannacry\1_6.png" alt="img"></p>
 <p>然后设置当前目录为隐藏属性，且设置为everyone可访问</p>
-<p><img src="d:/note/wannacry/1_2.png" alt="img"></p>
+<p><img src="/img/wannacry/1_2.png" alt="img"></p>
 <p>然后初始化Crypt相关函数，用于后面的解密操作。</p>
 <p>开始操作文件t.wnry，看看内容，应该是个加密文件。</p>
-<p><img src="d:/note/wannacry/1_4.png" alt="img"></p>
+<p><img src="/img/wannacry/1_4.png" alt="img"></p>
 <p>然后通过crypt API将t.wnry解密之后（解密后是个DLL模块，dump数据后可以用于分析），映射到内存（自己loaddll），然后找到导出接口函数TaskStart调用，开始加密工作。</p>
-<p><img src="d:/note/wannacry/1_5.png" alt="img"></p>
+<p><img src="/img/wannacry/1_5.png" alt="img"></p>
 <h1 id="0x03-加密部分"><a href="#0x03-加密部分" class="headerlink" title="0x03. 加密部分"></a>0x03. 加密部分</h1><p>TaskStart一进来，通过MsWinZonesCacheCounterMutexA的Mutex进行单示例检查，有则退出，没有继续工作。</p>
 <p>然后是设置工作目录，读取c.wnry信息。</p>
 <p>检查是否是SYSTEM账户。</p>
