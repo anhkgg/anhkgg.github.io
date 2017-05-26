@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://anhkgg.github.io/"/>
-  <updated>2017-05-22T00:14:21.388Z</updated>
+  <updated>2017-05-26T01:32:41.281Z</updated>
   <id>https://anhkgg.github.io/</id>
   
   <author>
@@ -14,6 +14,176 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>WannaCry深度详细分析报告</title>
+    <link href="https://anhkgg.github.io/wannacry-analyze-report/"/>
+    <id>https://anhkgg.github.io/wannacry-analyze-report/</id>
+    <published>2017-05-26T01:29:07.000Z</published>
+    <updated>2017-05-26T01:32:41.281Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00. 前言"></a>0x00. 前言</h1><p>最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。</p>
+<p>趁着这个热度，我也来跟风一把。</p>
+<p>前前后后把WannaCry详细分析了一遍。</p>
+<p>从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。</p>
+<a id="more"></a>
+<p>由于没有拿到初始样本，没有包含漏洞利用部分的分析。</p>
+<p>样本信息：</p>
+<blockquote>
+<p>MD5: 84C82835A5D21BBCF75A61706D8AB549</p>
+<p>SHA1: 5FF465AFAABCBF0150D1A3AB2C2E74F3A4426467</p>
+<p>CRC32: 4022FCAA</p>
+<p>无壳 / Visual C++ 6.0</p>
+</blockquote>
+<p>下面具体看分析内容。</p>
+<h1 id="0x01-概述"><a href="#0x01-概述" class="headerlink" title="0x01. 概述"></a>0x01. 概述</h1><ol>
+<li>样本首先通过资源释放各种文件，包括加密器、解密器、几个辅助程序、桌面背景图、说明文件、语言文件等等。</li>
+<li>内存加载加密器模块，执行加密部分功能。</li>
+<li>枚举目标文件（目标文件后缀列表后面给出），加密为.WNCRY文件（加密策略后面详述），删除原始文件。</li>
+<li>复制自身为tasksche.exe，安装启动项</li>
+<li>启动解密器</li>
+</ol>
+<p>大致流程图如图：</p>
+<p><img src="d:/note/wannacry/00.png" alt="img"></p>
+<p>下面开始详细分析各个部分细节。</p>
+<h1 id="0x02-释放文件"><a href="#0x02-释放文件" class="headerlink" title="0x02. 释放文件"></a>0x02. 释放文件</h1><p>设置当前目录为工作目录，然后查找PE中资源(XIA)。</p>
+<p><img src="d:/note/wannacry/1_0.png" alt="img"></p>
+<p>直接用资源工具看一下，发现是PK开头的，多半是个压缩文件了，导出来试试。</p>
+<p><img src="d:/note/wannacry/1_1.png" alt="img"></p>
+<p>解压还要密码，看代码密码是WNcry@2ol7，解压成功。</p>
+<p><img src="d:/note/wannacry/1_3.png" alt="img"></p>
+<p>读取资源数据后，解压释放文件到当前目录。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">//部分释放文件说明：</div><div class="line">b.wnry      //桌面背景图片</div><div class="line">c.wnry      //加密相关</div><div class="line">msg/*.wnry  //语言相关文件</div><div class="line">r.wnry      //@Please_Read_Me@.txt</div><div class="line">s.wnry      //是压缩文件，打包的是Tor相关组件</div><div class="line"></div><div class="line">taskdl.exe  //删除回收站文件</div><div class="line">taskse.exe  //用于启动其他session的@WanaDecryptor@.exe</div><div class="line"></div><div class="line">u.wnry      //@WanaDecryptor@.exe 解密器 </div><div class="line">t.wnry      //解密后是加密器</div></pre></td></tr></table></figure>
+<p>在三个比特币交易地址中随机选择一个，写入c.wnry</p>
+<p><img src="/img\wannacry\1_6.png" alt="img"></p>
+<p>然后设置当前目录为隐藏属性，且设置为everyone可访问</p>
+<p><img src="d:/note/wannacry/1_2.png" alt="img"></p>
+<p>然后初始化Crypt相关函数，用于后面的解密操作。</p>
+<p>开始操作文件t.wnry，看看内容，应该是个加密文件。</p>
+<p><img src="d:/note/wannacry/1_4.png" alt="img"></p>
+<p>然后通过crypt API将t.wnry解密之后（解密后是个DLL模块，dump数据后可以用于分析），映射到内存（自己loaddll），然后找到导出接口函数TaskStart调用，开始加密工作。</p>
+<p><img src="d:/note/wannacry/1_5.png" alt="img"></p>
+<h1 id="0x03-加密部分"><a href="#0x03-加密部分" class="headerlink" title="0x03. 加密部分"></a>0x03. 加密部分</h1><p>TaskStart一进来，通过MsWinZonesCacheCounterMutexA的Mutex进行单示例检查，有则退出，没有继续工作。</p>
+<p>然后是设置工作目录，读取c.wnry信息。</p>
+<p>检查是否是SYSTEM账户。</p>
+<p><img src="/img\wannacry\3_0.png" alt="img"></p>
+<p>初始化Crypt相关函数，以及文件操作函数（增加一点分析成本）。</p>
+<p><img src="/img\wannacry\3_1.png" alt="img"><br><img src="/img\wannacry\3_2.png" alt="img"></p>
+<p>检查Global\MsWinZonesCacheCounterMutexW，Global\MsWinZonesCacheCounterMutexA\0是否存在，</p>
+<p>存在则表示加密相关准备工作已经完成，不在进行，没有则创建Global\MsWinZonesCacheCounterMutexA\0</p>
+<p>检查00000000.dky和00000000.pky是否存在，存在是否配对的密钥，是则加密相关准备工作已经完成，不在进行，没有则进行后续工作。</p>
+<p><img src="/img\wannacry\3_6.png" alt="img"></p>
+<p>如果加密相关准备工作已经完成，创建一个线程，完成如下工作（记为工作A）：</p>
+<ol>
+<li>如果不是管理员权限，并且不是SYSTEM账户，通过taskse.exe提权启动@WanaDecryptor@.exe，是则普通方式启动@WanaDecryptor@.exe</li>
+</ol>
+<p><img src="/img\wannacry\3_3.png" alt="img"></p>
+<ol>
+<li>安装tasksche.exe启动项（注册表Run），键名随机</li>
+</ol>
+<p><img src="/img\wannacry\3_4.png" alt="img"></p>
+<p>如果加密准备未完成，初始化密钥，保存到00000000.pky, 00000000.eky。</p>
+<blockquote>
+<p>由于时间关系，具体加密密钥产生过程不再详述，很多分析文章说的很清楚了，本文重点不在此。</p>
+</blockquote>
+<p>然后是如果00000000.res不存在，通过CryptGenRandom产生8字节随机值，后续会写入00000000.res</p>
+<p>接着创建5个工作线程，完成不同的工作。</p>
+<ol>
+<li>线程1每隔25秒循环写入数据到00000000.res，包括前面CryptGenRandom生成的随机值，已经更新的当前时间，直到线程退出标记为真退出</li>
+</ol>
+<p><img src="/img\wannacry\3_5.png" alt="img"></p>
+<ol>
+<li>线程2每5秒检查00000000.dky和00000000.pky是否存在，存在是否配对的密钥，是则设置全局标志，然后退出线程</li>
+</ol>
+<p><img src="/img\wannacry\3_7.png" alt="img"></p>
+<ol>
+<li>线程3监测新增磁盘，加密新磁盘的文件（和其他磁盘加密相同）</li>
+</ol>
+<p><img src="/img\wannacry\3_8.png" alt="img"></p>
+<ol>
+<li><p>线程4每30秒启动taskdl.exe清除所有磁盘的回收站文件</p>
+</li>
+<li><p>线程5完成的也是前面提到的工作A的内容，不再详述</p>
+</li>
+</ol>
+<p>然后就是重点了，加密文件部分了。</p>
+<h2 id="加密文件部分"><a href="#加密文件部分" class="headerlink" title="加密文件部分"></a>加密文件部分</h2><p>拷贝u.wnry为@WanaDecryptor@.exe，通过写一个bat创建@WanaDecryptor@.exe.lnk快捷方式。</p>
+<p><img src="/img\wannacry\3_9.png" alt="img"></p>
+<p><img src="/img\wannacry\2_11.png" alt="img"></p>
+<p>读取r.wnry内容，生成@Please_Read_Me@.txt文件。</p>
+<p>枚举当前用户桌面和文档目录文件，进行加密（没有设置不复写标记，删除前会复写）。</p>
+<p>枚举All Users\Desktop和All Users\Documents，找到非当前用户目录进行加密（没有设置不复写标记，删除前会复写）。</p>
+<p>下面记为工作B:</p>
+<p>通过taskkill强删Microsoft.Exchange、sql和mysql进程（加密其数据）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">anhkgg_CreateProc_10001080(aTaskkill_exeFI, 0, 0);// taskkill.exe /f /im Microsoft.Exchange.*</div><div class="line">anhkgg_CreateProc_10001080(aTaskkill_exe_0, 0, 0);// taskkill.exe /f /im MSExchange*</div><div class="line">anhkgg_CreateProc_10001080(aTaskkill_exe_1, 0, 0);// &apos;taskkill.exe /f /im sqlserver.exe</div><div class="line">anhkgg_CreateProc_10001080(aTaskkill_exe_2, 0, 0);// taskkill.exe /f /im sqlwriter.exe</div><div class="line">anhkgg_CreateProc_10001080(aTaskkill_exe_3, 0, 0);// taskkill.exe /f /im mysqld.exe</div><div class="line">```      </div><div class="line"></div><div class="line">加密磁盘中文件，每个分区重复两次（会设置不复写标记，删除前不会复写）。</div><div class="line"></div><div class="line">枚举All Users\Desktop目录，复制b.wnry到目录中为@WanaDecryptor@.bmp，设置桌面背景为@WanaDecryptor@.bmp，</div><div class="line"></div><div class="line">执行@WanaDecryptor@.exe co</div><div class="line"></div><div class="line">更新00000000.res</div><div class="line"></div><div class="line">cmd.exe /c start /b @WanaDecryptor@.exe vs</div><div class="line"></div><div class="line">每个磁盘(fixed)创建x:/$Recycle/hibsys.WNCRYT（系统盘写在temp目录，x:/$Recycle被设置为系统隐藏属性），读取分区可用空间大小，大于0x40000000（1GB）的话，每10微秒循环写入0xa00000个字节的&apos;U&apos;，写20次，然后删除该文件，并且设置了重启后删除。</div><div class="line"></div><div class="line">每隔60s重复工作B，知道退出标志为真。</div><div class="line"></div><div class="line">## 文件枚举</div><div class="line"></div><div class="line">枚举文件采用方式为：</div><div class="line"></div><div class="line">1. 枚举当前目录中所有文件(排除文件看下文)，加入文件链表，记录所有子目录（排除目录看下文）到目录链表。</div><div class="line"></div><div class="line">2. 本目录文件有加密操作（具体看下文件）</div><div class="line"></div><div class="line">3. 分析目录层级，少于等于6层的，拷贝lease_Read_Me@.txt到目录，5-6层的拷贝@WanaDecryptor@.exe.lnk，1-4层拷贝@WanaDecryptor@.exe到目录。</div><div class="line"></div><div class="line">4. 然后遍历目录链表，枚举子目录，重复1操作。</div><div class="line"></div><div class="line">5. 子目录枚举完成，所有文件记录到链表，进行后续操作。</div><div class="line"></div><div class="line">目录和文件采用相同的链表结果，总结如下：</div></pre></td></tr></table></figure>
+<p>struct FILE_LIST_CONTEXT<br>{<br>    DWORD vtable;<br>    FILE_LIST *list;//<br>    DWORD file_count;//8<br>}</p>
+<p>struct FILE_LIST<br>{<br>    FILE_LIST<em> prev;<br>    FILE_LIST</em> next;<br>    FILE_INFO file;//8<br>}</p>
+<p>struct FILE_INFO<br>{<br>    WCHAR path[0x168];//<br>    WCHAR name[0x104];//2d0<br>    DWORD nFileSizeLow;//4d8<br>    DWORD nFileSizeHigh;//4dc<br>    DWORD type;//4e0  FILE_TYPE<br>}//0x4e4<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 排除目录</div><div class="line"></div><div class="line">枚举子目录时，会跳过如下目录（保证系统正常工作）：</div></pre></td></tr></table></figure></p>
+<p>\Intel<br>\ProgramData<br>\WINDOWS<br>\Program Files<br>\Program Files (x86)<br>\AppData\Local\Temp<br>\Local Settings\Temp<br>This folder protects against ransomware. Modifying it will reduce protection<br>Temporary Internet Files<br>Content.IE5<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 文件分类</div><div class="line"></div><div class="line">枚举文件时，首先跳过 @Please_Read_Me@.txt，@WanaDecryptor@.exe.lnk， @WanaDecryptor@.bmp</div><div class="line"></div><div class="line">然后检查文件类型，跳过0,1,6类型文件，其他文件加入链表。</div><div class="line"></div><div class="line">具体类型如下：</div></pre></td></tr></table></figure></p>
+<p>0 没有后缀以及其他类型后缀<br>1 .exe, .dll<br>4 .WNCRYT<br>5 .WNCYR<br>6 .WNCRY</p>
+<p>2.<br>“.doc””.docx””.xls””.xlsx””.ppt””.pptx””.pst””.ost””.msg””.eml””.vsd””.vsdx”<br>“.txt””.csv””.rtf””.123””.wks””.wk1””.pdf””.dwg””.onetoc2””.snt””.jpeg””.jpg”</p>
+<ol>
+<li>“.docb””.docm””.dot””.dotm””.dotx””.xlsm””.xlsb””.xlw””.xlt””.xlm””.xlc””.xltx””.xltm””.pptm””.pot””.pps””.ppsm””.ppsx””.ppam””.potx””.potm”<br>“.edb””.hwp””.602””.sxi””.sti””.sldx””.sldm””.sldm””.vdi””.vmdk””.vmx””.gpg””.aes””.ARC””.PAQ””.bz2””.tbk””.bak””.tar””.tgz””.gz””.7z””.rar”<br>“.zip””.backup””.iso””.vcd””.bmp””.png””.gif””.raw””.cgm””.tif””.tiff””.nef””.psd””.ai””.svg””.djvu””.m4u””.m3u””.mid””.wma””.flv””.3g2””.mkv”<br>“.3gp””.mp4””.mov””.avi””.asf””.mpeg””.vob””.mpg””.wmv””.fla””.swf””.wav””.mp3””.sh””.class””.jar””.java””.rb””.asp””.php””.jsp””.brd””.sch”<br>“.dch””.dip””.pl””.vb””.vbs””.ps1””.bat””.cmd””.js””.asm””.h””.pas””.cpp””.c””.cs””.suo””.sln””.ldf””.mdf””.ibd””.myi””.myd””.frm””.odb””.dbf”<br>“.db””.mdb””.accdb””.sql””.sqlitedb””.sqlite3””.asc””.lay6””.lay””.mml””.sxm””.otg””.odg””.uop””.std””.sxd””.otp””.odp””.wb2””.slk””.dif””.stc”<br>“.sxc””.ots””.ods””.3dm””.max””.3ds””.uot””.stw””.sxw””.ott””.odt””.pem””.p12””.csr””.crt””.key””.pfx””.der”<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">总结为下面的enum</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>enum FILE_TYPE<br>{<br>    FILE_TYPE_NULL = 0,<br>    FILE_TYPE_EXEDLL,<br>    FILE_TYPE_DOC,<br>    FILE_TYPE_DOCEX,<br>    FILE_TYPE_WNCRYT, //.wncryt<br>    FILE_TYPE_WNCYR, //.wncyr<br>    FILE_TYPE_WNCRY //.wncry<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 文件加密策略</div><div class="line"></div><div class="line">加密文件函数中有个参数，我取做cmd（取值是1-4）。因为不同的值会有不同的操作方式。</div><div class="line"></div><div class="line">根据cmd和文件类型和大小等等，函数`sub_10002E70`返回不同的操作方式。</div></pre></td></tr></table></figure></p>
+<ol>
+<li>cmd&gt;=4, FOT_ENCRYPT_NORMAL_4</li>
+<li>cmd&lt;=3，FILE_TYPE_NULL，FOT_NULL_1 </li>
+<li>cmd==3, 非FILE_TYPE_NULL，FOT_ENCRYPT_NORMAL_4</li>
+<li>cmd&lt;=2, .wncyr, FOT_NULL_1</li>
+<li>cmd&lt;=2, .wncryt, FOT_DELETE_FILE_2</li>
+</ol>
+<p>//用于枚举中的操作，直接操作普通文件（不加入链表）和大文件.doc（加入链表），小文件.doc,.docex加入链表，其他文件不加入链表<br>//枚举中完成加密操作的文件不加入链表了</p>
+<ol>
+<li>cmd==1, .doc, 大文件, FOT_ENCRYPT_WRITESRC_3 //也要加入链表</li>
+<li>cmd==1, .doc, 普通文件, FOT_ENCRYPT_NORMAL_4</li>
+<li>cmd==1, .doc, 小文件，FOT_NULL_1</li>
+<li><p>cmd==1, .docex, FOT_NULL_1</p>
+</li>
+<li><p>cmd==2, .doc, FOT_NULL_1</p>
+</li>
+<li>cmd==2, .docex, 大文件， FOT_ENCRYPT_WRITESRC_3</li>
+<li>cmd==2, .docex, 小文件，FOT_NULL_1</li>
+<li>cmd==2, .docex, 普通文件，FOT_ENCRYPT_NORMAL_4</li>
+</ol>
+<p>其他返回FOT_NULL_0<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">上面提到的大文件，普通文件，小文件定义如下：</div></pre></td></tr></table></figure></p>
+<p>小于0x400的是小文件，大于0xC800000的是大文件，中间的是普通文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![img](/img\wannacry\4_0.png)</div><div class="line"></div><div class="line">上面提到的作方式具体定义如下：</div></pre></td></tr></table></figure></p>
+<p>//返回0表示未作处理，或者处理未完成，需要插入链表或者不从链表中删除<br>enum FILE_OP_TYPE{<br>    FOT_NULL_0 = 0,     //0 未操作，返回1<br>    FOT_NULL_1,         //1,default 未操作，返回0<br>    FOT_DELETE_FILE_2,    //2 //删除文件，返回1<br>    FOT_ENCRYPT_WRITESRC_3, //3 改源文件，返回0<br>    FOT_ENCRYPT_NORMAL_4, //4 只加密，返回1<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">代码如下：</div><div class="line"></div><div class="line">![img](/img\wannacry\4_1.png)</div><div class="line"></div><div class="line">对加密策略做一下总结：</div><div class="line">1. 在枚举文件中，cmd=1，会对普通文件直接加密为.WNCRY，不再加入链表，大文件处理为.WNCYR，以及其他未作处理文件继续加入链表等待处理。</div><div class="line"></div><div class="line">![img](/img\wannacry\4_2.png)</div><div class="line"></div><div class="line">2. 枚举完成后，cmd从2-4，每个cmd遍历都遍历加密文件。</div><div class="line"></div><div class="line">* cmd=2，加密FILE_TYPE_DOCEX普通文件为.WNCRY（移出链表），以及FILE_TYPE_DOCEX大文件为.WNCYR。</div><div class="line">* cmd=2, 删除.WNCRYT</div><div class="line">* cmd=3, 加密链表中所有文件（移出链表）</div><div class="line">* cmd=4, 加密可能剩余链表中的文件</div><div class="line"></div><div class="line">![img](/img\wannacry\4_3.png)</div><div class="line"></div><div class="line">## 文件内容加密过程</div><div class="line"></div><div class="line">验证文件是否未加密，或者未加密完成。已完成加密，直接退出。</div><div class="line"></div><div class="line">![img](/img\wannacry\4_5.png)</div><div class="line"></div><div class="line">对于FOT_ENCRYPT_WRITESRC_3，按写打开源文件，将文件头0x10000字节内容移动到尾部，头部内容清零，写入加密文件头部数据，然后源文件移动为.WNCYR，完成退出。</div><div class="line"></div><div class="line">![img](/img\wannacry\4_4.png)</div><div class="line"></div><div class="line">对于FOT_ENCRYPT_NORMAL_4，按读打开源文件，对于普通文件进行随机值检查，满足100倍数，且文件数据小于10，那么换本次加密算法为免费解密的算法，标记，加密完成后调用回调函数写入f.wnry中。</div><div class="line"></div><div class="line">![img](/img\wannacry\4_6.png)</div><div class="line">![img](/img\wannacry\4_7.png)</div><div class="line"></div><div class="line">加密前，将文件后缀加上T变成.WNCRYT，然后创建文件。</div><div class="line"></div><div class="line">写入加密文件头部数据</div><div class="line"></div><div class="line">![img](/img\wannacry\4_8.png)</div></pre></td></tr></table></figure></p>
+<p>//加密文件头部数据结构<br>struct<br>{<br>    char magic[8];//WANACRY!’<br>    int size;//0x100<br>    char key[size];//<br>    int type;//加密文件类型3,4<br>    __int64 datasize;// &lt;=0x6400000 源文件大小<br>    char data[1];//<br>}<br>```</p>
+<p>对于.WNCYR文件（FOT_ENCRYPT_WRITESRC_3处理过一次），读取尾部0x10000的数据加密写入文件。</p>
+<p><img src="/img\wannacry\4_9.png" alt="img"></p>
+<p>然后每0x1000读取加密，写入.WNCRYT文件，循环知道所有数据加密。移动.WNCRYT为.WNCRT。</p>
+<p><img src="/img\wannacry\4_10.png" alt="img"></p>
+<p>对于FOT_ENCRYPT_NORMAL_4，加密完成后会将源文件加入删除链表，在删除线程中文件会被复写删除。</p>
+<p>复写通过生成随机值或者一片’U’，循环写入文件，细节不再阐述（桌面我的文档目录文件目录会被复写，其他目录文件不会）。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>至此，wannacry大部分内容都分析完成，由于时间精力的关系，后续解密器就不再分析了。<br>最后说一句，现在这个时代不再适合裸奔！！！</p>
+<p>转载请注明出处：<a href="https://anhkgg.github.io/wannacry-analyze-report">https://anhkgg.github.io/wannacry-analyze-report</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;0x00-前言&quot;&gt;&lt;a href=&quot;#0x00-前言&quot; class=&quot;headerlink&quot; title=&quot;0x00. 前言&quot;&gt;&lt;/a&gt;0x00. 前言&lt;/h1&gt;&lt;p&gt;最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。&lt;/p&gt;
+&lt;p&gt;趁着这个热度，我也来跟风一把。&lt;/p&gt;
+&lt;p&gt;前前后后把WannaCry详细分析了一遍。&lt;/p&gt;
+&lt;p&gt;从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Security" scheme="https://anhkgg.github.io/categories/Security/"/>
+    
+    
+      <category term="wannacry" scheme="https://anhkgg.github.io/tags/wannacry/"/>
+    
+      <category term="比特币病毒" scheme="https://anhkgg.github.io/tags/%E6%AF%94%E7%89%B9%E5%B8%81%E7%97%85%E6%AF%92/"/>
+    
+      <category term="逆向分析" scheme="https://anhkgg.github.io/tags/%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/"/>
+    
+      <category term="样本分析" scheme="https://anhkgg.github.io/tags/%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90/"/>
+    
+      <category term="locky" scheme="https://anhkgg.github.io/tags/locky/"/>
+    
+  </entry>
   
   <entry>
     <title>免杀技术有一套（免杀方法大集结）(Anti-AntiVirus)</title>
@@ -1485,60 +1655,6 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
       <category term="GS" scheme="https://anhkgg.github.io/tags/GS/"/>
     
       <category term="cookie" scheme="https://anhkgg.github.io/tags/cookie/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ctf认识</title>
-    <link href="https://anhkgg.github.io/known-ctf/"/>
-    <id>https://anhkgg.github.io/known-ctf/</id>
-    <published>2014-11-04T07:08:11.000Z</published>
-    <updated>2016-07-07T04:35:08.046Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="CTF-meaning"><a href="#CTF-meaning" class="headerlink" title="CTF meaning"></a><strong>CTF meaning</strong></h1><p><a href="http://www.csdn.net/article/2013-01-04/2813390-hackers-confs-comparison" title="ctf meaning" target="_blank" rel="external">CTF</a>: 全称Capture The Flag， 就是夺旗比赛，衍生自古代军事战争模式，两队人马前往对方基地夺旗，每队人马须在保护好己方旗帜的情况下将对方旗帜带回基地。在计算机安全领域，CTF是一种<a href="http://en.wikipedia.org/wiki/Capture_the_flag" title="computer security" target="_blank" rel="external">计算机安全竞赛</a>。<br>CTF通常有两种形式，<a href="http://bctf.cn/faq" title="ctf mode" target="_blank" rel="external">解题模式</a>（Jeopardy）和<a href="http://bctf.cn/faq" title="ctf mode" target="_blank" rel="external">攻防模式</a>（Attack-Defense）, 在解题模式的比赛中，主办方会提供一系列不同类型的赛题，比如上线一个有漏洞的服务、提供一段网络流量、给出一个加密后的数据或经过隐写后的文件等，他们将 flag 隐藏在这些赛题中，选手们通过比拼解题来一决高下；在攻防模式比赛中，主办方会事先编写一系列有漏洞的服务，并将它们安装在每个参赛队伍都相同的环境中，参赛队伍一方面需要修补自己服务的漏洞，同时也需要去攻击对手们的服务、拿到对手环境中的 flag 来得分，攻防模式的竞赛往往比解题模式的竞赛更接近真实环境，比赛过程也更加激烈。 一般资格赛采用解题模式，决赛采用攻防模式。</p>
-<a id="more"></a>
-<h1 id="CTF-content"><a href="#CTF-content" class="headerlink" title="CTF content"></a><strong>CTF content</strong></h1><p>CTF包含题目较广，有</p>
-<ul>
-<li>逆向工程</li>
-<li>密码学 </li>
-<li>ACM编程 </li>
-<li>web漏洞 </li>
-<li>二进制练习 </li>
-<li>网络和取证</li>
-<li>隐写术 </li>
-<li>无线安全<br>等等。需要深入研究某几个方向，涉及其他方向的知识。</li>
-</ul>
-<h1 id="CTF-matchs"><a href="#CTF-matchs" class="headerlink" title="CTF matchs"></a><strong>CTF matchs</strong></h1><p>国际赛比较有名的比赛：<br><a href="http://hitcon.org/2014/CTF/" target="_blank" rel="external">DEFCON CTF</a><br><a href="https://legitbs.net/2014" target="_blank" rel="external">HITCON CTF</a></p>
-<p>国内较有名气的信息安全比赛有：<br><a href="http://iscc.org.cn/" target="_blank" rel="external">ISCC ctf</a><br>2011年上海市信息安全技能竞赛<br>全国大学生信息安全竞赛<br>四川省大学生信息安全技术大赛<br>全国大学生网络安全实战竞赛<br>江西高校信息安全知识及软件设计大赛<br>绿盟科技杯-信息安全对抗技术竞赛<br>XCon安全焦点信息安全技术峰会</p>
-<p>以及目前各网络公司组办的ctf比赛，如<a href="http://alictf.com/" target="_blank" rel="external">alictf</a>, <a href="http://bctf.cn/faq" target="_blank" rel="external">bctf</a>, <a href="http://is.campus.360.cn/" target="_blank" rel="external">360信息安全技术大赛</a></p>
-<h1 id="CTF-starting"><a href="#CTF-starting" class="headerlink" title="CTF starting"></a><strong><a href="http://www.freebuf.com/articles/others-articles/36927.html" target="_blank" rel="external">CTF starting</a></strong></h1><p>各个方向学习参考(ctrl+c+v)：</p>
-<ol>
-<li>逆向工程。我强烈建议你得到一个IDA Pro的副本，这有免费版和学生认证书。尝试下crack me的问题。写出你的C语言代码，然后进行反编译。重复这个过程，同时更改编译器的选项和程序逻辑。在编译的二进制文件中“if”声明和“select”语句有什么不同？我建议你专注于一个单一的原始架构：x86、x86_64或是ARM。在处理器手册中查找你要找的，参考有：<br>《Practical Reverse Engineering》<br>《Reversing: Secrets of Reverse Engineering》<br>《The IDA Pro Book》</li>
-<li>加密。虽然这不是我自己的强项，但这里有一些参考还是要看看的：<br>《Applied Cryptography》<br>《Practical Cryptography》<br>Cryptography I</li>
-<li>ACM编程。选择一个高层次的语言，我推荐使用Python或Ruby。对于Python而言，阅读下《Dive into Python》和找一些你要加入的项目。值得一提的是Metasploit是用Ruby编写的。关于算法和数据结构的计算机科学课也要在此类中要走很长的路。看看来自CTF和其他编程的挑战，战胜他们。专注于创建一个解决方法而不是最快或是最好的方法，特别是在你刚刚开始的时候。</li>
-<li>web漏洞。有很多的网络编程技术，在CTF中最流行的就是PHP和SQL。php.net网站（译者注：需翻墙）是一个梦幻的语言参考，只要搜索你好奇的功能。PHP之后，看到网页上存在的挑战的最常见的方法就是使用Python或Ruby脚本。主要到技术有重叠，这有一本关于网络安全漏洞的好书，是《黑客攻防技术宝典：Web实战篇》。除此之外，在学习了一些基本技术之后，你可能也想通过比较流行的免费软件工具来取得一些经验。这些在CTF竞争中也可能会偶尔用到，这些加密会和你凭经验得到的加密重叠。</li>
-<li>二进制练习。这是我个人的爱好，我建议你在进入二进制练习前要完成逆向工程的学习。这有几个你可以独立学习的常见类型漏洞：栈溢出，堆溢出，对于初学者的格式字符串漏洞。很多是通过练习思维来辨别漏洞的类型。学习以往的漏洞是进入二进制门槛的最好途径。推荐你可以阅读：<br>《黑客：漏洞发掘的艺术》<br>《黑客攻防技术宝典：系统实战篇》<br>《The Art of Software Security Assessment》</li>
-<li>取证/网络。大多数的CTF团队往往有“一个”负责取证的人。我不是那种人，但是我建议你学习如何使用010 hex editor，不要怕做出荒谬、疯狂、随机的猜测这些问题运行的结果是怎样。<br>最后，Dan Guido和公司最近推出了CTF领域指南，会对以上几个主题的介绍有很好的帮助。</li>
-<li>其他<br><a href="http://smashthestack.org/" target="_blank" rel="external">Smash the Stack</a>（漏洞利用）<br><a href="http://crackmes.de/" target="_blank" rel="external">Crackmes.de</a>（逆向工程）<br><a href="http://netforce.nl/" target="_blank" rel="external">Netforce.nl</a>（web渗透与密码学）<br>另外，BCTF赛题会与国际CTF比赛接轨，因此可以报名参加国际CTF比赛（详情参考<a href="http://ctftime.org/" target="_blank" rel="external">ctftime</a>）进行练手，也可以随时练习往届CTF赛题（<a href="http://repo.shell-storm.org/CTF/" target="_blank" rel="external">赛题集合</a>）。</li>
-</ol>
-<h1 id="CTF-stars"><a href="#CTF-stars" class="headerlink" title="CTF stars"></a><strong>CTF stars</strong></h1><p>国内ctf赛棍：</p>
-<ol>
-<li>HITCON<br>被称为”新台湾之光”， 2014年DEFCON 22 CTF中，取得世界第二的成绩。</li>
-<li>Blue-Lotus<br>蓝莲花（blue-lotus）战队成立于清华大学网络与信息安全实验室，主要从事计算机安全攻防方面的研究。 多数主要成员为清华大学在读研究生，后吸纳包括来自浙江大学、上海交大、青岛理工、中国海洋大学、杭州电子科大等高校的多名学生， 以及若干绿盟、阿里巴巴等公司的年轻安全技术人员。在业余时间，团队组队参加多项国际知名CTF赛事， 曾作为中国的团队首次闯入全球顶级的DEFCON CTF总决赛。这里可以看到blue-lotus在各项国际CTF赛事中取得的所有成绩。</li>
-<li>其他</li>
-</ol>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;CTF-meaning&quot;&gt;&lt;a href=&quot;#CTF-meaning&quot; class=&quot;headerlink&quot; title=&quot;CTF meaning&quot;&gt;&lt;/a&gt;&lt;strong&gt;CTF meaning&lt;/strong&gt;&lt;/h1&gt;&lt;p&gt;&lt;a href=&quot;http://www.csdn.net/article/2013-01-04/2813390-hackers-confs-comparison&quot; title=&quot;ctf meaning&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;CTF&lt;/a&gt;: 全称Capture The Flag， 就是夺旗比赛，衍生自古代军事战争模式，两队人马前往对方基地夺旗，每队人马须在保护好己方旗帜的情况下将对方旗帜带回基地。在计算机安全领域，CTF是一种&lt;a href=&quot;http://en.wikipedia.org/wiki/Capture_the_flag&quot; title=&quot;computer security&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;计算机安全竞赛&lt;/a&gt;。&lt;br&gt;CTF通常有两种形式，&lt;a href=&quot;http://bctf.cn/faq&quot; title=&quot;ctf mode&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;解题模式&lt;/a&gt;（Jeopardy）和&lt;a href=&quot;http://bctf.cn/faq&quot; title=&quot;ctf mode&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;攻防模式&lt;/a&gt;（Attack-Defense）, 在解题模式的比赛中，主办方会提供一系列不同类型的赛题，比如上线一个有漏洞的服务、提供一段网络流量、给出一个加密后的数据或经过隐写后的文件等，他们将 flag 隐藏在这些赛题中，选手们通过比拼解题来一决高下；在攻防模式比赛中，主办方会事先编写一系列有漏洞的服务，并将它们安装在每个参赛队伍都相同的环境中，参赛队伍一方面需要修补自己服务的漏洞，同时也需要去攻击对手们的服务、拿到对手环境中的 flag 来得分，攻防模式的竞赛往往比解题模式的竞赛更接近真实环境，比赛过程也更加激烈。 一般资格赛采用解题模式，决赛采用攻防模式。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="ctf" scheme="https://anhkgg.github.io/categories/ctf/"/>
-    
-    
-      <category term="ctf" scheme="https://anhkgg.github.io/tags/ctf/"/>
     
   </entry>
   
