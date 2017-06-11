@@ -6,17 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://anhkgg.github.io">
-  <title>Category: code | Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
+  <title>看雪CTF2017第五题 独行孤客CrackMe的writeup | Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="内核研究/逆向分析/漏洞分析挖掘">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
-<meta property="og:url" content="https://anhkgg.github.io/categories/code/index.html">
+  <meta name="description" content="题目入口：http://ctf.pediy.com/game-fight-35.htm，可下载相关文件  本题需要在XP系统运行，因为驱动只支持xp  00. 先看驱动驱动不大，才20多个函数。 从入口开始分析。 1. 创建设备123456.text:000107D5 68 58 13 01 00                                                  p">
+<meta name="keywords" content="ctf,writeup,看雪,kanxue,bbs.pediy.com,crackme">
+<meta property="og:type" content="article">
+<meta property="og:title" content="看雪CTF2017第五题 独行孤客CrackMe的writeup">
+<meta property="og:url" content="https://anhkgg.github.io/kxctf2017-writeup5/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
-<meta property="og:description" content="内核研究/逆向分析/漏洞分析挖掘">
+<meta property="og:description" content="题目入口：http://ctf.pediy.com/game-fight-35.htm，可下载相关文件  本题需要在XP系统运行，因为驱动只支持xp  00. 先看驱动驱动不大，才20多个函数。 从入口开始分析。 1. 创建设备123456.text:000107D5 68 58 13 01 00                                                  p">
+<meta property="og:updated_time" content="2017-06-11T06:47:10.653Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
-<meta name="twitter:description" content="内核研究/逆向分析/漏洞分析挖掘">
+<meta name="twitter:title" content="看雪CTF2017第五题 独行孤客CrackMe的writeup">
+<meta name="twitter:description" content="题目入口：http://ctf.pediy.com/game-fight-35.htm，可下载相关文件  本题需要在XP系统运行，因为驱动只支持xp  00. 先看驱动驱动不大，才20多个函数。 从入口开始分析。 1. 创建设备123456.text:000107D5 68 58 13 01 00                                                  p">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
@@ -157,83 +159,373 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-kxctf2017-writeup5" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/liburl-use-minihttp/" class="archive-article-date">
-  	<time datetime="2016-08-25T12:32:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-25</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/liburl-use-minihttp/">libcurl小记-简单http封装使用-源码分析</a>
+    <h1 class="article-title" itemprop="name">
+      看雪CTF2017第五题 独行孤客CrackMe的writeup
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/kxctf2017-writeup5/" class="archive-article-date">
+  	<time datetime="2017-06-11T06:42:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-06-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>题目入口：<a href="http://ctf.pediy.com/game-fight-35.htm" target="_blank" rel="external">http://ctf.pediy.com/game-fight-35.htm</a>，可下载相关文件</p>
+<blockquote>
+<p>本题需要在XP系统运行，因为驱动只支持xp</p>
+</blockquote>
+<h1 id="00-先看驱动"><a href="#00-先看驱动" class="headerlink" title="00. 先看驱动"></a>00. 先看驱动</h1><p>驱动不大，才20多个函数。</p>
+<p>从入口开始分析。</p>
+<h2 id="1-创建设备"><a href="#1-创建设备" class="headerlink" title="1. 创建设备"></a>1. 创建设备</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">.text:000107D5 68 58 13 01 00                                                  push    offset aDeviceVmxdrv ; &quot;\\device\\vmxdrv&quot;</div><div class="line">.text:000107DA 8D 45 F4                                                        lea     eax, [ebp+DestinationString]</div><div class="line">.text:000107DD 33 FF                                                           xor     edi, edi</div><div class="line">.text:000107DF 50                                                              push    eax             ; DestinationString</div><div class="line">.text:000107E0 89 7D FC                                                        mov     [ebp+DeviceObject], edi</div><div class="line">.text:000107E3 FF D6                                                           call    esi ; RtlInitUnicodeString</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>用来与应用层通信</p>
+<h2 id="2-IRP-MJ-FUNCTION"><a href="#2-IRP-MJ-FUNCTION" class="headerlink" title="2. IRP_MJ_FUNCTION"></a>2. IRP_MJ_FUNCTION</h2><p>主要有三个，read/write/ioctl。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">.text:00010870 C7 46 44 A8 05 01 00                                            mov     dword ptr [esi+44h], offset f_DrvRead_105A8</div><div class="line">.text:00010877 C7 46 48 1C 06 01 00                                            mov     dword ptr [esi+48h], offset f_DrvWrite_1061C</div><div class="line">.text:0001087E C7 46 70 1A 07 01 00                                            mov     dword ptr [esi+70h], offset f_DrvControl_1071A</div></pre></td></tr></table></figure>
+<p>先看f_DrvWrite_1061C，通过irp获取到上层传入的数据，然后通过104b6获取某个输出存入全局变量g_READCC（根据read的分析，可以知道长度为4的4字节数组）。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">.text:00010669 57                                                              push    edi             ; size_t</div><div class="line">.text:0001066A FF 75 0C                                                        push    [ebp+Irp]       ; void *</div><div class="line">.text:0001066D 53                                                              push    ebx             ; void *</div><div class="line">.text:0001066E E8 11 0C 00 00                                                  call    memcpy</div><div class="line">.text:00010673 83 C4 18                                                        add     esp, 18h</div><div class="line">.text:00010676 83 3D D8 14 01 00 00                                            cmp     dword ptr is_clean_port, 0</div><div class="line">.text:0001067D 74 15                                                           jz      short loc_10694</div><div class="line">.text:0001067F 68 C8 14 01 00                                                  push    offset g_READCC ; int</div><div class="line">.text:00010684 53                                                              push    ebx             ; void *</div><div class="line">.text:00010685 E8 2C FE FF FF                                                  call    f_GetMd5_104B6</div><div class="line">.text:0001068A C7 05 DC 14 01 00 01 00 00 00                                   mov     is_write, 1</div></pre></td></tr></table></figure></p>
+<p>进入104b6内部，key是个16字节数组，初始化0。然后将上面传下的数据拷贝到key中，长度需要小于16。然后将key进行一下变换。<br>key[0] ++(反调试标志为1，后面再说)，其他key[i] += i<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">.text:000104F5 56                                                              push    esi             ; size_t //长度</div><div class="line">.text:000104F6 51                                                              push    ecx             ; void * //上层输入</div><div class="line">.text:000104F7 8D 45 EC                                                        lea     eax, [ebp+key]</div><div class="line">.text:000104FA 50                                                              push    eax             ; void *</div><div class="line">.text:000104FB E8 84 0D 00 00                                                  call    memcpy</div><div class="line">...</div><div class="line">text:00010505 39 05 D8 14 01 00                                               cmp     dword ptr is_clean_port, eax //判断标志是否为0，不为0，key[0] ++</div><div class="line">.text:0001050B 74 03                                                           jz      short loc_10510</div><div class="line">.text:0001050D FE 45 EC                                                        inc     [ebp+key]</div><div class="line">.text:00010510</div><div class="line">.text:00010510                                                 loc_10510:                              ; CODE XREF: f_GetMd5_104B6+55j</div><div class="line">.text:00010510 3B F0                                                           cmp     esi, eax</div><div class="line">.text:00010512 7E 09                                                           jle     short loc_1051D</div><div class="line">.text:00010514</div><div class="line">.text:00010514                                                 loc_10514:                              ; CODE XREF: f_GetMd5_104B6+65j</div><div class="line">.text:00010514 00 44 05 EC                                                     add     [ebp+eax+key], al //key[i] += i</div><div class="line">.text:00010518 40                                                              inc     eax</div><div class="line">.text:00010519 3B C6                                                           cmp     eax, esi</div><div class="line">.text:0001051B 7C F7                                                           jl      short loc_10514</div></pre></td></tr></table></figure></p>
+<p>接着通过下面三个函数对key进行计算，输出结果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">f_Md5_Init_108B2((MD5OBJ *)&amp;v5);</div><div class="line">f_Md5_j_11124((MD5OBJ *)&amp;v5, key, strlen(key));</div><div class="line">f_Md5_hexdigest((int)&amp;v5, md5);</div></pre></td></tr></table></figure></p>
+<p>进入108b2一看就猜测是md5计算，f_Md5_hexdigest将计算结果(32字节字符)保存到md<br>5字段中输出，设置计算标志。也就是大致确认write是计算md5，然后保存到g_READCC<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">MD5OBJ *__stdcall f_Md5_Init_108B2(MD5OBJ *a1)</div><div class="line">&#123;</div><div class="line">  MD5OBJ *result; // eax@1</div><div class="line"></div><div class="line">  result = a1;</div><div class="line">  a1-&gt;len8 = 0;</div><div class="line">  a1-&gt;unk_4 = 0;</div><div class="line">  a1-&gt;s1 = 0x67452301;</div><div class="line">  a1-&gt;s2 = 0xEFCDAB89;</div><div class="line">  a1-&gt;s3 = 0x98BADCFE;</div><div class="line">  a1-&gt;s4 = 0x10325476;</div><div class="line">  return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>接着看f_DrvRead_105A8，看刚才的计算标志是否为0，为0就初始化g_READCC一段值（不知道作者意图，迷惑cracker？），如果计算标志是1，就直接返回计算的结果，然后该值返回到用户空间。也就是如果通过write计算了md5，这里就是获取md5计算结果。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">.text:000105AD </div><div class="line"> if ( !is_write )</div><div class="line">  &#123;</div><div class="line">    i = 3;</div><div class="line">    do</div><div class="line">    &#123;</div><div class="line">      g_READCC[i] = 3 * i - &apos;d&apos;;</div><div class="line">      ++i;</div><div class="line">    &#125;</div><div class="line">    while ( i &lt; 16 );</div><div class="line">    g_READCC[0] = 0xCBu;</div><div class="line">    g_READCC[1] = 0xAAu;</div><div class="line">    g_READCC[2] = 0xDEu;</div><div class="line">    g_READCC[3] = 0xB0u;</div><div class="line">  &#125;</div><div class="line">  //返回数据</div><div class="line">   *(_DWORD *)&amp;MasterIrp-&gt;Type = *(_DWORD *)g_READCC;</div><div class="line">  v4 = (int)&amp;MasterIrp-&gt;MdlAddress;</div><div class="line">  *(_DWORD *)v4 = *(_DWORD *)&amp;g_READCC[4];</div><div class="line">  v4 += 4;</div><div class="line">  *(_DWORD *)v4 = *(_DWORD *)&amp;g_READCC[8];</div><div class="line">  *(_DWORD *)(v4 + 4) = *(_DWORD *)&amp;g_READCC[12];</div></pre></td></tr></table></figure></p>
+<p>最后看f_DrvControl_1071A，支持多个命令号，但只有222004h有用。设置反调试标志为1，然后进入10486看看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">.text:00010734 2D 04 20 22 00                                                  sub     eax, 222004h</div><div class="line">.text:00010739 8B 4E 0C                                                        mov     ecx, [esi+0Ch]</div><div class="line">.text:0001073C 74 2C                                                           jz      short loc_1076A</div><div class="line">...</div><div class="line">.text:0001076A                                                 loc_1076A:                              ; CODE XREF: f_DrvControl_1071A+22j</div><div class="line">.text:0001076A C7 05 D8 14 01 00 01 00 00 00                                   mov     dword ptr is_clean_port, 1</div><div class="line">.text:00010774 FF 15 80 13 01 00                                               call    ds:IoGetCurrentProcess</div><div class="line">.text:0001077A A3 E0 14 01 00                                                  mov     eproc, eax</div><div class="line">.text:0001077F E8 02 FD FF FF                                                  call    f_ClearDebugPort_10486</div></pre></td></tr></table></figure></p>
+<p>枚举进程找到当前进程的eprocess(其实没必要枚举把)，置eprocess-&gt;DebugPort = NULL，让应用层调试器失效，达到反跳试效果。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">result = IoGetCurrentProcess();</div><div class="line">  v1 = result;</div><div class="line">  while ( result != (PEPROCESS)eproc )</div><div class="line">  &#123;</div><div class="line">    result = (PEPROCESS)(*((_DWORD *)result + 0x22) - 0x88);// eproc-&gt;ActiveProcessLinks.Flink</div><div class="line">    if ( result == v1 )</div><div class="line">      return result;</div><div class="line">  &#125;</div><div class="line">  *((_DWORD *)result + 0x2F) = 0;               // eproc-&gt;DebugPort = 0</div></pre></td></tr></table></figure></p>
+<p>这里猜想一下，如果破解者通过应用层patch，不发送222004h命令来解除反跳试的话，那么这里的反跳试标志就是0，然后在write中计算md5时，对key[0]就不会做++操作，那么上层就会获取到一个错误的值，从而影响破解。</p>
+<h2 id="3-k掉驱动反调试"><a href="#3-k掉驱动反调试" class="headerlink" title="3. k掉驱动反调试"></a>3. k掉驱动反调试</h2><p>首先想到的是将驱动文件patch，也就是DebugPort置零的指令nop掉<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">.text:000104A9 83 A0 BC 00 00 00 00                                            and     dword ptr [eax+0BCh], 0</div></pre></td></tr></table></figure></p>
+<p>通过reshacker将驱动资源导出来，然后hex编辑工具修改104A9的内容(文件内存对齐一样)为7个NOP，然后再将patch驱动文件导入到exe中。</p>
+<p>会提示驱动加载失败，可能有校验，不再细跟。</p>
+<p>没办法，为了让od能够调试，我写了个简单驱动，在本驱动加载时，将104A进行patch，通过反跳试。</p>
+<h1 id="01-再看CrackMe"><a href="#01-再看CrackMe" class="headerlink" title="01. 再看CrackMe"></a>01. 再看CrackMe</h1><p>既然知道有驱动了，先找找释放和加载驱动的代码，通过 FindResourceA和CreateService即可定位（不再详述），注意到的是，驱动加载成功会设置一个标志，用于后面验证的判断</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">v5 = f_CreaetSrv_401AA0(ServiceName, &amp;Buffer);// vmxdrv</div><div class="line"> v1-&gt;is_drv_run = v5;</div></pre></td></tr></table></figure>
+<p>然后再找和驱动通信的代码，通过DeviceIoControl找到调用222004命令好的代码。通过创建一个线程，循环调用该接口来清零DebugPort</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">while ( 1 )</div><div class="line"> &#123;</div><div class="line">   v0 = CreateFileA(FileName, 0xC0000000, 0, 0, 3u, 0x80u, 0);</div><div class="line">   if ( v0 == (HANDLE)-1 )</div><div class="line">     break;</div><div class="line">   DeviceIoControl(v0, 0x222004u, 0, 0, &amp;OutBuffer, 0x100u, &amp;BytesReturned, 0);</div><div class="line">   CloseHandle(v0);</div><div class="line">   Sleep(0xBB8u);</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<p>按理说这里可以patch掉来去掉反跳试，但就会出现我前面分析提到的问题。</p>
+<p>通过WriteFile找到调用read/write的位置，也就是计算md5和获取md5的位置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">.text:00401D50 ; HANDLE __thiscall f_CalcKeyMd5_401D50(void *this, char *key, size_t len)</div><div class="line">...</div><div class="line">.text:00401E4E                 push    ebx             ; lpOverlapped</div><div class="line">.text:00401E4F                 push    eax             ; lpNumberOfBytesWritten</div><div class="line">.text:00401E50                 lea     ecx, [esp+344h+Buffer] //用户输入的key相关数据</div><div class="line">.text:00401E54                 push    esi             ; nNumberOfBytesToWrite</div><div class="line">.text:00401E55                 push    ecx             ; lpBuffer</div><div class="line">.text:00401E56                 push    edi             ; hFile</div><div class="line">.text:00401E57                 call    ds:WriteFile //计算md5</div><div class="line">.text:00401E5D                 test    eax, eax</div><div class="line">.text:00401E5F                 jz      short loc_401ED4</div><div class="line">.text:00401E61                 lea     edx, [esp+33Ch+NumberOfBytesRead]</div><div class="line">.text:00401E65                 push    ebx             ; lpOverlapped</div><div class="line">.text:00401E66                 push    edx             ; lpNumberOfBytesRead</div><div class="line">.text:00401E67                 lea     eax, [esp+344h+keymd5]</div><div class="line">.text:00401E6E                 push    10h             ; nNumberOfBytesToRead</div><div class="line">.text:00401E70                 push    eax             ; lpBuffer</div><div class="line">.text:00401E71                 push    edi             ; hFile</div><div class="line">.text:00401E72                 call    ds:ReadFile //读取md5</div></pre></td></tr></table></figure></p>
+<p>f_CalcKeyMd5_401D50回溯一层就是输入key回车的响应函数。<br>这里先通过UpdateData(1)获取输入数据，然后拷贝到局部变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">f_UpdateData_41A4F7(1);</div><div class="line"> f_CString_copy_417D43((CString *)&amp;key, (LPCSTR *)&amp;v1-&gt;key);//用户输入的</div></pre></td></tr></table></figure></p>
+<p> 然后输入进行小写和反转变换<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">f_CString_lwr_4182FA((CString *)&amp;key); //小写</div><div class="line"> f_Cstring_rev_41830C((CString *)&amp;key);        // 反转</div></pre></td></tr></table></figure></p>
+<p> 判断输入长度是否为6，不是退出，清除输入，并通过IsDebuggerPresent检查是否在调试（OD直接过），是调试也退出，清理出输入。<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">  if ( *(_DWORD *)(key - 8) != 6 || IsDebuggerPresent() )</div><div class="line">  &#123;</div><div class="line">    CString::operator=((CString *)&amp;v1-&gt;unk_6c, byte_431398);</div><div class="line">    CString::operator=((CString *)&amp;v1-&gt;key, byte_431398);</div><div class="line">    f_UpdateData_41A4F7(0);</div><div class="line">  &#125;</div><div class="line"> ``` </div><div class="line">满足长度要求，再看驱动是否加载，再调用f_CalcKeyMd5_401D50计算md5. 也就是调用驱动获取md5，记为KeyMd51.</div></pre></td></tr></table></figure></p>
+<p>//.text:004017DE<br> if ( v1-&gt;is_drv_run )<br>    {<br>      keymd5str = <em>(_DWORD </em>)(key - 8);<br>      v3 = sub_418263(&amp;key, 0);<br>      f_CalcKeyMd5_401D50(v1, (char *)v3, keymd5str);<br>    }<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">接着下面两个函数，先调用f_GetStrMd5_401920（应用层的Md5，通过调试可以很快确认，内部也有md5特征）计算KeyMd51的Md5，记为KeyMd52，然后调用sub_415A78截取KeyMd52从第3为开始的10字符，记为KeyMd53。</div></pre></td></tr></table></figure></p>
+<pre><code>f_GetStrMd5_401920((char)v4, (CString *)keymd5str);// 00943950  37 63 37 36 36 65 32 61 31 63 61 30 35 37 63 37  7c766e2a1ca057c7
+                                            // 00943960  62 30 65 39 31 66 39 33 35 65 64 61 61 64 37 33  b0e91f935edaad73
+                                            // 
+                                            // 
+                                            // 
+sub_415A78((LPCSTR *)&amp;keymd5str_obj, (int)&amp;v9, 2, 0xAu);// 截取2开始长度0xA的值
+                                            // 00943900  37 36 36 65 32 61 31 63 61 30 00 38 39 30 33 38  766e2a1ca0.89038
+                                            // 00943910  33 39 32 36 39 32 65 38 32 64 36 33 62 31 37 64  392692e82d63b17d
+                                            // 
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">最后KeyMd53与888aeda4ab比较，成功提示Success^^！</div></pre></td></tr></table></figure>
+<p>if ( _mbsicmp(keymd5str_obj, a888aeda4ab) ) // 888aeda4ab<br>    {<br>      CString::operator=((CString <em>)&amp;v1-&gt;unk_6c, byte_431398);<br>      CString::operator=((CString </em>)&amp;v1-&gt;key, byte_431398);<br>      f_UpdateData_41A4F7(0);<br>    }<br>    else<br>    {<br>      f_ShowSuccess_402030(v1);//成功提示<br>    }<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">总结算法：</div><div class="line">1. KEY1 = rev(lwr(key))，key长度6，将输入转小写，逆序</div><div class="line">2. 反调试成功时KEY1[0]+=1, 其他KEY1[i]+=i;</div><div class="line">3. KEY2 = DrvMd5(KEY1)，驱动MD5计算</div><div class="line">4. KEY3 = Md5(KEY2), 应用层Md5计算</div><div class="line">5. KEY4 = KEY3[2:12]，取第3位开始的10个字符</div><div class="line">6. KEY4 == &apos;888aeda4ab&apos;</div><div class="line"></div><div class="line"># 11. 求解</div><div class="line"></div><div class="line">由于MD5hash无法逆运算，只能爆破了，刚开始忘了题目key只能是数字和字母，结果我跑了全字符，跑了1天多....没出来，卡hi是怀疑自己</div><div class="line"></div><div class="line">后来改成了数字字母，终于得到答案 su1987</div><div class="line"></div><div class="line">爆破代码如下：</div></pre></td></tr></table></figure></p>
+<p>char Seed[/<em>68</em>/36] = {<br>    ‘a’, ‘b’, ‘c’, ‘d’, ‘e’, ‘f’, ‘g’, ‘h’, ‘i’, ‘j’, ‘k’, ‘l’, ‘m’, ‘n’, ‘o’, ‘p’, ‘q’, ‘r’, ‘s’, ‘t’, ‘u’, ‘v’, ‘w’, ‘x’, ‘y’, ‘z’,<br>    ‘0’, ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’, ‘9’,<br>    };</p>
+<p>#define SEED_SIZE 36// 68</p>
+<p>typedef struct _THREAD_PARAM<br>{<br>    int i1;<br>    int i2;<br>    int i3;<br>    int i2_1;<br>    int i2_2;<br>}TPP, *PTPP;</p>
+<p>int g_ThreadCnt = 0;<br>int g_start = 0;<br>long g_count = 0;</p>
+<p>void write_file(char* sz)<br>{<br>    HANDLE hFile = CreateFileA(“1.log”, GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);<br>    if(hFile)<br>    {<br>        SetFilePointer(hFile, 0, 0, FILE_END);<br>        DWORD dw = 0;<br>        WriteFile(hFile, sz, strlen(sz), &amp;dw, NULL);<br>        CloseHandle(hFile);<br>        hFile = NULL;<br>    }<br>}</p>
+<p>bool crack1(PTPP p)<br>{<br>    int i1 = p-&gt;i1;<br>    int i2 = p-&gt;i2;</p>
+<pre><code>char sss[20] = {0};
+
+for(int i3=0; i3&lt;SEED_SIZE; i3++)
+{
+    for(int i4=0; i4&lt;SEED_SIZE; i4++)
+    {
+        for(int i5=0; i5&lt;SEED_SIZE; i5++)
+        {
+            for(int i6=0; i6&lt;SEED_SIZE; i6++)
+            {
+                char sza[7] = {Seed[i1], Seed[i2], Seed[i3], Seed[i4], Seed[i5], Seed[i5]};
+
+                g_count ++;
+
+                char sz[7] = {0};
+                //反转
+                sz[0] = Seed[i6]+1;
+                sz[1] = Seed[i5]+1;
+                sz[2] = Seed[i4]+2;
+                sz[3] = Seed[i3]+3;
+                sz[4] = Seed[i2]+4;
+                sz[5] = Seed[i1]+5;
+
+                FileMD5 fm;
+                char* p = (char*)fm.md5(sz, 6);
+                p = (char*)fm.md5(p, 32);
+                strncpy(sss, p+2, 10);
+
+
+                if(!stricmp(sss, &quot;888aeda4ab&quot;))
+                {
+                    char info[1024] = {0};
+                    sprintf(info, &quot;%c%c%c%c%c%c, =&gt; %s，%s\n&quot;, 
+                        Seed[i1], Seed[i2], Seed[i3], Seed[i4], Seed[i5], Seed[i6], 
+                        sz,
+                        sss
+                        );
+                    write_file(info);
+
+
+
+                    int spell = GetTickCount() - g_start;
+                    printf(&quot;spell time : %d s&quot;, spell/1000);
+
+                    system(&quot;pause&quot;);
+
+                    return true;
+                }                            
+            }
+        }
+        //system(&quot;cls&quot;);
+        printf(&quot;count: %ld\n&quot;, g_count);
+    }
+
+}
+
+return false;
+</code></pre><p>}<br>void crack3(PTPP p)<br>{<br>    int i1 = p-&gt;i1;<br>    int i2_1 = p-&gt;i2_1;<br>    int i2_2 = p-&gt;i2_2;</p>
+<pre><code>delete[] p;
+
+TPP p1 = {0};
+p1.i1 = i1;
+for(int i=i2_1; i&lt;i2_2; i++)
+{
+    p1.i2 = i;
+    if(crack1(&amp;p1))
+    {
+        return;
+    }
+}
+</code></pre><p>}<br>void crack2(int i1, int i2_1, int i2_2)<br>{<br>    PTPP p = new TPP;//{0};<br>    if(p == NULL)<br>    {<br>        printf(“!!!!!!!!!!!!没neicun！！”);<br>        return;<br>    }<br>    memset(p, 0, sizeof(TPP));<br>    p-&gt;i1 = i1;<br>    p-&gt;i2_1 = i2_1;<br>    p-&gt;i2_2 = i2_2;</p>
+<pre><code>HANDLE h = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)crack3, (PVOID)p, 0, NULL);
+if(h == NULL)
+{
+    printf(&quot;CreateTHREAD error [%d]\n&quot;, g_ThreadCnt);
+}
+else
+{
+    g_Handles[g_ThreadCnt++] = h;
+}
+</code></pre><p>}</p>
+<p>void crack()<br>{<br>    for(int i1=0; i1&lt;SEED_SIZE; i1++)<br>    {<br>        int i2 = 0;</p>
+<p>#define STEP_SIZE 2<br>        for(i2 = 0; i2&lt;SEED_SIZE-STEP_SIZE; i2+=STEP_SIZE)<br>        {<br>            crack2(i1, i2, i2+STEP_SIZE);<br>        }<br>        crack2(i1, i2, SEED_SIZE);<br>    }<br>}    </p>
+<p>int _tmain(int argc, _TCHAR* argv[])<br>{<br>    int start = GetTickCount();<br>    g_start = GetTickCount();</p>
+<pre><code>crack();
+
+WaitForMultipleObjects(g_ThreadCnt, g_Handles, TRUE, INFINITE);
+
+int spell = GetTickCount() - start;
+printf(&quot;spell time : %d s, thread-count: %d\n&quot;, spell, g_ThreadCnt);
+
+getchar();
+
+return 0;
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">最后结果</div></pre></td></tr></table></figure></p>
+<p>su1986, =&gt; 79;4yx，888aeda4ab<br>```</p>
+<p>由于算法开始有转小写，所以其时答案中所有字母都可以是大小写选择，答案不唯一。</p>
+<p>转载请注明出处：<a href="https://anhkgg.github.io/kxctf2017_writeup5">https://anhkgg.github.io/kxctf2017_writeup5</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/img/wechatpay.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">libcurl</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ctf</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">http</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">writeup</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">minihttp</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">看雪</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">get_post_ajax</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">kanxue</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">bbs.pediy.com</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">crackme</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/code/" class="article-tag-list-link color5">code</a>
+        			<a href="/categories/ctf/" class="article-tag-list-link color4">ctf</a>
         		</li>
       		
 		</ul>
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=https://anhkgg.github.io/kxctf2017-writeup5/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/kxctf2017_writeup2/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">看雪CTF2017第二题lelfeiCM的writeup</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+
+  
+  
+  
+  <!--
+<div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+<script>
+  var cloudTieConfig = {
+    url: "https://anhkgg.github.io/kxctf2017-writeup5/", 
+    sourceId: "kxctf2017-writeup5",
+    productKey: "8826b7b0b2974a38ae576da179105941",
+    target: "cloud-tie-wrapper"
+  };
+</script>
+<script src="https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+-->
+
+<!--
+<div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+<script>
+  var cloudTieConfig = {
+    url: document.location.href, 
+    sourceId: "",
+    productKey: "8826b7b0b2974a38ae576da179105941",
+    target: "cloud-tie-wrapper"
+  };
+</script>
+<script src="https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+
+-->
+
+<div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+<script src="https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+<script>
+var cloudTieConfig = {
+  url: document.location.href, 
+  sourceId: "",
+  productKey: "8826b7b0b2974a38ae576da179105941",
+  target: "cloud-tie-wrapper"
+};
+var yunManualLoad = true;
+Tie.loader("aHR0cHM6Ly9hcGkuZ2VudGllLjE2My5jb20vcGMvbGl2ZXNjcmlwdC5odG1s", true);
+</script>
   
 
-    
+  
+
+  
 
 
           </div>
@@ -256,10 +548,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		root: "/",
 		innerArchive: true,
