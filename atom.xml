@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://anhkgg.github.io/"/>
-  <updated>2017-08-09T16:06:28.173Z</updated>
+  <updated>2017-08-09T22:30:22.762Z</updated>
   <id>https://anhkgg.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="https://anhkgg.github.io/hxsec-search-pwd-interface-analyze/"/>
     <id>https://anhkgg.github.io/hxsec-search-pwd-interface-analyze/</id>
     <published>2017-08-09T15:34:25.000Z</published>
-    <updated>2017-08-09T16:06:28.173Z</updated>
+    <updated>2017-08-09T22:30:22.762Z</updated>
     
     <content type="html"><![CDATA[<h1 id="0x00-开始"><a href="#0x00-开始" class="headerlink" title="0x00 开始"></a>0x00 开始</h1><p>最近爬个站的数据，然后想扫一下其他网站的同一个账号名能否找到泄露的密码，然后在这个站嘿嘿一下…</p>
 <p>在 <a href="https://www.sec-wiki.com/topic/12" target="_blank" rel="external">sec-wiki</a> 找到了<a href="http://cha.hxsec.com/" target="_blank" rel="external">这个密码泄露查询网站</a>。</p>
@@ -81,7 +81,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">//猜猜怎么看！</div></pre></td></tr></table></figure>
 <div style="display:none;"><br><br>这种eval(x)如何分析呢？这里分享一个技巧<br>调试中，得到x之后，如果继续f10，那肯定就飞了，还要继续分析的，怎么办呢？<br><br>使用下面的方法：<br>x = “debugger;\r\n” + x;<br><br>然后f10就会在debugger断下来，然后就跟普通的js分析一样了<br><br>感谢chrome强大的工具！<br><br>希望这点没让大家失望！<br><br></div>
 
-<p>封装了一套py的代码，有需要的请说！</p>
+<p>代码地址，有需要请移步：<br><a href="https://github.com/anhkgg/hxsec_search" target="_blank" rel="external">https://github.com/anhkgg/hxsec_search</a></p>
 <p>转载请注明出处，博客原文：<a href="https://anhkgg.github.io/hxsec-search-pwd-interface-analyze">https://anhkgg.github.io/hxsec-search-pwd-interface-analyze</a></p>
 ]]></content>
     
