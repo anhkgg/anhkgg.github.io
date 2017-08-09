@@ -17,7 +17,7 @@
 <meta property="og:description" content="0x00 开始最近爬个站的数据，然后想扫一下其他网站的同一个账号名能否找到泄露的密码，然后在这个站嘿嘿一下… 在 sec-wiki 找到了这个密码泄露查询网站。 随便用了一下，发现网站虽然讲密码打码了，但是某些数据还是可以猜出来原始的内容，或者通过简单的计算拿到原始的内容。 but，我不能一个个输入然后看吧，数据虽然少，也有上千条啊，怎么说也是个python程序员，怎么也得鼓捣一下。 分析一下hx">
 <meta property="og:image" content="https://anhkgg.github.io/img/hxsec1.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/hxsec2.png">
-<meta property="og:updated_time" content="2017-08-09T16:02:53.404Z">
+<meta property="og:updated_time" content="2017-08-09T16:06:28.173Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="看我鼓捣华西安全网(cha.hxsec.com)密码泄露查询接口（有意思的js混淆）">
 <meta name="twitter:description" content="0x00 开始最近爬个站的数据，然后想扫一下其他网站的同一个账号名能否找到泄露的密码，然后在这个站嘿嘿一下… 在 sec-wiki 找到了这个密码泄露查询网站。 随便用了一下，发现网站虽然讲密码打码了，但是某些数据还是可以猜出来原始的内容，或者通过简单的计算拿到原始的内容。 but，我不能一个个输入然后看吧，数据虽然少，也有上千条啊，怎么说也是个python程序员，怎么也得鼓捣一下。 分析一下hx">
@@ -238,11 +238,11 @@
 <p>另外，我只想对写system.js的同志说，nmmmp！那一段中文啥用没有，只能激起fn！</p>
 <p>有不敬之处，敬请见谅！</p>
 <p>有一点小小的分析技巧：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">.......</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">//猜猜怎么看！</div></pre></td></tr></table></figure>
 <div style="display:none;"><br><br>这种eval(x)如何分析呢？这里分享一个技巧<br>调试中，得到x之后，如果继续f10，那肯定就飞了，还要继续分析的，怎么办呢？<br><br>使用下面的方法：<br>x = “debugger;\r\n” + x;<br><br>然后f10就会在debugger断下来，然后就跟普通的js分析一样了<br><br>感谢chrome强大的工具！<br><br>希望这点没让大家失望！<br><br></div>
 
 <p>封装了一套py的代码，有需要的请说！</p>
-<p>转载请注明出处，博客原文：<a href="https://http://anhkgg.github.io/hxsec-search-pwd-interface-analyze" target="_blank" rel="external">https://http://anhkgg.github.io/hxsec-search-pwd-interface-analyze</a></p>
+<p>转载请注明出处，博客原文：<a href="https://anhkgg.github.io/hxsec-search-pwd-interface-analyze">https://anhkgg.github.io/hxsec-search-pwd-interface-analyze</a></p>
 
       
 
