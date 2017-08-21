@@ -6,24 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://anhkgg.github.io">
-  <title>让代码飞出一段钢琴曲(freepiano小助手) | Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
+  <title>pylogin系列之搞定百度统计 | Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="概述突然想玩一下键盘弹曲子，就找到了freepiano，专业的东西不懂，就找了写简谱来玩玩，感觉挺不错的，哈哈~~ 玩疯了之后，突然想到，我平时写代码，是不是可以弹出一段曲子呢，是不是心情会变得非常好，代码也写的更有节奏呢~~ 说不定还搞出来一个什么《代码之歌》的钢琴曲~~ 嘎嘎 突然被自己这个想法吸引住了，不管咋样，每敲下代码的一个字符，后面想起了背景音乐，真是不错的，程序员也可以是“钢琴师”啊">
-<meta name="keywords" content="WM_KEYBOARD_LL,HOOK,freepiano,inject">
+  <meta name="description" content="概述这次分析的百度统计登录接口，算是这几个中最简单的了。 但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。">
+<meta name="keywords" content="crawler,python,js,javascript,v2ex,自动领币">
 <meta property="og:type" content="article">
-<meta property="og:title" content="让代码飞出一段钢琴曲(freepiano小助手)">
-<meta property="og:url" content="https://anhkgg.github.io/coding-piano-hook/index.html">
+<meta property="og:title" content="pylogin系列之搞定百度统计">
+<meta property="og:url" content="https://anhkgg.github.io/pylogin-baidutongji-login-analyzeee/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
-<meta property="og:description" content="概述突然想玩一下键盘弹曲子，就找到了freepiano，专业的东西不懂，就找了写简谱来玩玩，感觉挺不错的，哈哈~~ 玩疯了之后，突然想到，我平时写代码，是不是可以弹出一段曲子呢，是不是心情会变得非常好，代码也写的更有节奏呢~~ 说不定还搞出来一个什么《代码之歌》的钢琴曲~~ 嘎嘎 突然被自己这个想法吸引住了，不管咋样，每敲下代码的一个字符，后面想起了背景音乐，真是不错的，程序员也可以是“钢琴师”啊">
-<meta property="og:image" content="https://anhkgg.github.io/img/freepiano_1.png">
-<meta property="og:image" content="https://anhkgg.github.io/img/freepiano_2.png">
-<meta property="og:image" content="https://anhkgg.github.io/img/freepiano_3.png">
-<meta property="og:image" content="https://anhkgg.github.io/img/freepiano_4.png">
-<meta property="og:updated_time" content="2017-05-01T07:27:41.473Z">
+<meta property="og:description" content="概述这次分析的百度统计登录接口，算是这几个中最简单的了。 但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。">
+<meta property="og:updated_time" content="2017-08-21T16:04:50.799Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="让代码飞出一段钢琴曲(freepiano小助手)">
-<meta name="twitter:description" content="概述突然想玩一下键盘弹曲子，就找到了freepiano，专业的东西不懂，就找了写简谱来玩玩，感觉挺不错的，哈哈~~ 玩疯了之后，突然想到，我平时写代码，是不是可以弹出一段曲子呢，是不是心情会变得非常好，代码也写的更有节奏呢~~ 说不定还搞出来一个什么《代码之歌》的钢琴曲~~ 嘎嘎 突然被自己这个想法吸引住了，不管咋样，每敲下代码的一个字符，后面想起了背景音乐，真是不错的，程序员也可以是“钢琴师”啊">
-<meta name="twitter:image" content="https://anhkgg.github.io/img/freepiano_1.png">
+<meta name="twitter:title" content="pylogin系列之搞定百度统计">
+<meta name="twitter:description" content="概述这次分析的百度统计登录接口，算是这几个中最简单的了。 但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
@@ -164,90 +159,61 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-coding-piano-hook" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-pylogin-baidutongji-login-analyzeee" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      让代码飞出一段钢琴曲(freepiano小助手)
+      pylogin系列之搞定百度统计
     </h1>
   
 
         
-        <a href="/coding-piano-hook/" class="archive-article-date">
-  	<time datetime="2017-05-01T07:11:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-01</time>
+        <a href="/pylogin-baidutongji-login-analyzeee/" class="archive-article-date">
+  	<time datetime="2017-08-21T16:01:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-22</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>突然想玩一下键盘弹曲子，就找到了<a href="http://freepiano.tiwb.com/cn/" target="_blank" rel="external">freepiano</a>，专业的东西不懂，就找了写简谱来玩玩，感觉挺不错的，哈哈~~</p>
-<p>玩疯了之后，突然想到，我平时写代码，是不是可以弹出一段曲子呢，是不是心情会变得非常好，代码也写的更有节奏呢~~</p>
-<p>说不定还搞出来一个什么《代码之歌》的钢琴曲~~ 嘎嘎</p>
-<p>突然被自己这个想法吸引住了，不管咋样，每敲下代码的一个字符，后面想起了背景音乐，真是不错的，程序员也可以是“钢琴师”啊~~</p>
-<p>有了想法，就开整！！！</p>
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>这次分析的百度统计登录接口，算是这几个中最简单的了。</p>
+<p>但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。</p>
 <a id="more"></a>
-<p>有下面几点问题：</p>
-<ol>
-<li>freepiano必须是激活窗口下，才能接受键盘输入</li>
-<li>我要在写代码时，让freepiano响应按键，就需要全局劫持键盘输入了</li>
-<li>怎么给freepiano通知，我按下了什么呢？</li>
-</ol>
-<p>忘了说，freepiano长这样：<br><img src="/img/freepiano_1.png" alt="img"></p>
-<h1 id="开搞"><a href="#开搞" class="headerlink" title="开搞"></a>开搞</h1><p>先简单整理下思路：</p>
-<ol>
-<li>首先肯定是弄个键盘钩子难道全局的所有键盘输入，暂定WH_KEYBOARD</li>
-<li>怎么让钩子执行？弄个exe，把freepiano再启动起来，感觉麻烦，然后就想让freepiano加载我的模块吧，简单确认了一下，可行（后面具体描述）</li>
-<li>劫持到键盘输入之后，通过PostMessage给freepiano发送键盘消息，模拟WM_KEYDOWN/WM_KEYUP</li>
-</ol>
-<h2 id="1-加载我的模块"><a href="#1-加载我的模块" class="headerlink" title="1. 加载我的模块"></a>1. 加载我的模块</h2><p>首先想到的就是DLL劫持和修改freepiano的导入表，后者不够优雅，果断要选择dll劫持。</p>
-<p>然后就用depends看了下freepiano的导入信息，发现几个可以劫持的（dsound.dll，d3d9.dll等），简单代码确认了一下，freepiano可以劫持这两个模块，选择了d3d9.dll（函数少）。</p>
-<p><img src="/img/freepiano_2.png" alt="img"></p>
-<p>然后偷懒用了aheadlib导出了d3d9.dll的导出函数信息，简单方便，飞快得就搞定了劫持。</p>
-<p>代码很简单，就贴一点（都不需要手写）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">// 导出函数</div><div class="line">#pragma comment(linker, &quot;/EXPORT:Direct3DShaderValidatorCreate9=_AheadLib_Direct3DShaderValidatorCreate9,@1&quot;)</div><div class="line">#pragma comment(linker, &quot;/EXPORT:PSGPError=_AheadLib_PSGPError,@2&quot;)</div><div class="line">#pragma comment(linker, &quot;/EXPORT:PSGPSampleTexture=_AheadLib_PSGPSampleTexture,@3&quot;)</div><div class="line">...</div><div class="line">// 导出函数</div><div class="line">ALCDECL AheadLib_Direct3DShaderValidatorCreate9(void)</div><div class="line">&#123;</div><div class="line">	// 保存返回地址</div><div class="line">	__asm POP m_dwReturn[0 * TYPE long];</div><div class="line"></div><div class="line">	// 调用原始函数</div><div class="line">	GetAddress(&quot;Direct3DShaderValidatorCreate9&quot;)();</div><div class="line"></div><div class="line">	// 转跳到返回地址</div><div class="line">	__asm JMP m_dwReturn[0 * TYPE long];</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>一试，OK，模块起来了，freepiano正常工作。</p>
-<p><img src="/img/freepiano_3.png" alt="img">)</p>
-<h2 id="2-安装钩子"><a href="#2-安装钩子" class="headerlink" title="2. 安装钩子"></a>2. 安装钩子</h2><p>选择了安装全局WH_KEYBOARD钩子，这个代码网上也太多了，就不细说了，看看就行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">//安装钩子</div><div class="line">BOOL Hook(HMODULE hMod)</div><div class="line">&#123;</div><div class="line">	g_Hook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, hMod, 0);</div><div class="line">	return g_Hook?TRUE:FALSE;</div><div class="line">&#125;</div><div class="line">//卸载钩子</div><div class="line">VOID Unhook()</div><div class="line">&#123;</div><div class="line">	if(g_Hook)</div><div class="line">	&#123;</div><div class="line">		UnhookWindowsHookEx(g_Hook);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">//钩子函数，劫持键盘消息</div><div class="line">LRESULT CALLBACK KeyboardProc(  int code,       // hook code</div><div class="line">							  WPARAM wParam,  // virtual-key code</div><div class="line">							  LPARAM lParam   // keystroke-message information</div><div class="line">							  )</div><div class="line">&#123;	</div><div class="line">	if(code == HC_ACTION)</div><div class="line">	&#123;</div><div class="line">		SendKeyMsg(wParam, lParam);</div><div class="line">	&#125;</div><div class="line">	return CallNextHookEx(g_Hook, code, wParam, lParam);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h2 id="3-发送按键信息给freepiano"><a href="#3-发送按键信息给freepiano" class="headerlink" title="3. 发送按键信息给freepiano"></a>3. 发送按键信息给freepiano</h2><p>首先想到的就是在钩子函数里给freepiano发送WM_KEYDOWN/WM_KEYUP消息就行了。</p>
-<p>先找到freepiano的窗口，spy++上，找到窗口标题和类型信息，然后代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">HWND hwnd = FindWindow(&quot;FreePianoMainWindow&quot;, &quot;Wispow Freepiano 2&quot;);</div><div class="line">if(hwnd == NULL)</div><div class="line">&#123;</div><div class="line">	hwnd =  FindWindow(&quot;FreePianoMainWindow&quot;, NULL);</div><div class="line">	if(hwnd == NULL)</div><div class="line">	&#123;</div><div class="line">		hwnd =  FindWindow(NULL, &quot;Wispow Freepiano 2&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>然后就是发消息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">if(hwnd)</div><div class="line">&#123;</div><div class="line">	SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);</div><div class="line">	if(keydown)</div><div class="line">	&#123;</div><div class="line">		keydown = false;</div><div class="line">		PostMessage(hwnd, WM_KEYDOWN, wParam, lParam);</div><div class="line">	&#125;else</div><div class="line">	&#123;</div><div class="line">		keydown = true;</div><div class="line">		PostMessage(hwnd, WM_KEYUP, wParam, lParam);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>测试，失败了，没有预想的效果。</p>
-<p>分析原因：</p>
-<ol>
-<li>Post发送消息失败。但是通过spy++抓消息看到freepiano是收到了消息的。那就不是这个原因。</li>
-<li>freepiano校验了窗口是否激活？然后就用上面每次置顶试了一下，依然不行。</li>
-<li>freepiano使用了GetKeyState之类的函数检查按键状态，通过ida简单看了一下导入表，没有相关函数（没有深究是否显示导入了）。</li>
-<li>用ida看了下freepiano的窗口消息处理，看是否有什么过滤</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">v7.lpfnWndProc = (WNDPROC)xxx_main_wndproc_41D070; //窗口响应函数</div><div class="line">v7.cbClsExtra = 0;</div><div class="line">v7.cbWndExtra = 0;</div><div class="line">v7.hInstance = GetModuleHandleA(0);</div><div class="line">v7.hIcon = LoadIconA(v1, (LPCSTR)0xA);</div><div class="line">v7.hCursor = 0;</div><div class="line">v7.hbrBackground = 0;</div><div class="line">v7.lpszMenuName = 0;</div><div class="line">v7.lpszClassName = &quot;FreePianoMainWindow&quot;;</div></pre></td></tr></table></figure>
-<p>然后发现居然没有对WM_KEYDOWN/WM_KEYUP/WM_CHAR之类的消息进行处理，那是怎么接受的按键信息</p>
-<p>继续用ida看是否有钩子之类的处理，果然，导入表中明晃晃的SetWindowsHookEx，进入一看，一个WM_KEYBOARD_LL局部钩子</p>
-<p><img src="/img/freepiano_4.png" alt="img"></p>
-<p>进钩子函数一下，各种按键状态记录的处理，不深究了。基本确认他使用这种方式来接受按键信息。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">v6 = (unsigned __int8)byte_4F6DC8[scanCode];</div><div class="line"> if ( (unsigned int)(v6 - 1) &gt; 0x6A )</div><div class="line">   goto LABEL_23;</div><div class="line"> if ( (unsigned __int8)byte_4F6ED0[v6] != pressed_0 )</div><div class="line"> &#123;</div><div class="line">   byte_4F6ED0[v6] = pressed_0;</div><div class="line">   sub_449B20(v6, pressed_0 != 0);</div><div class="line"> &#125;</div><div class="line"> if ( (_BYTE)dword_4F6DC0</div><div class="line">   || BYTE1(dword_4F6DC0) &amp;&amp; (v6 == &apos;D&apos; || v6 == &apos;H&apos;)</div><div class="line">   || BYTE2(dword_4F6DC0) &amp;&amp; (byte_4F6F15 || byte_4F6F17) &amp;&amp; v6 == 28 )</div><div class="line">   result = 1;</div><div class="line"> else</div></pre></td></tr></table></figure>
-<h2 id="4-改变策略"><a href="#4-改变策略" class="headerlink" title="4. 改变策略"></a>4. 改变策略</h2><p>那就不能直接PostMessage发送消息了。</p>
-<p>修改我的钩子为WM_KEYBOARD_LL全局键盘钩子，消息和freepiano完全一样了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">g_Hook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, hMod, 0);</div></pre></td></tr></table></figure>
-<p>钩子函数通过WM_COPYDATA打包数据，发送给freepiano</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">LRESULT CALLBACK LowLevelKeyboardProc(  int nCode,     // hook code</div><div class="line">									  WPARAM wParam, // message identifier  </div><div class="line">									  LPARAM lParam  // message data</div><div class="line">									  )</div><div class="line">&#123;</div><div class="line">	COPYDATASTRUCT CopyData = &#123;0&#125;;</div><div class="line">	KeyboardLL_Msg Msg = &#123;0&#125;;</div><div class="line"></div><div class="line">	Msg.nCode = nCode;</div><div class="line">	Msg.wParam = wParam;</div><div class="line">	memcpy(&amp;Msg.lParam, (char*)lParam, sizeof(KBDLLHOOKSTRUCT));</div><div class="line"></div><div class="line">	CopyData.cbData = sizeof(KeyboardLL_Msg);</div><div class="line">	CopyData.dwData = 0;</div><div class="line">	CopyData.lpData = &amp;Msg;</div><div class="line"></div><div class="line">	HWND hwnd = FindFreepiano();</div><div class="line">	if(hwnd)</div><div class="line">	&#123;</div><div class="line">		BOOL ret = SendMessage(hwnd, WM_COPYDATA, (WPARAM)hwnd, (LPARAM)&amp;CopyData);</div><div class="line">	&#125;</div><div class="line">	return CallNextHookEx(g_Hook, nCode, wParam, lParam);</div><div class="line">&#125;</div><div class="line">typedef struct _KeyboardLL_Msg</div><div class="line">&#123;</div><div class="line">	int nCode;</div><div class="line">	WPARAM wParam;</div><div class="line">	KBDLLHOOKSTRUCT lParam;</div><div class="line">&#125;KeyboardLL_Msg, *PKeyboardLL_Msg;</div></pre></td></tr></table></figure>
-<p>通过SetWindowLong挂钩freepiano的窗口响应函数，增加处理WM_COPYDATA，来接受全局键盘信息，找到freepiano的钩子函数地址A，然后接受到WM_COPYDATA之后，直接调用A，把键盘信息给freepiano</p>
-<p>通过一个线程，循环查找freepianp窗口（可能还没起来），然后hook窗口响应函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">void HookWinProc()</div><div class="line">&#123;</div><div class="line">	while(1)</div><div class="line">	&#123;</div><div class="line">		HWND hwnd = FindFreepiano();</div><div class="line">		if(hwnd)</div><div class="line">		&#123;</div><div class="line">			g_WndProc = (pfn_WindProc)GetWindowLong(hwnd, GWL_WNDPROC);</div><div class="line">			if(g_WndProc)</div><div class="line">			&#123;</div><div class="line">				SetWindowLong(hwnd, GWL_WNDPROC, (LONG)fakeWindowProc);</div><div class="line">				break;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		Sleep(10);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>自己的函数中加入对WM_COPYDATA的消息处理，调用freepiano的钩子函数g_LowLevelKeyboardProc发键盘消息过去。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">LRESULT WINAPI fakeWindowProc(</div><div class="line">					   HWND hWnd,              // handle to window</div><div class="line">					   UINT Msg,               // message</div><div class="line">					   WPARAM wParam,          // first message parameter</div><div class="line">					   LPARAM lParam           // second message parameter</div><div class="line">					   )</div><div class="line">&#123;</div><div class="line">	if(Msg == WM_COPYDATA)</div><div class="line">	&#123;</div><div class="line">		COPYDATASTRUCT* CopyData = (COPYDATASTRUCT*)lParam;	</div><div class="line">		//if(CopyData-&gt;cbData == sizeof(KeyboardLL_Msg))</div><div class="line">		&#123;</div><div class="line">			KeyboardLL_Msg* Msg = (KeyboardLL_Msg*)CopyData-&gt;lpData;</div><div class="line">			g_LowLevelKeyboardProc(Msg-&gt;nCode, Msg-&gt;wParam, (LPARAM)&amp;Msg-&gt;lParam);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	return g_WndProc(hWnd, Msg, wParam, lParam);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>g_LowLevelKeyboardProc地址这里使用硬编码，图方便<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">HMODULE hExe = GetModuleHandle(NULL);</div><div class="line">g_LowLevelKeyboardProc = (pfn_LowLevelKeyboardProc)((DWORD)hExe + (DWORD)g_LowLevelKeyboardProc);</div></pre></td></tr></table></figure></p>
-<p>功能到这里基本搞定。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>测试通过。</p>
-<p>手指立马不受控制的在编辑器里、浏览器、文件浏览器里各种按键，然后耳边响起了悠扬（忽略乱打的节奏的话）的钢琴声~~</p>
-<p>可能的优化：</p>
-<ol>
-<li>加入进程名单控制，不想在某些进程中听到琴声</li>
-<li>代码优化~~</li>
-</ol>
-<p>有兴趣的同学可以去折腾，我这里就不继续了~~</p>
-<p>转载请注明出处：<a href="http://anhkgg.github.io/coding-piano-hook">http://anhkgg.github.io/coding-piano-hook</a></p>
+<p>工具：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1. chrome/firefox</div><div class="line">2. f12，network</div><div class="line">3. python：requests、re</div></pre></td></tr></table></figure>
+<h1 id="登录接口"><a href="#登录接口" class="headerlink" title="登录接口"></a>登录接口</h1><p>打开百度统计首页<code>https://tongji.baidu.com/web/welcome/login</code>，点开登录框，f12。尝试输入之后，查看发送的数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">Request URL:https://cas.baidu.com/?action=login</div><div class="line">Request Method:POST</div><div class="line">Status Code:200 OK</div><div class="line"></div><div class="line">appscope[]:6</div><div class="line">appscope[]:7</div><div class="line">appscope[]:12</div><div class="line">appid:12</div><div class="line">entered_login:anhkgg //名字</div><div class="line">entered_password:1111111111111111 //密码</div><div class="line">entered_imagecode:9mxm //验证码</div><div class="line">charset:utf-8</div><div class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</div><div class="line">selfu:https://tongji.baidu.com/web/welcome/login</div><div class="line">senderr:1</div></pre></td></tr></table></figure>
+<p>除了上面注释的需要输入的三个字段，其他字段意义都不明确，偷点懒，多次尝试后发现其他字段不会变化，那么就用固定值了。</p>
+<p>点击验证码，看到网络，拿到获取验证码的请求，key使用10位时间戳。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET https://cas.baidu.com/?action=image&amp;key=1503151305</div></pre></td></tr></table></figure>
+<p>所以登录接口就出来了，<code>vcode</code>需要人工输入。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">url = &apos;https://cas.baidu.com/?action=image&amp;key=&apos; + time_stamp(10)</div><div class="line">r = self.s.get(url)</div><div class="line"></div><div class="line">payload = &#123;</div><div class="line">    &apos;appscope[]&apos;:6,</div><div class="line">    &apos;appscope[]&apos;:7,</div><div class="line">    &apos;appscope[]&apos;:12,</div><div class="line">    &apos;appid&apos;:12,</div><div class="line">    &apos;entered_login&apos;:name,</div><div class="line">    &apos;entered_password&apos;:pwd,</div><div class="line">    &apos;entered_imagecode&apos;:vcode,</div><div class="line">    &apos;charset&apos;:&apos;utf-8&apos;,</div><div class="line">    &apos;fromu&apos;:&apos;https://tongji.baidu.com/web/welcome/loginback&apos;,</div><div class="line">    &apos;selfu&apos;:&apos;https://tongji.baidu.com/web/welcome/login&apos;,</div><div class="line">    &apos;senderr&apos;:1,</div><div class="line">    &#125;        </div><div class="line">url = &apos;https://cas.baidu.com/?action=login&apos;</div><div class="line">r = self.s.post(url, data = payload)</div></pre></td></tr></table></figure>
+<p>接着看看登录返回状态，如果失败了，返回数据中包含如下数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</div><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;</div><div class="line">&lt;meta http-equiv=&quot;ReFresh&quot; content=&quot;0; url=https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot; /&gt;</div><div class="line">&lt;title&gt;正在处理...&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">    &lt;script&gt;                </div><div class="line">    var url=&quot;https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot;;</div><div class="line">    location.href=url;</div><div class="line">    &lt;/script&gt;</div><div class="line"></div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<p>然后浏览器加载该url，显示错误提示信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Request URL:https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132</div><div class="line">Request Method:GET</div><div class="line"></div><div class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</div><div class="line">e:用户名密码错误</div><div class="line">un:anhkgg</div><div class="line">aid:12</div><div class="line">errno:132</div></pre></td></tr></table></figure>
+<p>其中<code>e</code>是错误提示信息，errno是错误号。</p>
+<p>登录成功返回数据如下，没有<code>e</code>错误信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;                </div><div class="line">var url=&quot;http://cas.baidu.com/?action=check&amp;appid=12&amp;u=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback%3Fcastk%3Dc4086gh7e82166251d451&amp;fromLogin=1&quot;;</div><div class="line">location.href=url;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>那么就可以先通过正则拿到url，通过搜索url是否有<code>e</code>判断是否登录成功，并且拿到提示信息。成功则继续访问该url跳转到成功页面，获取其他需要的信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">pattern = re.compile(r&apos;var url=&quot;(.*?)&quot;;&apos;)</div><div class="line">cont = re.search(pattern, r.content)</div><div class="line">url = cont.group(1)</div><div class="line">pattern = re.compile(r&apos;e=(.*?)&amp;un=&apos;)</div><div class="line">cont = re.search(pattern, url)</div><div class="line">if cont != None:</div><div class="line">    r = urllib.unquote(cont.group(1)) #失败</div><div class="line">    return utf2gbk(r)        </div><div class="line"></div><div class="line">r = self.s.get(url) # 成功</div></pre></td></tr></table></figure>
+<h1 id="js模板"><a href="#js模板" class="headerlink" title="js模板"></a>js模板</h1><p>这里比较意思的是使用的js模板来生成登录表单。</p>
+<p>具体js模板使用看<a href="http://freshflower.iteye.com/blog/2120268" target="_blank" rel="external">这里</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">&lt;script id=&quot;LoginTemplate&quot; type=&quot;text/template&quot;&gt;</div><div class="line"></div><div class="line">    &lt;div id=&quot;LoginContainer&quot; class=&quot;login-dialog&quot;&gt;</div><div class="line">        &lt;div id=&quot;TopTmp&quot;&gt;&amp;nbsp;&lt;/div&gt;</div><div class="line"></div><div class="line">        if (this.isIco == 1) &#123;</div><div class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;ico-login clearfix&quot;&gt;</div><div class="line">            &lt;div class=&quot;visitor-login-tab&quot; id=&quot;LoginTab&quot;&gt;请输入查看密码&lt;/div&gt;</div><div class="line">            &lt;div id=&quot;LoginInput&quot; class=&quot;login-input&quot;&gt;</div><div class="line">                if (this.errMsg) &#123;</div><div class="line">                &lt;div id=&quot;ErrorTip&quot; class=&quot;error&quot;&gt;#&#123;this.errMsg&#125;&lt;/div&gt;</div><div class="line">                &#125;</div><div class="line">                ...</div><div class="line">            &lt;/div&gt;</div><div class="line">        &lt;/div&gt;</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;login-main&quot;&gt;</div><div class="line">            </div><div class="line">                &lt;form method=&quot;post&quot; action=&quot;#&#123;this.loginAction&#125;&quot;&gt;</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;12&quot; id=&quot;Appid&quot; name=&quot;appid&quot;&gt;</div><div class="line">                    ...</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;#&#123;this.selfUrl&#125;&quot; name=&quot;selfu&quot; /&gt;</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;1&quot; name=&quot;senderr&quot; /&gt;</div><div class="line">                &lt;/form&gt;</div><div class="line">            &lt;/div&gt;</div><div class="line">        &lt;/div&gt;</div><div class="line">        &#125;</div><div class="line">    &lt;/div&gt;</div><div class="line">    &lt;div class=&quot;dialog-bottom-bg&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>从上面代码中可以看到，某些标签的值使用了<code>#{this.xxx}</code>这样的语法，不是直接填入的具体内容，更加灵活，扩展更容易。</p>
+<p>然后在点击登录按钮之后，通过函数格式化一个全局定义的变量来生成的登录表单。具体如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">//全局数据，用于替换表单中的this.xxx</div><div class="line">&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">VAR = &#123;</div><div class="line">    webMasterRegister: &quot;https://tongji.baidu.com/web/register&quot;,</div><div class="line">    customRegister: &quot;https://u.baidu.com/ucweb/?module=Reguser&amp;controller=reg&amp;action=index&amp;appid=3&quot;,</div><div class="line">    union_forget: &quot;http://union.baidu.com/findPassword!input.action&quot;,</div><div class="line">    shifen_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</div><div class="line">    uc_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</div><div class="line">    waiting_img_src: &quot;/web/img/loadingImage.gif&quot;,</div><div class="line">    app_id: &quot;0&quot;,</div><div class="line">    errMsg: &quot;&quot;,</div><div class="line">    loginUrl: &quot;/web/welcome/login&quot;,</div><div class="line">    loginAction: &quot;https://cas.baidu.com/?action=login&quot;,</div><div class="line">    userName: &quot;&quot;,</div><div class="line">    authCode: &quot;https://cas.baidu.com/?action=image&amp;key=1503151305&quot;,</div><div class="line">    registerUrl: &quot;/web/register&quot;,</div><div class="line">    fromUrl: &quot;https://tongji.baidu.com/web/welcome/loginback&quot;,</div><div class="line">    selfUrl: &quot;https://tongji.baidu.com/web/welcome/login&quot;,</div><div class="line">    isIco: &quot;0&quot;,</div><div class="line">    webmasterUserNum: &quot;2097176&quot;,</div><div class="line">    customerUserNum: &quot;2270927&quot;,</div><div class="line">    mtjUserNum: &quot;2262130&quot;</div><div class="line">&#125;;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>然后在login.js中，通过下面的函数来初始化表单，并且显示。</p>
+<p>其中<code>n.format(&quot;LoginTemplate&quot;, VAR)</code>用于格式化VAR定义的数据到表单的数据中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">, h = function() &#123;</div><div class="line">    var e = t(&quot;.login-trigger&quot;).eq(0);</div><div class="line">    e.on(&quot;click&quot;, function() &#123;</div><div class="line">        s || (s = new i(&#123;</div><div class="line">            width: 345,</div><div class="line">            isModal: !0,</div><div class="line">            titleText: &quot;&quot;,</div><div class="line">            isSingle: !0,</div><div class="line">            content: n.format(&quot;LoginTemplate&quot;, VAR) //初始化登录表单数据</div><div class="line">        &#125;),</div><div class="line">        loginController.init()),</div><div class="line">        s.show()</div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
+<p>而在format具体如何替换的，就随意实现了，这里就不在具体分析，有兴趣跟着分析的同学可以去看看common.js中的代码。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>百度统计接口非常简单，密码未做变换，使用https。</p>
+<p>登录之后具体做什么也不在分析。</p>
+<p>预告下次做百度主站的登录分析，简单看了下，非常…复杂！</p>
+<p>转载请注明出处，博客原文：<a href="https://anhkgg.github.io/pylogin-baidutongji-login-analyze/">https://anhkgg.github.io/pylogin-baidutongji-login-analyze/</a></p>
 
       
 
@@ -287,19 +253,27 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">WM_KEYBOARD_LL</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">crawler</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">HOOK</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">freepiano</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">js</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">inject</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">javascript</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">v2ex</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">自动领币</a>
         		</li>
       		
 		</ul>
@@ -311,7 +285,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
+        			<a href="/categories/crawler/" class="article-tag-list-link color3">crawler</a>
         		</li>
       		
 		</ul>
@@ -366,7 +340,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://s.jiathis.com/qrcode.php?url=https://anhkgg.github.io/coding-piano-hook/" alt="微信分享二维码">
+      <img src="http://s.jiathis.com/qrcode.php?url=https://anhkgg.github.io/pylogin-baidutongji-login-analyzeee/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -380,18 +354,9 @@
   
 <nav id="article-nav">
   
-    <a href="/wechat-multi-pc/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          微信(WeChat)电脑端多开研究+源码
-        
-      </div>
-    </a>
   
-  
-    <a href="/win-apc-analyze1/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">小Win，点一份APC（Apc机制详解）（一）</div>
+    <a href="/pylogin-v2ex-login-analyze/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">pylogin系列之V2EX自动领币消息提醒</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -408,8 +373,8 @@
 <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
 <script>
   var cloudTieConfig = {
-    url: "https://anhkgg.github.io/coding-piano-hook/", 
-    sourceId: "coding-piano-hook",
+    url: "https://anhkgg.github.io/pylogin-baidutongji-login-analyzeee/", 
+    sourceId: "pylogin-baidutongji-login-analyzeee",
     productKey: "8826b7b0b2974a38ae576da179105941",
     target: "cloud-tie-wrapper"
   };
@@ -449,7 +414,7 @@ Tie.loader("aHR0cHM6Ly9hcGkuZ2VudGllLjE2My5jb20vcGMvbGl2ZXNjcmlwdC5odG1s", true)
 
 <!--PC和WAP自适应版-->
 
-<div id="SOHUCS" sid="https://anhkgg.github.io/coding-piano-hook/" ></div> 
+<div id="SOHUCS" sid="https://anhkgg.github.io/pylogin-baidutongji-login-analyzeee/" ></div> 
 <script type="text/javascript"> 
 (function(){ 
 var appid = 'cyt9KcpJN'; 
@@ -462,7 +427,7 @@ window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="tex
 
 <!--PC版-->
 <!--
-<div id="SOHUCS" sid="https://anhkgg.github.io/coding-piano-hook/"></div>
+<div id="SOHUCS" sid="https://anhkgg.github.io/pylogin-baidutongji-login-analyzeee/"></div>
 <script charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/changyan.js" ></script>
 <script type="text/javascript">
 window.changyan.api.config({

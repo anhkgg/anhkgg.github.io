@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://anhkgg.github.io/"/>
-  <updated>2017-08-18T23:06:22.121Z</updated>
+  <updated>2017-08-21T16:04:50.799Z</updated>
   <id>https://anhkgg.github.io/</id>
   
   <author>
@@ -14,6 +14,74 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>pylogin系列之搞定百度统计</title>
+    <link href="https://anhkgg.github.io/pylogin-baidutongji-login-analyzeee/"/>
+    <id>https://anhkgg.github.io/pylogin-baidutongji-login-analyzeee/</id>
+    <published>2017-08-21T16:01:25.000Z</published>
+    <updated>2017-08-21T16:04:50.799Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>这次分析的百度统计登录接口，算是这几个中最简单的了。</p>
+<p>但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。</p>
+<a id="more"></a>
+<p>工具：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1. chrome/firefox</div><div class="line">2. f12，network</div><div class="line">3. python：requests、re</div></pre></td></tr></table></figure>
+<h1 id="登录接口"><a href="#登录接口" class="headerlink" title="登录接口"></a>登录接口</h1><p>打开百度统计首页<code>https://tongji.baidu.com/web/welcome/login</code>，点开登录框，f12。尝试输入之后，查看发送的数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">Request URL:https://cas.baidu.com/?action=login</div><div class="line">Request Method:POST</div><div class="line">Status Code:200 OK</div><div class="line"></div><div class="line">appscope[]:6</div><div class="line">appscope[]:7</div><div class="line">appscope[]:12</div><div class="line">appid:12</div><div class="line">entered_login:anhkgg //名字</div><div class="line">entered_password:1111111111111111 //密码</div><div class="line">entered_imagecode:9mxm //验证码</div><div class="line">charset:utf-8</div><div class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</div><div class="line">selfu:https://tongji.baidu.com/web/welcome/login</div><div class="line">senderr:1</div></pre></td></tr></table></figure>
+<p>除了上面注释的需要输入的三个字段，其他字段意义都不明确，偷点懒，多次尝试后发现其他字段不会变化，那么就用固定值了。</p>
+<p>点击验证码，看到网络，拿到获取验证码的请求，key使用10位时间戳。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET https://cas.baidu.com/?action=image&amp;key=1503151305</div></pre></td></tr></table></figure>
+<p>所以登录接口就出来了，<code>vcode</code>需要人工输入。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">url = &apos;https://cas.baidu.com/?action=image&amp;key=&apos; + time_stamp(10)</div><div class="line">r = self.s.get(url)</div><div class="line"></div><div class="line">payload = &#123;</div><div class="line">    &apos;appscope[]&apos;:6,</div><div class="line">    &apos;appscope[]&apos;:7,</div><div class="line">    &apos;appscope[]&apos;:12,</div><div class="line">    &apos;appid&apos;:12,</div><div class="line">    &apos;entered_login&apos;:name,</div><div class="line">    &apos;entered_password&apos;:pwd,</div><div class="line">    &apos;entered_imagecode&apos;:vcode,</div><div class="line">    &apos;charset&apos;:&apos;utf-8&apos;,</div><div class="line">    &apos;fromu&apos;:&apos;https://tongji.baidu.com/web/welcome/loginback&apos;,</div><div class="line">    &apos;selfu&apos;:&apos;https://tongji.baidu.com/web/welcome/login&apos;,</div><div class="line">    &apos;senderr&apos;:1,</div><div class="line">    &#125;        </div><div class="line">url = &apos;https://cas.baidu.com/?action=login&apos;</div><div class="line">r = self.s.post(url, data = payload)</div></pre></td></tr></table></figure>
+<p>接着看看登录返回状态，如果失败了，返回数据中包含如下数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</div><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;</div><div class="line">&lt;meta http-equiv=&quot;ReFresh&quot; content=&quot;0; url=https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot; /&gt;</div><div class="line">&lt;title&gt;正在处理...&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">    &lt;script&gt;                </div><div class="line">    var url=&quot;https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot;;</div><div class="line">    location.href=url;</div><div class="line">    &lt;/script&gt;</div><div class="line"></div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<p>然后浏览器加载该url，显示错误提示信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Request URL:https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132</div><div class="line">Request Method:GET</div><div class="line"></div><div class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</div><div class="line">e:用户名密码错误</div><div class="line">un:anhkgg</div><div class="line">aid:12</div><div class="line">errno:132</div></pre></td></tr></table></figure>
+<p>其中<code>e</code>是错误提示信息，errno是错误号。</p>
+<p>登录成功返回数据如下，没有<code>e</code>错误信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;                </div><div class="line">var url=&quot;http://cas.baidu.com/?action=check&amp;appid=12&amp;u=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback%3Fcastk%3Dc4086gh7e82166251d451&amp;fromLogin=1&quot;;</div><div class="line">location.href=url;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>那么就可以先通过正则拿到url，通过搜索url是否有<code>e</code>判断是否登录成功，并且拿到提示信息。成功则继续访问该url跳转到成功页面，获取其他需要的信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">pattern = re.compile(r&apos;var url=&quot;(.*?)&quot;;&apos;)</div><div class="line">cont = re.search(pattern, r.content)</div><div class="line">url = cont.group(1)</div><div class="line">pattern = re.compile(r&apos;e=(.*?)&amp;un=&apos;)</div><div class="line">cont = re.search(pattern, url)</div><div class="line">if cont != None:</div><div class="line">    r = urllib.unquote(cont.group(1)) #失败</div><div class="line">    return utf2gbk(r)        </div><div class="line"></div><div class="line">r = self.s.get(url) # 成功</div></pre></td></tr></table></figure>
+<h1 id="js模板"><a href="#js模板" class="headerlink" title="js模板"></a>js模板</h1><p>这里比较意思的是使用的js模板来生成登录表单。</p>
+<p>具体js模板使用看<a href="http://freshflower.iteye.com/blog/2120268" target="_blank" rel="external">这里</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">&lt;script id=&quot;LoginTemplate&quot; type=&quot;text/template&quot;&gt;</div><div class="line"></div><div class="line">    &lt;div id=&quot;LoginContainer&quot; class=&quot;login-dialog&quot;&gt;</div><div class="line">        &lt;div id=&quot;TopTmp&quot;&gt;&amp;nbsp;&lt;/div&gt;</div><div class="line"></div><div class="line">        if (this.isIco == 1) &#123;</div><div class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;ico-login clearfix&quot;&gt;</div><div class="line">            &lt;div class=&quot;visitor-login-tab&quot; id=&quot;LoginTab&quot;&gt;请输入查看密码&lt;/div&gt;</div><div class="line">            &lt;div id=&quot;LoginInput&quot; class=&quot;login-input&quot;&gt;</div><div class="line">                if (this.errMsg) &#123;</div><div class="line">                &lt;div id=&quot;ErrorTip&quot; class=&quot;error&quot;&gt;#&#123;this.errMsg&#125;&lt;/div&gt;</div><div class="line">                &#125;</div><div class="line">                ...</div><div class="line">            &lt;/div&gt;</div><div class="line">        &lt;/div&gt;</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;login-main&quot;&gt;</div><div class="line">            </div><div class="line">                &lt;form method=&quot;post&quot; action=&quot;#&#123;this.loginAction&#125;&quot;&gt;</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;12&quot; id=&quot;Appid&quot; name=&quot;appid&quot;&gt;</div><div class="line">                    ...</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;#&#123;this.selfUrl&#125;&quot; name=&quot;selfu&quot; /&gt;</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;1&quot; name=&quot;senderr&quot; /&gt;</div><div class="line">                &lt;/form&gt;</div><div class="line">            &lt;/div&gt;</div><div class="line">        &lt;/div&gt;</div><div class="line">        &#125;</div><div class="line">    &lt;/div&gt;</div><div class="line">    &lt;div class=&quot;dialog-bottom-bg&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>从上面代码中可以看到，某些标签的值使用了<code>#{this.xxx}</code>这样的语法，不是直接填入的具体内容，更加灵活，扩展更容易。</p>
+<p>然后在点击登录按钮之后，通过函数格式化一个全局定义的变量来生成的登录表单。具体如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">//全局数据，用于替换表单中的this.xxx</div><div class="line">&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">VAR = &#123;</div><div class="line">    webMasterRegister: &quot;https://tongji.baidu.com/web/register&quot;,</div><div class="line">    customRegister: &quot;https://u.baidu.com/ucweb/?module=Reguser&amp;controller=reg&amp;action=index&amp;appid=3&quot;,</div><div class="line">    union_forget: &quot;http://union.baidu.com/findPassword!input.action&quot;,</div><div class="line">    shifen_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</div><div class="line">    uc_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</div><div class="line">    waiting_img_src: &quot;/web/img/loadingImage.gif&quot;,</div><div class="line">    app_id: &quot;0&quot;,</div><div class="line">    errMsg: &quot;&quot;,</div><div class="line">    loginUrl: &quot;/web/welcome/login&quot;,</div><div class="line">    loginAction: &quot;https://cas.baidu.com/?action=login&quot;,</div><div class="line">    userName: &quot;&quot;,</div><div class="line">    authCode: &quot;https://cas.baidu.com/?action=image&amp;key=1503151305&quot;,</div><div class="line">    registerUrl: &quot;/web/register&quot;,</div><div class="line">    fromUrl: &quot;https://tongji.baidu.com/web/welcome/loginback&quot;,</div><div class="line">    selfUrl: &quot;https://tongji.baidu.com/web/welcome/login&quot;,</div><div class="line">    isIco: &quot;0&quot;,</div><div class="line">    webmasterUserNum: &quot;2097176&quot;,</div><div class="line">    customerUserNum: &quot;2270927&quot;,</div><div class="line">    mtjUserNum: &quot;2262130&quot;</div><div class="line">&#125;;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>然后在login.js中，通过下面的函数来初始化表单，并且显示。</p>
+<p>其中<code>n.format(&quot;LoginTemplate&quot;, VAR)</code>用于格式化VAR定义的数据到表单的数据中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">, h = function() &#123;</div><div class="line">    var e = t(&quot;.login-trigger&quot;).eq(0);</div><div class="line">    e.on(&quot;click&quot;, function() &#123;</div><div class="line">        s || (s = new i(&#123;</div><div class="line">            width: 345,</div><div class="line">            isModal: !0,</div><div class="line">            titleText: &quot;&quot;,</div><div class="line">            isSingle: !0,</div><div class="line">            content: n.format(&quot;LoginTemplate&quot;, VAR) //初始化登录表单数据</div><div class="line">        &#125;),</div><div class="line">        loginController.init()),</div><div class="line">        s.show()</div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
+<p>而在format具体如何替换的，就随意实现了，这里就不在具体分析，有兴趣跟着分析的同学可以去看看common.js中的代码。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>百度统计接口非常简单，密码未做变换，使用https。</p>
+<p>登录之后具体做什么也不在分析。</p>
+<p>预告下次做百度主站的登录分析，简单看了下，非常…复杂！</p>
+<p>转载请注明出处，博客原文：<a href="https://anhkgg.github.io/pylogin-baidutongji-login-analyze/">https://anhkgg.github.io/pylogin-baidutongji-login-analyze/</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;这次分析的百度统计登录接口，算是这几个中最简单的了。&lt;/p&gt;
+&lt;p&gt;但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="crawler" scheme="https://anhkgg.github.io/categories/crawler/"/>
+    
+    
+      <category term="crawler" scheme="https://anhkgg.github.io/tags/crawler/"/>
+    
+      <category term="python" scheme="https://anhkgg.github.io/tags/python/"/>
+    
+      <category term="js" scheme="https://anhkgg.github.io/tags/js/"/>
+    
+      <category term="javascript" scheme="https://anhkgg.github.io/tags/javascript/"/>
+    
+      <category term="v2ex" scheme="https://anhkgg.github.io/tags/v2ex/"/>
+    
+      <category term="自动领币" scheme="https://anhkgg.github.io/tags/%E8%87%AA%E5%8A%A8%E9%A2%86%E5%B8%81/"/>
+    
+  </entry>
   
   <entry>
     <title>pylogin系列之V2EX自动领币消息提醒</title>
@@ -2029,43 +2097,6 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
       <category term="upx" scheme="https://anhkgg.github.io/tags/upx/"/>
     
       <category term="unpack" scheme="https://anhkgg.github.io/tags/unpack/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>xctf sctf summary, little writeup</title>
-    <link href="https://anhkgg.github.io/sctf-summary/"/>
-    <id>https://anhkgg.github.io/sctf-summary/</id>
-    <published>2014-12-07T13:02:23.000Z</published>
-    <updated>2016-07-07T04:28:44.869Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="1-Misc10"><a href="#1-Misc10" class="headerlink" title="1. Misc10"></a><strong>1. Misc10</strong></h1><p>xctf优良传统，百度之<br>手持两把锟斤拷，口中疾呼烫烫烫<br>脚踏千朵屯屯屯，笑看万物锘锘锘<br>其实我没提交，队友提交的，应该是这个</p>
-<a id="more"></a>
-<h1 id="2-Re50"><a href="#2-Re50" class="headerlink" title="2. Re50"></a><strong>2. Re50</strong></h1><p>听说逆向都挺难的，这里有个简单的，快来秒~~~ :D</p>
-<p>逆向题把我们逼疯了，才弄个这个出来，秀优越吗？<br>队友做的，看了一下，很简单<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">k = &quot;Jr3gFud6n&quot;</div><div class="line">flag = &quot;&quot;</div><div class="line">for i in range(0, len(k)):</div><div class="line">    a = ord(k[i])-3</div><div class="line">    flag += chr(a)</div><div class="line"></div><div class="line">print flag</div><div class="line">#应该是这个SCTF&#123;Go0dCra3k&#125;</div></pre></td></tr></table></figure></p>
-<h1 id="3-Misc100"><a href="#3-Misc100" class="headerlink" title="3. Misc100"></a><strong>3. Misc100</strong></h1><p>简单的贪吃蛇，吃到30分它就告诉你flag！但是要怎么控制它呢? </p>
-<p>妹的，确定是100的，搞了老半天，还是linux的，upx加壳，首先就乱了<br>好吧，过了不知道多久，回过神来，upx脱壳，ida加载分析，大致弄清楚流程，代码用到了几个关键函数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">move移动光标</div><div class="line">printw显示字符</div></pre></td></tr></table></figure></p>
-<p>然后就是位置比较，成功了30次之后，就会显示出flag，可是代码中没有啊，习惯了可以f5就f5，所以，乱了很久<br>回到汇编窗口，通过printw找到几处打印，提取字符，通过python打印了一下，妹的乱码，有什么编码问题，不懂：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">flag = [0x7F, 0x1A, 0x64, 0x7F, 0x78, 0x44, 0x5E, 0x50, 0x67, 0x7d, 0x4E, 0x5F, 0x2A, </div><div class="line">        0x64, 0x6D, 0x52, 0x4C, 0x67, 0x72, 0x64, 0x4C, 0x70, 0x44, 0x7C, 0x5F, 0x2A,</div><div class="line">        0x48, 0x44, 0x41, 0x1C, 0x61, 0x72, 0x1A, 0x17]</div><div class="line">def printArr(arr):</div><div class="line">    for i in range(0, len(arr)):</div><div class="line">        s += chr(arr[i])</div><div class="line">    print s</div><div class="line">printArr(flag)</div></pre></td></tr></table></figure></p>
-<p>没法子，我也不可能玩30分钟，只好暴力解决了，修改了几个比较，成功进入异常处理（请原谅我，看着真是异常处理），注释中是几次暴力修改位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">//.text:08049D75 jz      loc_8049EA0</div><div class="line">  if ( v11 &amp;&amp; v6 == target_y )//!=text:08049EA6 jnz     loc_8049D7B</div><div class="line">        &#123;</div><div class="line">          ++dword_804C3C0;</div><div class="line">          if ( dword_804C3C0 == 5 * dword_804C3C0 / 5 )</div><div class="line">            ++dword_804C3D8;</div><div class="line">          if ( dword_804C3C0 == 3 * dword_804C3C0 / 3 )</div><div class="line">            ++dword_804C3D4;</div><div class="line">          if ( dword_804C3C0 == 30 )//!=.text:08049EFD   jz      loc_8049F94</div><div class="line">          &#123;</div><div class="line">            if ( dword_804C3D8 == 6 )//!=text:08049F9B  jnz     loc_8049F03</div><div class="line">            &#123;</div><div class="line">              if ( dword_804C3D4 == 10 )//!=.text:08049FA8 jnz     loc_8049F03</div><div class="line">              &#123;</div><div class="line">                v16 = __cxa_allocate_exception();</div><div class="line">		//执行异常中会调用chk(3)，显示Mission Complete，然后居然没有调用打印flag，</div><div class="line">		//看到有个.text:0804A039 cmp     ds:dword_804C3DC, 3Bh</div><div class="line">		//.text:0804A040 jg      short loc_804A051强制跳转到打印flag</div><div class="line">		//会进入f5没解析成功的代码，最后我都没弄清，是出题人故意的，还是ida能力问题，亦或是我的问题</div><div class="line">                *(_DWORD *)v16 = 0;</div><div class="line">                __cxa_throw(v16, &amp;_typeinfo_for_int, 0, v17);</div><div class="line">              &#125;</div><div class="line">            &#125;</div><div class="line">          &#125;</div></pre></td></tr></table></figure></p>
-<p>ok,终于打印出来了U0NURntzMWduNGxfMXNfZnVubnk6KX0=，base64解码之后SCTF{s1gn4l_1s_funny:)}，做出来还是比较兴奋的</p>
-<h1 id="4-其他"><a href="#4-其他" class="headerlink" title="4. 其他"></a><strong>4. 其他</strong></h1><p>其他题目也尝试了很多。<br>re300，算法太绕，晕了，没去弄了，后面提示是三阶魔方，你妹啊，被吓住了，最后也没人做出来<br>re500，又来了个lua虚拟机，额，我再次败退，这次比赛逆向题基本完败，丢人。<br>图片题貌似是两题，用自己知道的各种方式尝试了，无果。<br>web题目，额，我scan了一题，看到了个head attck，然后不会了。<br>pwn题目，好简单，可是，路在何方？求writeup啊。<br>哦，还有两道code的题目，code200在我们努力下，队友提交成功，code400目前还在暴力运算中，明天看看有答案不（求思路，野路子只有暴力破了，也不知道对不）。<br>我想说code500，请问3 3 1是几个意思啊。按我们分析的思路弄出来了，跟我说wrong input！逗我呢啊，要writeup！</p>
-<p>最后总结：<br>太急躁，没思路，最后还是能力问题！</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1-Misc10&quot;&gt;&lt;a href=&quot;#1-Misc10&quot; class=&quot;headerlink&quot; title=&quot;1. Misc10&quot;&gt;&lt;/a&gt;&lt;strong&gt;1. Misc10&lt;/strong&gt;&lt;/h1&gt;&lt;p&gt;xctf优良传统，百度之&lt;br&gt;手持两把锟斤拷，口中疾呼烫烫烫&lt;br&gt;脚踏千朵屯屯屯，笑看万物锘锘锘&lt;br&gt;其实我没提交，队友提交的，应该是这个&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="ctf" scheme="https://anhkgg.github.io/categories/ctf/"/>
-    
-    
-      <category term="ctf" scheme="https://anhkgg.github.io/tags/ctf/"/>
-    
-      <category term="writeup" scheme="https://anhkgg.github.io/tags/writeup/"/>
-    
-      <category term="sctf" scheme="https://anhkgg.github.io/tags/sctf/"/>
     
   </entry>
   
