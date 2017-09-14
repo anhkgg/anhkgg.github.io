@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://anhkgg.github.io/"/>
-  <updated>2017-08-22T05:31:17.909Z</updated>
+  <updated>2017-09-14T02:26:09.266Z</updated>
   <id>https://anhkgg.github.io/</id>
   
   <author>
@@ -14,6 +14,71 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>翻译：FireEye揭露CVE-2017-8759：分发FINSPY的0day</title>
+    <link href="https://anhkgg.github.io/tans-fireeye-cve-2017-8759-finspy-0day/"/>
+    <id>https://anhkgg.github.io/tans-fireeye-cve-2017-8759-finspy-0day/</id>
+    <published>2017-09-14T02:12:47.000Z</published>
+    <updated>2017-09-14T02:26:09.266Z</updated>
+    
+    <content type="html"><![CDATA[<p>2017.9.12 | by Genwei Jiang, Ben Read, Tom Bennett | Threat Research</p>
+<p>FIreEye近期检测到一个恶意的利用CVE-2017-8759漏洞的微软Office RTF文档。</p>
+<p>CVE-2017-8759是SOAP WSDL分析器代码注入漏洞，在解析SOAP WSDL定义的内容中它允许攻击者注入任意代码。</p>
+<p>FireEye分析了这个攻击者使用的微软Word文档，它利用任意代码注入来下载和执行一个包含PowerShell命令的VB脚本。</p>
+<a id="more"></a>
+<p>FireEye将这个漏洞的细节分享给了微软，然后协调了信息披露的时间，发布了修补该漏洞的补丁和安全指导，可以在这里找到它们。</p>
+<p>FireEye的邮件，终端以及网络产品都已经可以检测该恶意文档。</p>
+<h1 id="针对俄语目标的漏洞"><a href="#针对俄语目标的漏洞" class="headerlink" title="针对俄语目标的漏洞"></a>针对俄语目标的漏洞</h1><p>该恶意文档（Проект.doc）（MD5：fe5c4d6bb78e170abf5cf3741868ea4c）可能是针对俄语目标的。</p>
+<p>在CVE-2017-8759利用成功之后，该文档会下载多个组件（后面有详情），最终会加载一个FINSPY payload（MD5：a7b990d5f57b244dd17e9a937a41e7f5）。</p>
+<p>FINSPY恶意软件，也叫做FinFisher或者WingBird，是可以购买的用于“合法窃听”的软件。基于这个和之前FINSPY的使用，我们有更多的信心说这个恶意文档是一个针对俄语目标的网络间谍活动。</p>
+<p>根据FireEye动态威胁情报系统的更多的检测，根据不同client的行为关联，发现该样本在2017年7月就已经出现了。</p>
+<h1 id="CVE-2017-8759-WSDL-解析器代码注入"><a href="#CVE-2017-8759-WSDL-解析器代码注入" class="headerlink" title="CVE-2017-8759 WSDL 解析器代码注入"></a>CVE-2017-8759 WSDL 解析器代码注入</h1><p>代码注入漏洞是存在于WSDL解析模块的PrintClientProxy方法中（<a href="http://referencesource.microsoft.com/" target="_blank" rel="external">http://referencesource.microsoft.com/</a> - System.Runtime.Remoting/metadata/wsdlparser.cs,6111）。</p>
+<p>IsValidUrl没有对提供的包含CRLF序列（换行回车）的数据进行正确的校验，这就允许了攻击者注入和执行任意代码。部分漏洞代码如图1所示。</p>
+<p><img src="/img/fireeye-CVE-2017-8759-1.png" alt="图1. WSDL解析器的漏洞"></p>
+<p>当在SOAP响应中多个address被定义时，代码会在第一个地址后插入“//base.ConfigureProxy(this.GetType(),”字符串，注释了后面剩余的address。然而，如果恶意的address的还有一个CRLF，后面的代码就不会被注释。</p>
+<p>图2展示了对CRLF缺乏验证，System.Diagnostics.Process.Start方法会被注入。生成的代码会被.NET框架的csc.exe编译，然后作为DLL加载到Office可执行程序中。</p>
+<p><img src="/img/fireeye-CVE-2017-8759-2.png" alt="图2. SOAP定义和产生的代码"> </p>
+<h1 id="在外散播的攻击"><a href="#在外散播的攻击" class="headerlink" title="在外散播的攻击"></a>在外散播的攻击</h1><p>FireEye检测到在外散播的攻击使用的是富文本(RTF)格式的文档，和我们之前报告的CVE-2017-0199文档类似。</p>
+<p>该恶意样本包含一个是利用更方便的嵌入的SOAP Moniker，如图3所示。</p>
+<p><img src="/img/fireeye-CVE-2017-8759-3.png" alt="图3. SOAP Moniker"> </p>
+<p>样本从一个攻击者控制的服务器接收恶意的SOAP WSDL定义的数据。.NET框架中System.Runtime.Remoting.ni.dll中实现的WSDL解析器会解析内容然后生成一个.cs源代码到工作目录中。</p>
+<p>接着.NET框架的csc.exe编译该代码生成一个名字像http[url path].dll的库文件。然后微软的Office会加载这个库，完成漏洞利用。图4展示了漏洞利用加载的示例库文件。</p>
+<p><img src="/img/fireeye-CVE-2017-8759-4.png" alt="图4. 被加载的DLL">  </p>
+<p>在成功的利用中，注入的代码会创建一个新的进程，利用mshta.exe会从同一个服务器接收一个叫做“word.db”的HTA脚本。</p>
+<p>HTA脚本会从磁盘删除源代码，编译的DLL和PDB文件，然后下载执行叫做“left.jpg”的FINSPY恶意软件，虽然它是.jpg后缀名，类型是image/jpeg，但其实是个可执行文件。</p>
+<p>图5展示了恶意软件传输的PCAP细节。</p>
+<p><img src="/img/fireeye-CVE-2017-8759-5.png" alt="图5. 实时的请求"> </p>
+<p>该恶意软件会被放在%appdata%\Microsoft\Windows\OfficeUpdte-KB[ 6 random numbers ].exe中。图6展示了在Process Monitor中的进程创建链。</p>
+<p><img src="/img/fireeye-CVE-2017-8759-6.png" alt="图6. 进程创建链"> </p>
+<h1 id="恶意软件"><a href="#恶意软件" class="headerlink" title="恶意软件"></a>恶意软件</h1><p>Left.jpg (md5: a7b990d5f57b244dd17e9a937a41e7f5)是FINSPY的变体。它利用高强度的混淆代码开发了一个内置虚拟机以及其他的一些反分析技术，来增加逆向的难度。比如另个月单独的反分析技术是，它会解析自己的全路径，然后搜索是否存在他自己的MD5哈希字符串。很多分析工具和沙箱为了能保证准确的唯一文件名会重命名样本文件为MD5哈希。该样本会使用WininetStartupMutex0的mutex来保证单实例。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>CVE-2017-8759是2017年FireEye发现的第二个分发FINSPY的0day。这个揭露说明签名资源对“合法窃听”的公司和他们用户都是可用的。此外，FINSPY买了多个不同的客户端，漏洞可以用于攻击其他的目标。</p>
+<p>CVE-2017-8759可能已经被更多的攻击者利用了。尽管我们没有证据，但是在2017年7月分析中，CVE-2017-0199已经被金融攻击者用来分发FINSPY。如果FINSPY的攻击者有之前使用的相同源码的漏洞，那么可能代码已经被卖给了更多的攻击者。</p>
+<h1 id="感谢"><a href="#感谢" class="headerlink" title="感谢"></a>感谢</h1><p>感谢Dhanesh Kizhakkinan, Joseph Reyes, FireEye Labs Team, FireEye FLARE Team and FireEye iSIGHT Intelligence发布这个博客。同样感谢MSRC协助解决这个问题的工作人员。</p>
+<p>参考：<a href="http://blog.sina.com.cn/s/blog_67ae918d0102e1l9.html" target="_blank" rel="external">http://blog.sina.com.cn/s/blog_67ae918d0102e1l9.html</a></p>
+<p>文章来源：<br><a href="https://www.fireeye.com/blog/threat-research/2017/09/zero-day-used-to-distribute-finspy.html" target="_blank" rel="external">https://www.fireeye.com/blog/threat-research/2017/09/zero-day-used-to-distribute-finspy.html</a></p>
+<p>转载请注明：<a href="http://anhkgg.github.io/tans-fireeye-cve-2017-8759-finspy-0day/">http://anhkgg.github.io/tans-fireeye-cve-2017-8759-finspy-0day/</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;2017.9.12 | by Genwei Jiang, Ben Read, Tom Bennett | Threat Research&lt;/p&gt;
+&lt;p&gt;FIreEye近期检测到一个恶意的利用CVE-2017-8759漏洞的微软Office RTF文档。&lt;/p&gt;
+&lt;p&gt;CVE-2017-8759是SOAP WSDL分析器代码注入漏洞，在解析SOAP WSDL定义的内容中它允许攻击者注入任意代码。&lt;/p&gt;
+&lt;p&gt;FireEye分析了这个攻击者使用的微软Word文档，它利用任意代码注入来下载和执行一个包含PowerShell命令的VB脚本。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
+    
+    
+      <category term="FireEye" scheme="https://anhkgg.github.io/tags/FireEye/"/>
+    
+      <category term="cve20178759" scheme="https://anhkgg.github.io/tags/cve20178759/"/>
+    
+      <category term="FINSPY" scheme="https://anhkgg.github.io/tags/FINSPY/"/>
+    
+  </entry>
   
   <entry>
     <title>pylogin系列之搞定百度统计</title>
@@ -1676,11 +1741,11 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
       <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
+      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
+    
       <category term="IDAPro" scheme="https://anhkgg.github.io/tags/IDAPro/"/>
     
       <category term="IDC" scheme="https://anhkgg.github.io/tags/IDC/"/>
-    
-      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
     
   </entry>
   
@@ -2065,42 +2130,6 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
     
     
       <category term="pyspider" scheme="https://anhkgg.github.io/tags/pyspider/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>upx3.05手脱笔记</title>
-    <link href="https://anhkgg.github.io/upx3-05%E6%89%8B%E8%84%B1%E7%AC%94%E8%AE%B0/"/>
-    <id>https://anhkgg.github.io/upx3-05%E6%89%8B%E8%84%B1%E7%AC%94%E8%AE%B0/</id>
-    <published>2015-01-07T06:57:42.000Z</published>
-    <updated>2015-01-07T07:14:13.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料<br>但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。</p>
-<a id="more"></a>
-<p>#<strong>1. 查壳</strong><br><strong>[!] UPX 3.05 compressed !</strong><br>查出来是3.05，也不知道是不是误报，比[1]中版本高了点，所以也就是尝试尝试esp定律拖一下</p>
-<p>#<strong>2. 脱壳</strong><br>OD加载（是个dll，通过load.exe加载），在DllMain断下，看到熟悉的pushad，感觉方法可能靠谱了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">103432E0 &gt;  807C24 08 01    cmp byte ptr ss:[esp+0x8],0x1</div><div class="line">103432E5    0F85 9D0B0000   jnz xxx.10343E88</div><div class="line">103432EB    60              pushad</div><div class="line">103432EC    BE 00C02C10     mov esi,xxx.102CC000</div></pre></td></tr></table></figure></p>
-<p>f8到103432EC ，在数据窗口显示esp值，然后右键下了个硬件访问断点（其实以前尝试过，但是下的是内存访问断点，失败了，也不知道是不是这个原因，待会儿试试）。接着F9，断在了下面的代码中，看不出啥，就有个 jmp xxx.100C3C71，地址离当前地址还算较远，可能是另一个节<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">10343E7B    8D4424 80       lea eax,dword ptr ss:[esp-0x80] //这个就是先前pushad压入的吗？？</div><div class="line">10343E7F    6A 00           push 0x0</div><div class="line">10343E81    39C4            cmp esp,eax</div><div class="line">10343E83  ^ 75 FA           jnz short xxx.10343E7F //循环了多次，F4直接到10343E85  ，应该是在清理堆栈吧？？  </div><div class="line">10343E85    83EC 80         sub esp,-0x80</div><div class="line">10343E88  - E9 E4FDD7FF     jmp xxx.100C3C71</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">100C3C71   /E9 CA371100     jmp xxx.101D7440</div><div class="line">100C3C76   |E9 15311700     jmp xxx.10236D90                           ; jmp 到 kernel32.UnlockFile</div></pre></td></tr></table></figure>
-<p>单步到jmp，F8跟到其代码中，看到了熟悉的一段入口代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">101D7440    8BFF            mov edi,edi</div><div class="line">101D7442    55              push ebp</div><div class="line">101D7443    8BEC            mov ebp,esp</div><div class="line">101D7445    837D 0C 01      cmp dword ptr ss:[ebp+0xC],0x1</div><div class="line">101D7449    75 05           jnz short xxx.101D7450</div><div class="line">101D744B    E8 32DFEEFF     call xxx.100C5382</div><div class="line">101D7450    8B45 10         mov eax,dword ptr ss:[ebp+0x10]</div><div class="line">101D7453    50              push eax</div><div class="line">101D7454    8B4D 0C         mov ecx,dword ptr ss:[ebp+0xC]</div><div class="line">101D7457    51              push ecx</div><div class="line">101D7458    8B55 08         mov edx,dword ptr ss:[ebp+0x8]</div><div class="line">101D745B    52              push edx</div><div class="line">101D745C    E8 1F000000     call xxx.101D7480</div><div class="line">101D7461    83C4 0C         add esp,0xC</div><div class="line">101D7464    5D              pop ebp</div><div class="line">101D7465    C2 0C00         retn 0xC</div></pre></td></tr></table></figure></p>
-<p>通过堆栈参数，进一步确认了下，这是DllMain函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">0006F880   7C92118A  返回到 ntdll.7C92118A</div><div class="line">0006F884   10000000  xxx.10000000</div><div class="line">0006F888   00000001</div><div class="line">0006F88C   00000000</div></pre></td></tr></table></figure></p>
-<p>然后在101D7440地址，尝试dump，成功之后在检测壳信息<br><strong>[CompilerDetect] -&gt; Visual C++ 9.0 (Visual Studio 2008)</strong><br>应该是脱壳成功了，但是iat没有修复，先ida看看是否需要修复</p>
-<p>#<strong>3. 修复</strong><br>如果需要修复，使用importRec工具<br><img src="/img/fix.png" alt="img"><br>找到进程，选择目标dll，然后填入OEP，修复即可</p>
-<p>#<strong>4. 参考</strong></p>
-<p>[1]: <a href="http://bbs.pediy.com/showthread.php?t=44125" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=44125</a> 【原创】手脱 UPX3.0<br>[2]: <a href="http://bbs.pediy.com/showthread.php?t=140312" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=140312</a> 【原创】UPX3.03脱壳机-学习版[代码更新]</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料&lt;br&gt;但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="reverse" scheme="https://anhkgg.github.io/categories/reverse/"/>
-    
-    
-      <category term="upx" scheme="https://anhkgg.github.io/tags/upx/"/>
-    
-      <category term="unpack" scheme="https://anhkgg.github.io/tags/unpack/"/>
     
   </entry>
   
