@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://anhkgg.github.io/"/>
-  <updated>2017-09-21T06:08:51.860Z</updated>
+  <updated>2017-11-17T05:35:17.809Z</updated>
   <id>https://anhkgg.github.io/</id>
   
   <author>
@@ -14,6 +14,233 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Rustls之源码分析总结（一）</title>
+    <link href="https://anhkgg.github.io/rustls-source-code-analyze/"/>
+    <id>https://anhkgg.github.io/rustls-source-code-analyze/</id>
+    <published>2017-11-17T05:19:50.000Z</published>
+    <updated>2017-11-17T05:35:17.809Z</updated>
+    
+    <content type="html"><![CDATA[<ul>
+<li>作者：<strong>anhkgg</strong> </li>
+<li>日期：<strong>2017-11-16</strong></li>
+</ul>
+<p>rustls已经支持tls1.3，但是测试分析中使用的tls1.2，所以后面分析主要集中在tls1.2。</p>
+<p>主要分析的源码内容：</p>
+<ol>
+<li>client和server的握手协议流程</li>
+<li>rustls是如何进行数据传输的</li>
+<li>数据传输是如何加密解密的</li>
+</ol>
+<a id="more"></a>
+<h2 id="源码结构"><a href="#源码结构" class="headerlink" title="源码结构"></a>源码结构</h2><p><strong>分为client和server两部分</strong></p>
+<h3 id="公共接口"><a href="#公共接口" class="headerlink" title="公共接口"></a>公共接口</h3><p><strong>session.rs</strong>定义了SessionCommon，包括了数据传输、数据加密、包处理相关接口。</p>
+<p><strong>主要字段</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">pub struct SessionCommon &#123;</div><div class="line">    pub negotiated_version: Option&lt;ProtocolVersion&gt;, //协商好的协议版本</div><div class="line">    pub is_client: bool, //是客户端true，是服务端false</div><div class="line">    message_encrypter: Box&lt;MessageEncrypter&gt;, //数据加密接口</div><div class="line">    message_decrypter: Box&lt;MessageDecrypter&gt;, //数据解密接口</div><div class="line">    key_schedule: Option&lt;KeySchedule&gt;,</div><div class="line">    suite: Option&lt;&amp;&apos;static SupportedCipherSuite&gt;,</div><div class="line">    write_seq: u64,</div><div class="line">    read_seq: u64,</div><div class="line">    peer_eof: bool,</div><div class="line">    pub peer_encrypting: bool,</div><div class="line">    pub we_encrypting: bool,</div><div class="line">    pub traffic: bool, // 默认false，握手完成字段为true</div><div class="line">    pub want_write_key_update: bool,</div><div class="line">    pub message_deframer: MessageDeframer, //消息帧处理对象，保存所有Message包</div><div class="line">    pub handshake_joiner: HandshakeJoiner,</div><div class="line">    pub message_fragmenter: MessageFragmenter,</div><div class="line">    received_plaintext: ChunkVecBuffer, //缓存接收到的数据明文</div><div class="line">    sendable_plaintext: ChunkVecBuffer,//缓存握手后需要传输的数据明文</div><div class="line">    pub sendable_tls: ChunkVecBuffer, //缓存握手数据包</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>主要接口</strong></p>
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>说明 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_tls</code></td>
+<td>接收底层连接数据 </td>
+</tr>
+<tr>
+<td><code>write_tls</code></td>
+<td>通过底层连接发送数据</td>
+</tr>
+<tr>
+<td><code>process_new_packets</code></td>
+<td>每次调用read_tls之后都需要调用该函数主动触发消息处理</td>
+</tr>
+<tr>
+<td><code>wants_read/wants_write</code></td>
+<td>是否有数据需要接收发送</td>
+</tr>
+<tr>
+<td><code>encrypt_outgoing</code></td>
+<td>加密要发送的数据，在握手完成之后需要</td>
+</tr>
+<tr>
+<td><code>decrypt_incoming</code></td>
+<td>解密要接收的数据，在握手完成之后需要</td>
+</tr>
+<tr>
+<td><code>send_msg_encrypt</code></td>
+<td>发送加密数据</td>
+</tr>
+<tr>
+<td><code>send_appdata_encrypt</code></td>
+<td>发送握手之后的数据，加密</td>
+</tr>
+<tr>
+<td><code>send_some_plaintext</code></td>
+<td>发送明文数据，握手之后会被加密发送</td>
+</tr>
+<tr>
+<td><code>start_traffic</code></td>
+<td>握手完成之后调用，设置传输标志，发送缓存的数据明文</td>
+</tr>
+<tr>
+<td><code>send_msg</code></td>
+<td>发送TLS消息，根据是否加密走不通发送方式</td>
+</tr>
+<tr>
+<td><code>take_received_plaintext</code></td>
+<td>握手完成之后，收到数据会被调用，参数已经是明文Message</td>
+</tr>
+<tr>
+<td><code>set_message_encrypter</code></td>
+<td>设置消息加密接口，<code>start_encryption_tls12</code>中调用</td>
+</tr>
+<tr>
+<td><code>set_message_decrypter</code></td>
+<td>设置消息解密接口，<code>start_encryption_tls12</code>中调用</td>
+</tr>
+<tr>
+<td><code>start_encryption_tls12</code></td>
+<td>TLS1.2设置加解密接口，在ExpectTLS12ServerDone::handle/ExpectTLS12ClientKX::handle调用</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ciper.rs</strong>定义了加密解密的接口。</p>
+<p><code>MessageEncrypter</code>,<code>MessageDecrypter</code>，具体使用加解密方法在握手过程中ExpectTLS12ServerDone::handle/ExpectTLS12ClientKX::handle设置。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//client端</div><div class="line">// 5e. Now commit secrets.</div><div class="line">let hashalg = sess.common.get_suite().get_hash();</div><div class="line">if st.handshake.using_ems &#123;</div><div class="line">    sess.secrets = Some(SessionSecrets::new_ems(&amp;st.handshake.randoms,</div><div class="line">                                                &amp;handshake_hash,</div><div class="line">                                                hashalg,</div><div class="line">                                                &amp;kxd.premaster_secret));</div><div class="line">&#125; else &#123;</div><div class="line">    sess.secrets = Some(SessionSecrets::new(&amp;st.handshake.randoms,</div><div class="line">                                            hashalg,</div><div class="line">                                            &amp;kxd.premaster_secret));</div><div class="line">&#125;</div><div class="line">sess.start_encryption_tls12();</div><div class="line">//----------</div><div class="line">pub fn start_encryption_tls12(&amp;mut self, secrets: &amp;SessionSecrets) &#123;</div><div class="line">        let (dec, enc) = cipher::new_tls12(self.get_suite(), secrets);</div><div class="line">        self.message_encrypter = enc;</div><div class="line">        self.message_decrypter = dec;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h3 id="client详解"><a href="#client详解" class="headerlink" title="client详解"></a>client详解</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">src/client/mod.rs 导出ClientSession接口，外部使用</div><div class="line">src/client/hs.rs tls协议中所有包处理，包括握手和传输</div></pre></td></tr></table></figure>
+<p><code>ClientSession</code>内部由<code>ClientSessionImpl</code>实现。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">pub struct ClientSessionImpl &#123;</div><div class="line">    pub config: Arc&lt;ClientConfig&gt;, //保存client端的证书，密钥配置等信息</div><div class="line">    pub secrets: Option&lt;SessionSecrets&gt;, //保存握手后的会话密钥</div><div class="line">    pub alpn_protocol: Option&lt;String&gt;,</div><div class="line">    pub common: SessionCommon, // 完成具体消息传输、加解密等</div><div class="line">    pub error: Option&lt;TLSError&gt;,</div><div class="line">    pub state: Option&lt;Box&lt;hs::State + Send&gt;&gt;, // 保存握手过程中的交互状态，握手中处理对象都实现State接口</div><div class="line">    pub server_cert_chain: CertificatePayload, // 服务端证书链</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>握手，准备第一个数据包</strong>。</p>
+<p><code>ClientSessionImpl::new</code>内部就会准备握手要发送的第一个数据包。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">cs.state = Some(hs::start_handshake(&amp;mut cs, hostname));</div><div class="line">//cs.state保存下一次将处理数据对象</div><div class="line">---&gt; //进入hs.rs</div><div class="line">InitialState::emit_initial_client_hello</div><div class="line">---&gt;</div><div class="line">emit_client_hello_for_retry</div><div class="line">---&gt; //构造发送的数据包</div><div class="line">let mut chp = HandshakeMessagePayload &#123;</div><div class="line">        typ: HandshakeType::ClientHello,</div><div class="line">        payload: HandshakePayload::ClientHello(ClientHelloPayload &#123;</div><div class="line">            client_version: ProtocolVersion::TLSv1_2,</div><div class="line">            random: Random::from_slice(&amp;handshake.randoms.client),</div><div class="line">            session_id: session_id,</div><div class="line">            cipher_suites: sess.get_cipher_suites(),</div><div class="line">            compression_methods: vec![Compression::Null],</div><div class="line">            extensions: exts,</div><div class="line">        &#125;),</div><div class="line">    &#125;;</div></pre></td></tr></table></figure>
+<p>然后，收到返回数据之后，会在<code>ClientSessionImpl::process_main_protocol</code>调用<code>state.handle</code>来处理收到的数据，然后返回新的state，用于下次处理，如此循环，知道握手完成。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">fn process_main_protocol(&amp;mut self, msg: Message) -&gt; Result&lt;(), TLSError&gt; &#123;</div><div class="line">	//检查消息是否合法</div><div class="line">    let state = self.state.take().unwrap();</div><div class="line">    state</div><div class="line">        .check_message(&amp;msg)</div><div class="line">        .map_err(|err| &#123;</div><div class="line">            self.queue_unexpected_alert();</div><div class="line">            err</div><div class="line">        &#125;)?;</div><div class="line">    //处理本次数据，返回下次需要处理的数据对象</div><div class="line">    self.state = Some(state.handle(self, msg)?);</div><div class="line">    Ok(())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>消息处理调用流程如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//ClientSessionImpl</div><div class="line">process_new_packets-&gt;process_msg-&gt;process_main_protocol-&gt;state.handle</div></pre></td></tr></table></figure>
+<p>下面直接列出client端握手处理流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ExpectServerHelloOrHelloRetryRequest:handle </div><div class="line">ExpectServerHello:handle // 处理serverhello</div><div class="line">ExpectTLS12Certificate: handle //验证证书</div><div class="line">ExpectTLS12ServerKX: handle  // 密钥交换</div><div class="line">ExpectTLS12ServerDoneOrCertReq: handle</div><div class="line">ExpectTLS12ServerDone: handle</div><div class="line">emit_clientkx</div><div class="line">emit_ccs</div><div class="line">ExpectTLS12CCS:handle //通知使用加密方式发送报文，sess.common.peer_now_encrypting();设置后面数据会加密的状态</div><div class="line">emit_finished</div><div class="line">ExpectTLS12Finished:handle // 握手结束</div></pre></td></tr></table></figure>
+<p>在<code>ExpectTLS12Finished::handle</code>中，会保存<code>session</code>，开始传输数据，以及返回下次的<code>state</code>，<strong>此时握手协议已经完成</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">save_session(&amp;mut st.handshake,</div><div class="line">             &amp;mut st.ticket,</div><div class="line">             sess);</div><div class="line"></div><div class="line">if st.resuming &#123;</div><div class="line">    emit_ccs(sess);</div><div class="line">    emit_finished(&amp;mut st.handshake, sess);</div><div class="line">&#125;</div><div class="line"></div><div class="line">sess.common.we_now_encrypting();</div><div class="line">sess.common.start_traffic(); //发送数据</div><div class="line">Ok(st.into_expect_tls12_traffic(fin)) // 下次需要ExpectTLS12Traffic</div></pre></td></tr></table></figure>
+<p>后面数据传输的所有流程都会进入<code>ExpectTLS12Traffic::handle</code>，也就是开始<strong>传输协议</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">impl State for ExpectTLS12Traffic &#123;</div><div class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ClientSessionImpl, mut m: Message) -&gt; StateResult &#123;</div><div class="line">   sess.common.take_received_plaintext(m.take_opaque_payload().unwrap());</div><div class="line">        Ok(self) //返回的依然是ExpectTLS12Traffic给state，所以以后都会进入这里</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>传输数据的处理</strong>。</p>
+<p><strong>接收数据</strong></p>
+<p>调用<code>take_received_plaintext</code>将获取到的明文Message传给内部处理，存入<code>SessionCommon</code>的<code>received_plaintext</code>，等待用户的提取。</p>
+<p>那明文Message是怎么来的呢？是在前面说到的消息处理流程中，到handle之前。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">process_new_packets-&gt;process_msg-&gt;process_main_protocol-&gt;state.handle</div></pre></td></tr></table></figure>
+<p>在<code>process_msg</code>中会判断<code>peer_encrypting</code>状态为真则将数据解密，而该状态是在握手中<code>ExpectTLS12CCS::handle</code> 被设置为true的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">pub fn process_msg(&amp;mut self, mut msg: Message) -&gt; Result&lt;(), TLSError&gt; &#123;</div><div class="line">	// Decrypt if demanded by current state.</div><div class="line">	if self.common.peer_encrypting &#123;</div><div class="line">	    let dm = self.common.decrypt_incoming(msg)?; //解密数据</div><div class="line">	    msg = dm;</div><div class="line">	&#125;</div><div class="line">        </div><div class="line">//self.common.peer_encrypting</div><div class="line">pub fn peer_now_encrypting(&amp;mut self) &#123;</div><div class="line">    self.peer_encrypting = true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>发送数据</strong></p>
+<p><strong>握手过程中</strong>，发送数据包使用<code>sess.common.send_msg(ch, false)</code>。<code>send_msg</code>内部根据是否加密状态（<code>must_encrypt</code>）进行不同处理，直接缓存或者调用<code>send_msg_encrypt</code>加密之后缓存。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">send_msg_encrypt-&gt;send_single_fragment-&gt;encrypt_outgoing(加密)</div></pre></td></tr></table></figure>
+<p>最后都是通过<code>queue_tls_message</code>将数据先缓存，然后在调用<code>write_tls</code>之后将数据发送。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">pub fn write_tls(&amp;mut self, wr: &amp;mut Write) -&gt; io::Result&lt;usize&gt; &#123;</div><div class="line">    self.sendable_tls.write_to(wr)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>握手完成后</strong>，通过<code>ClientSession</code>实现的<code>io::write</code>（或者<code>write_all</code>）接口发送明文数据。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">impl io::Write for ClientSession &#123;</div><div class="line">	//先缓存数据</div><div class="line">    fn write(&amp;mut self, buf: &amp;[u8]) -&gt; io::Result&lt;usize&gt;&#123;</div><div class="line">            self.imp.common.send_some_plaintext(buf)</div><div class="line">    &#125;</div><div class="line">	//flush时才发送数据</div><div class="line">    fn flush(&amp;mut self) -&gt; io::Result&lt;()&gt; &#123;</div><div class="line">        self.imp.common.flush_plaintext();</div><div class="line">        Ok(())</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>send_some_plaintext</code>在根据是否握手完成有不同的操作，握手未完成时，先缓存明文到<code>sendable_plaintext</code>，握手完成后，直接调用<code>send_appdata_encrypt</code>缓存密文（进入<code>send_single_fragment</code>过程加密）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">pub fn send_some_plaintext(&amp;mut self, data: &amp;[u8]) -&gt; io::Result&lt;usize&gt; &#123;</div><div class="line">    self.send_plain(data, Limit::Yes)</div><div class="line">&#125;</div><div class="line"></div><div class="line">fn send_plain(&amp;mut self, data: &amp;[u8], limit: Limit) -&gt; io::Result&lt;usize&gt; &#123;</div><div class="line">    if !self.traffic &#123; //握手未完成</div><div class="line">        let len = match limit &#123; //缓存明文</div><div class="line">            Limit::Yes =&gt; self.sendable_plaintext.append_limited_copy(data),</div><div class="line">            Limit::No =&gt; self.sendable_plaintext.append(data.to_vec())</div><div class="line">        &#125;;</div><div class="line">        return Ok(len);</div><div class="line">    &#125;</div><div class="line">    //握手完成，直接缓存加密数据</div><div class="line">    Ok(self.send_appdata_encrypt(data, limit))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>握手完成时，之前缓存的明文数据通过<code>start_traffic</code>实际将数据加密缓存到sendable_tls，最后也是通过write_tls发送出去。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">pub fn start_traffic(&amp;mut self) &#123;</div><div class="line">        self.traffic = true;</div><div class="line">        self.flush_plaintext();</div><div class="line">    &#125;</div><div class="line">-&gt;</div><div class="line">flush_plaintext-&gt;send_plain-&gt;send_appdata_encrypt-&gt;send_single_fragment-&gt; encrypt_outgoing(加密)</div></pre></td></tr></table></figure>
+<p>握手完成之后调用的<code>send_some_plaintext</code>是直接将数据加密缓存，在write_tls后发送出去。</p>
+<h3 id="server详解"><a href="#server详解" class="headerlink" title="server详解"></a>server详解</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">src/server/mod.rs 导出ServerSession接口，外部使用</div><div class="line">src/server/hs.rs tls协议中所有包处理，包括握手和传输</div><div class="line">src/client/</div></pre></td></tr></table></figure>
+<p>公开外部使用的借口ServerSession，内部由ServerSessionImpl实现。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">pub struct ServerSessionImpl &#123;</div><div class="line">    pub config: Arc&lt;ServerConfig&gt;, //证书、密钥等配置</div><div class="line">    pub secrets: Option&lt;SessionSecrets&gt;, //会话密钥</div><div class="line">    pub common: SessionCommon, // 实际握手传输数据处理对象</div><div class="line">    sni: Option&lt;webpki::DNSName&gt;, //SNI(Server Name Indication) ，解决一个服务器使用多个域名和证书的SSL/TLS扩展</div><div class="line">    pub alpn_protocol: Option&lt;String&gt;,</div><div class="line">    pub error: Option&lt;TLSError&gt;,</div><div class="line">    pub state: Option&lt;Box&lt;hs::State + Send&gt;&gt;, //握手和传输中处理数据包的状态，每个状态的数据包处理对象</div><div class="line">    pub client_cert_chain: Option&lt;Vec&lt;key::Certificate&gt;&gt;, //client证书链</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>接口基本和ClientSession类似，不再详述</strong></p>
+<p><strong>握手流程</strong></p>
+<p>server和client处理握手的方式都一样，每个握手包处理对象都会实现State接口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">pub trait State &#123;</div><div class="line">    fn check_message(&amp;self, m: &amp;Message) -&gt; CheckResult;</div><div class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ServerSessionImpl, m: Message) -&gt; StateResult;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后在收到client消息之后，在<code>process_main_protocol</code>中调用对应握手包对象的handle函数，并且会返回握手期望处理的下次数据包对象给state，以便下次收到消息继续处理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//process_main_protocol</div><div class="line">self.state = Some(st.handle(self, msg)?);</div></pre></td></tr></table></figure>
+<p>握手流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">-----ExpectClientHello::handle</div><div class="line">-----ExpectTLS12Certificate::handle //如果需要验证client的证书，有这步</div><div class="line">-----ExpectTLS12ClientKX::handle //密钥交换</div><div class="line">-----ExpectTLS12CertificateVerify::handle //验证client证书</div><div class="line">-----ExpectTLS12CCS::handle //通知使用加密方式发送报文</div><div class="line">-----ExpectTLS12Finished::handle //握手完成</div><div class="line">-----ExpectTLS12Traffic:: handle //开发传输数据</div></pre></td></tr></table></figure>
+<p><strong>消息传输</strong></p>
+<p>同样，握手完成后，server在<code>ExpectTLS12Traffic::handle</code>中处理后续的传输协议中的消息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">impl State for ExpectTLS12Traffic &#123;</div><div class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ServerSessionImpl, mut m: Message) -&gt; StateResult &#123;</div><div class="line">        println!(&quot;-----ExpectTLS12Traffic::handle&quot;);</div><div class="line">        sess.common.take_received_plaintext(m.take_opaque_payload().unwrap());</div><div class="line">        Ok(self)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>数据加密和解密流程基本和client类似，不再详述。</p>
+<p><strong>另外，client和server握手中需要发送的数据包构造都在hs.rs::emit_xxx函数中</strong></p>
+<h3 id="消息相关"><a href="#消息相关" class="headerlink" title="消息相关"></a>消息相关</h3><p>该部分存在单独的msgs目录下，包含了握手过程中各种消息类型的定义，消息传输具体设计的<code>fragment/deframe</code>等。</p>
+<p>所有消息统一的结构<code>Message</code>，<code>Message</code>也定义了一下方便获取字段和数据的借口，这里不再详述。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">pub struct Message &#123;</div><div class="line">    pub typ: ContentType,</div><div class="line">    pub version: ProtocolVersion,</div><div class="line">    pub payload: MessagePayload,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">//msgs/message.rs</div><div class="line">MessagePayload</div><div class="line">BorrowMessage</div><div class="line"></div><div class="line">//msgs/handshake.rs</div><div class="line">包含握手过程中，证书、密钥交换的一些数据结构</div><div class="line"></div><div class="line">//msgs/deframe.rs</div><div class="line">定义了MessageDeframer，管理Message数据，read/deframe_one</div><div class="line"></div><div class="line">//msgs/hsjoiner.rs</div><div class="line">HandshakeJoiner，重建握手数据，验证数据等定义</div><div class="line"></div><div class="line">//msgs/enums.rs</div><div class="line">各种版本号，算法类型号，握手包类型序号等等的enum定义</div><div class="line"></div><div class="line">//msgs/ccs.rs</div><div class="line">密钥交换相关定义</div></pre></td></tr></table></figure>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key.rs</td>
+<td>密钥、证书结构定义</td>
+</tr>
+<tr>
+<td>pemfile.rs</td>
+<td>PEM文件解析生成密钥相关接口</td>
+</tr>
+<tr>
+<td>verify.rs</td>
+<td>证书验证相关</td>
+</tr>
+<tr>
+<td>suites.rs</td>
+<td>加密套件、密钥交换相关</td>
+</tr>
+<tr>
+<td>sign.rs</td>
+<td>签名相关</td>
+</tr>
+<tr>
+<td>vecbuf.rs</td>
+<td>所有消息数据最底层存储结构，vec构成</td>
+</tr>
+<tr>
+<td>webpki</td>
+<td>三方库，完成证书验证</td>
+</tr>
+<tr>
+<td>ring</td>
+<td>三方库，完成加密算法相关能力</td>
+</tr>
+</tbody>
+</table>
+<p><strong>下篇在根据示例代码分析一下rustls库具体的使用</strong></p>
+<p>转载请注明出处：<a href="https://anhkgg.github.io/rustls-source-code-analyze/">https://anhkgg.github.io/rustls-source-code-analyze/</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;ul&gt;
+&lt;li&gt;作者：&lt;strong&gt;anhkgg&lt;/strong&gt; &lt;/li&gt;
+&lt;li&gt;日期：&lt;strong&gt;2017-11-16&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;rustls已经支持tls1.3，但是测试分析中使用的tls1.2，所以后面分析主要集中在tls1.2。&lt;/p&gt;
+&lt;p&gt;主要分析的源码内容：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;client和server的握手协议流程&lt;/li&gt;
+&lt;li&gt;rustls是如何进行数据传输的&lt;/li&gt;
+&lt;li&gt;数据传输是如何加密解密的&lt;/li&gt;
+&lt;/ol&gt;
+    
+    </summary>
+    
+      <category term="rust" scheme="https://anhkgg.github.io/categories/rust/"/>
+    
+    
+      <category term="rust" scheme="https://anhkgg.github.io/tags/rust/"/>
+    
+      <category term="rustls" scheme="https://anhkgg.github.io/tags/rustls/"/>
+    
+      <category term="源码分析" scheme="https://anhkgg.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="TLS/SSL" scheme="https://anhkgg.github.io/tags/TLS-SSL/"/>
+    
+  </entry>
   
   <entry>
     <title>翻译：通过.NET程序提权绕过UAC</title>
@@ -2091,102 +2318,6 @@ call _KeTestAlertThread@4 ; 检查用户模式APC队列是否为空，不空将U
       <category term="shellcode" scheme="https://anhkgg.github.io/tags/shellcode/"/>
     
       <category term="IDAPython" scheme="https://anhkgg.github.io/tags/IDAPython/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Windbg系列-RPC调试</title>
-    <link href="https://anhkgg.github.io/Windbg%E7%B3%BB%E5%88%97-RPC%E8%B0%83%E8%AF%95/"/>
-    <id>https://anhkgg.github.io/Windbg%E7%B3%BB%E5%88%97-RPC%E8%B0%83%E8%AF%95/</id>
-    <published>2016-01-04T12:16:10.000Z</published>
-    <updated>2016-07-06T23:46:33.472Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧<br>算是自己的笔记，有看客的话，可以多多指出问题，提提建议，不吝赐教！</p>
-<p>微软的远程过程调用（RPC）可以轻松越过进程和机器的界限并且进行数据通信。这种网络通信标准是微软Window网络通信如此强大的原因（….太绕了，翻不来，也不重要）。<br>然而，因为RPC对进程隐藏了网络调用，所以隐藏了计算机之间的交互细节。这使得用户很难确认线程为什么这么做，正在做什么，为什么在支持的功能上失败。所以，调试和解决RPC错误非常困难。另外，大部分RPC错误的问题实际上出现在配置问题，网络连接问题，其他组件问题上。<br><a id="more"></a><br>Windows有个调试工具是DbgRpc，是RPC相关的调试器扩展。这些扩展能够用来分析Windows Xp以及更新版本系统的各种RPC问题。<br>这些Windows版本可以配置来保存RPC实时状态信息。可以保存不同数量的状态信息；这可以让你获得需要的信息，而不用防止一个重的负担在你的电脑上了（significant burden，什么东西）。细节请看Enabling RPC State Information</p>
-<p>之后这些信息就可以被调试器或者DbgRpc访问了。在每种情况下，一个集合的查询都是可以用的。细节请看Displaying RPC State Information</p>
-<p>在大部分情况下，你可以通过使用Common RPC Debugging Techniques.中的技术找到问题。<br>如果你想探索一下机器是怎么保存这些细腻的，或者你想设计自己的状态信息分析的技术，可以看看RPC State Information Internals.<br>这些工具和技术在Windows2000中不能使用</p>
-<h1 id="激活RPC状态信息"><a href="#激活RPC状态信息" class="headerlink" title="激活RPC状态信息"></a>激活RPC状态信息</h1><p>可以收集两种不同的RPC运行时状态信息：服务端信息和完整信息。必须要在调试器或者DbgRpc使用之前激活状态信息的收集。<br>只有Windows XP以及以后的系统可以收集RPC状态信息。<br>收集服务端状态信息是比较轻量级。每次RPC调用大概需要100条机器指令，甚至在性能测试中都几乎不可察觉已经被加载了（…）。但是收集这些信息会耗费内存（每个RPC服务端大概4KB），所以不推荐内存有压力的机器使用。服务端信息包括数据，endpoints，线程，连接对象和服务调用对象（SCALL）。这些足够调试大部分RPC问题了。<br>收集全部状态信息更加heavyweight。它收集了所有的信息，包括服务端信息，另外还有客户端调用对象（CCALL）。全部状态信息通常是不需要的。<br>在电脑中运行Group Policy Editor(Gpedit.msc)可以激活收集RPC状态信息的功能。在本地电脑策略中，找到Computer Configuration/Administrative Templates/System/Remote Procedure Call。在这节下面可以看到RPC Troubleshooting State Information，当你编辑它的属性时，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">本地计算机策略-计算机配置-管理模板-系统-远程过程调用-维护RPC疑难解答状态信息（默认未启用，启用之后配置下面5中状态）</div></pre></td></tr></table></figure>
-<p>可以看到5中可能的状态：<br>None：不维持任何状态信息。除非你电脑内存压力很大，不推荐这种配置。<br>Server：收集服务端状态信息。推荐在个人电脑中设置这个。<br>Full：收集全部状态信息。<br>Auto1：在内存小于64MB的电脑中，相当于None配置。在大于64MB的电脑中相当于Server配置。<br>Auto2：在内存小于128MB的运行Windows Server2003的电脑，或者运行Windows XP的电脑，相当于None配置。在大于128MB的Windows Server 2003中，相当于Server。这个也是默认配置。</p>
-<p>如果你想同时配置一个局域网中的电脑的这些状态，使用Group Policy Editor卷起（roll out）机器策略到首选的机器中。策略引擎会监视你配置的策略传到首选的机器中。在这种情况下，Auto1和Auto2是特别有用的，因为不同机器的操作系统和内存大小是不一样的。<br>如果网络中包括运行了比Windows XP更老的系统，这些电脑会忽略这些配置。</p>
-<h1 id="显示RPC状态信息"><a href="#显示RPC状态信息" class="headerlink" title="显示RPC状态信息"></a>显示RPC状态信息</h1><p>各种各样的RPC调试扩展在Rpcexts.dll中导出。<br>这些用来显示RPC状态信息RPC扩展只能在用户模式中运行。他们可以在CDB(或者NTSD)或者用户模式的Windbg中使用。<br>用户模式的调试器必须有一个目标程序，但是这个目标跟RPC扩展又是没有关系的（？？）。如果调试器还没有运行，你可以简单打开它调试一个毫不相干的目标（比如windbg notepad或者cdb winmine）。接着在CDB中CTRL+C，或者Windbg中Debug|Break来停止目标进程，这样可以使用调试器的命令窗口。<br>如果你需要分析一个远程电脑的RPC状态信息，你需要在目标电脑中运行一个用户模式的调试器，然后使用Remote Debugging。<br>通过调试器访问RPC状态信息在一个stress环境中是特别有用的，或者当一个调试器已经运行了。</p>
-<h2 id="使用RPC调试扩展"><a href="#使用RPC调试扩展" class="headerlink" title="使用RPC调试扩展"></a>使用RPC调试扩展</h2><p>各种各样的RPC调试扩展在Rpcexts.dll中导出。<br>这些用来显示RPC状态信息RPC扩展只能在用户模式中运行。他们可以在CDB(或者NTSD)或者用户模式的Windbg中使用。<br>用户模式的调试器必须有一个目标程序，但是这个目标跟RPC扩展又是没有关系的（？？）。如果调试器还没有运行，你可以简单打开它调试一个毫不相干的目标（比如windbg notepad或者cdb winmine）。接着在CDB中CTRL+C，或者Windbg中Debug|Break来停止目标进程，这样可以使用调试器的命令窗口。<br>如果你需要分析一个远程电脑的RPC状态信息，你需要在目标电脑中运行一个用户模式的调试器，然后使用Remote Debugging。<br>通过调试器访问RPC状态信息在一个stress环境中是特别有用的，或者当一个调试器已经运行了。</p>
-<h2 id="使用DbgRpc工具"><a href="#使用DbgRpc工具" class="headerlink" title="使用DbgRpc工具"></a>使用DbgRpc工具</h2><p>DbgRpc工具（DbgRpc.exe）放在windbg安装目录中，必须使用命令提示窗口打开它。<br>双击是不能启动这个工具的。<br>命令提示窗口必须运行在本地电脑的administrator权限的账户下，或者域管理员权限。<br>DbgRpc不会对系统服务产生任何调用（比如LSASS）。 这个对调试时非常有用的，只要内核还在运行，即便在系统服务已经崩溃了。</p>
-<p>在远程电脑中使用DbgRpc<br>DbgRpc也可以用来检查远程电脑的信息。为了让这个可以正常工作，远程电脑需要可以接受远程连接和远程认证用户。如果远程电脑的RPCSS服务已经崩溃，DbgRpc将不能工作。远程电脑中也需要Administrative或者域管理员权限。</p>
-<p>-s参数用来指定服务端名字，-p指定传输协议。TCP和命名管道都可以使用。推荐使用TCP协议，它几乎可以在每种情况下使用。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">G:\&gt;dbgrpc -s MyServer -p ncacn_ip_tcp -l -P 1e8 -L 0.1</div><div class="line">Getting remote cell info ...</div><div class="line">Endpoint</div><div class="line">Status: Active</div><div class="line">Protocol Sequence: LRPC</div><div class="line">Endpoint name: OLE18</div></pre></td></tr></table></figure>
-<p>DbgRpc命令行<br>可以查看详细的DbgRpc命令描述</p>
-<h2 id="获取RPC-Cell信息"><a href="#获取RPC-Cell信息" class="headerlink" title="获取RPC Cell信息"></a>获取RPC Cell信息</h2><p>详细的cell信息通过!rpcexts.getdbgcell显示，或者使用DbgRpc的-l开关。<br>需要指定进程id已经cell number。<br>下面的例子，进程id是0x278，cell number是0000.0002</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -l -P 278 -L 0.2</div><div class="line">Getting cell info ...</div><div class="line">Thread</div><div class="line">Status: Dispatched</div><div class="line">Thread ID: 0x1A4 (420)</div><div class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</div><div class="line">For details on the optional parameters, see DbgRpc Command-Line Options.</div><div class="line">For a similar example using the RPC debugger extensions, see !rpcexts.getdbgcell.</div></pre></td></tr></table></figure>
-<h2 id="获取RPC-Endpoint信息"><a href="#获取RPC-Endpoint信息" class="headerlink" title="获取RPC Endpoint信息"></a>获取RPC Endpoint信息</h2><p>Endpoint信息通过!rpcexts.getendpointinfo显示，或者DbgRpc的-e开关。<br>如果指定了endpoint number，就会显示它的信息。如果忽略endpoint number，系统中所有进程的endpoint都会显示。<br>下面是显示所有endpoints的例子，通常包含进程id和cell number作为额外的参数是很有用的方式。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -e</div><div class="line">Searching for endpoint info ...</div><div class="line">PID  CELL ID   ST PROTSEQ        ENDPOINT</div><div class="line">-------------------------------------------------------</div><div class="line">00a8 0000.0001 01            NMP \PIPE\InitShutdown</div><div class="line">00a8 0000.0003 01            NMP \PIPE\SfcApi</div><div class="line">00a8 0000.0004 01            NMP \PIPE\ProfMapApi</div><div class="line">00a8 0000.0007 01            NMP \pipe\winlogonrpc</div><div class="line">00a8 0000.0008 01           LRPC OLE5</div><div class="line">00c4 0000.0001 01           LRPC ntsvcs</div><div class="line">00c4 0000.0003 01            NMP \PIPE\ntsvcs</div><div class="line">00c4 0000.0008 01            NMP \PIPE\scerpc</div><div class="line">00d0 0000.0001 01            NMP \PIPE\lsass</div><div class="line">00d0 0000.0004 01            NMP \pipe\WMIEP_d0</div><div class="line">00d0 0000.000b 01            NMP \PIPE\POLICYAGENT</div><div class="line">00d0 0000.000c 01           LRPC policyagent</div><div class="line">0170 0000.0001 01           LRPC epmapper</div><div class="line">0170 0000.0003 01            TCP 135</div><div class="line">0170 0000.0005 01            SPX 34280</div><div class="line">0170 0000.0006 01             NB 135</div><div class="line">0170 0000.0007 01             NB 135</div><div class="line">0170 0000.000b 01            NMP \pipe\epmapper</div><div class="line">01b8 0000.0001 01            NMP \pipe\spoolss</div><div class="line">01b8 0000.0003 01           LRPC spoolss</div><div class="line">01b8 0000.0007 01           LRPC OLE7</div><div class="line">00ec 0000.0001 01           LRPC OLE2</div><div class="line">00ec 0000.0003 01           LRPC senssvc</div><div class="line">00ec 0000.0007 01            NMP \pipe\tapsrv</div><div class="line">00ec 0000.0008 01           LRPC tapsrvlpc</div><div class="line">00ec 0000.000c 01            NMP \PIPE\ROUTER</div><div class="line">00ec 0000.0010 01            NMP \pipe\WMIEP_ec</div><div class="line">0214 0000.0001 01            NMP \PIPE\winreg</div><div class="line">022c 0000.0001 01           LRPC LRPC0000022c.00000001</div><div class="line">022c 0000.0003 01            TCP 1058</div><div class="line">022c 0000.0005 01            SPX 24576</div><div class="line">022c 0000.0006 01            NMP \PIPE\atsvc</div><div class="line">02a8 0000.0001 01           LRPC OLE3</div><div class="line">0370 0000.0001 01           LRPC OLE9</div><div class="line">0278 0000.0001 01            TCP 1120</div><div class="line">030c 0000.0001 01           LRPC OLE12</div></pre></td></tr></table></figure>
-<p>For details on the optional parameters, see DbgRpc Command-Line Options.<br>For a similar example using the RPC debugger extensions, see !rpcexts.getendpointinfo.</p>
-<h2 id="获取RPC线程信息"><a href="#获取RPC线程信息" class="headerlink" title="获取RPC线程信息"></a>获取RPC线程信息</h2><p>使用显示!rpcexts.getthreadinfo线程信息，或者DbgRpc的-t开关。<br>必须指定进程pid。也可以指定线程ID，如果忽略，显示进程的所有线程。<br>例子，进程ID 0x278，忽略了线程ID</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -t -P 278</div><div class="line">Searching for thread info ...</div><div class="line">PID  CELL ID   ST TID      LASTTIME</div><div class="line">-----------------------------------</div><div class="line">0278 0000.0002 01 000001a4 00072c09</div><div class="line">0278 0000.0005 03 0000031c 00072bf5</div><div class="line">For details on the optional parameters, see DbgRpc Command-Line Options.</div><div class="line">For a similar example using the RPC debugger extensions, see !rpcexts.getthreadinfo.</div></pre></td></tr></table></figure>
-<h2 id="获取RPC调用信息"><a href="#获取RPC调用信息" class="headerlink" title="获取RPC调用信息"></a>获取RPC调用信息</h2><p>服务端调用信息通过!rpcexts.getcallinfo显示，DbgRpc的-c开关<br>有4个可选的参数。其中三个CallID，IfStart，ProcNum是用来跟中RPC调用来标记信息的。第四个参数是ProcessID是服务端的Pid。你可以使用你知道的参数值来缩小搜索。<br>如果没有参数指定，系统中所有可知的SCALLs都会显示。例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -c</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   ST PNO IFSTART  TIDNUMBER CALLFLAG CALLID   LASTTIME CONN/CLN</div><div class="line">----------------------------------------------------------------------------</div><div class="line">00c4 0000.0002 00 00f 82273fdc 0000.0007 00000001 00000002 0003595d 0000.0010</div><div class="line">00c4 0000.0006 00 009 367abb81 0000.0015 00000001 0000004d 000185bd 0000.0005</div><div class="line">00c4 0000.000a 00 007 367abb81 0000.002d 00000001 0000009f 00014672 0000.0009</div><div class="line">00c4 0000.000c 00 007 367abb81 0000.002d 00000001 00000083 000122e3 0000.000b</div><div class="line">00c4 0000.000d 00 03b 8d9f4e40 0000.002d 00000001 000000f7 0001aba5 0000.0020</div><div class="line">00c4 0000.000e 00 03b 8d9f4e40 0000.0026 00000001 00000002 00023056 0000.0021</div><div class="line">00c4 0000.000f 00 008 82273fdc 0000.001e 00000009 baadf00d 000366b4 00ec.03bc</div><div class="line">00c4 0000.0012 00 00d 8d9f4e40 0000.0004 00000001 00000051 0000a334 0000.0011</div><div class="line">00c4 0000.0014 00 000 367abb81 0000.0015 00000001 0000004c 0002db53 0000.0013</div><div class="line">00c4 0000.0017 00 007 367abb81 0000.0015 00000001 00000006 0000d102 0000.0016</div><div class="line">00c4 0000.0019 00 007 367abb81 0000.0004 00000001 00000006 0000f09e 0000.0018</div><div class="line">00c4 0000.001b 00 009 65a93890 0000.0007 00000001 0000012e 00630f65 0000.001a</div><div class="line">00c4 0000.001e 00 026 8d9f4e40 0000.0015 00000001 0000037d 0005e579 0000.002c</div><div class="line">00c4 0000.001f 00 008 82273fdc 0000.0033 00000009 baadf00d 000145b3 00c4.02f8</div><div class="line">00c4 0000.0023 00 000 367abb81 0000.0004 00000001 0000007e 000372f3 0000.0022</div><div class="line">00c4 0000.0025 00 03b 8d9f4e40 0000.0026 00000001 0000000b 000122e3 0000.0024</div><div class="line">00c4 0000.0027 00 000 367abb81 0000.002d 00000001 0000000b 00012e27 0000.0028</div><div class="line">00c4 0000.002a 00 008 82273fdc 0000.0033 00000009 baadf00d 0001245f 022c.0290</div><div class="line">00c4 0000.002f 00 007 367abb81 0000.0026 00000001 0000000a 0002983c 0000.002e</div><div class="line">00c4 0000.0031 00 004 3ba0ffc0 0000.0026 00000001 00000007 0005c439 0000.001c</div><div class="line">00c4 0000.0032 00 00b 82273fdc 0000.0039 00000009 baadf00d 00687db6 00d0.01d4</div><div class="line">00c4 0000.0036 00 007 367abb81 0000.0030 00000001 00000065 0003a5e1 0000.0035</div><div class="line">00c4 0000.0037 00 00d 8d9f4e40 0000.0015 00000001 0000033f 000376fa 0000.002b</div><div class="line">00c4 0000.0038 00 008 8d9f4e40 0000.0015 00000001 00000803 0018485c 0000.003b</div><div class="line">00c4 0000.003c 00 00b 82273fdc 0000.0034 00000009 baadf00d 0001f956 00a8.0244</div><div class="line">00c4 0000.003d 00 008 82273fdc 0000.0034 00000009 baadf00d 0001ff02 01b8.037c</div><div class="line">0170 0000.0009 00 002 e60c73e6 0000.0013 00000009 baadf00d 0005a371 00ec.031c</div><div class="line">0170 0000.000a 00 002 0b0a6584 0000.0002 00000009 baadf00d 000126ae 00c4.0130</div><div class="line">0170 0000.000c 00 002 0b0a6584 0000.0010 00000009 baadf00d 00012bc4 022c.0290</div><div class="line">0170 0000.000d 00 003 00000136 0000.001b 00000009 baadf00d 0005ba71 00ec.0310</div><div class="line">0170 0000.000e 00 000 412f241e 0000.0002 00000009 baadf00d 00012f21 02a8.029c</div><div class="line">0170 0000.0010 00 003 00000136 0000.0013 00000009 00000003 000341da 0370.0060</div><div class="line">0170 0000.0011 00 006 e60c73e6 0000.001b 00000009 baadf00d 000f1d00 0370.0328</div><div class="line">0170 0000.0017 00 002 0b0a6584 0000.001b 00000009 baadf00d 0006c803 0278.0184</div><div class="line">0170 0000.001a 00 004 00000136 0000.0012 00000001 baadf00d 00038e9b 00ec.0348</div><div class="line">00ec 0000.0006 00 009 00000134 0000.0011 00000009 baadf00d 000b233f 0170.0244</div><div class="line">00ec 0000.000b 00 001 2f5f6520 0000.001c 00000009 baadf00d 00035510 00ec.0334</div><div class="line">00ec 0000.000e 00 001 629b9f66 0000.0014 00000009 baadf00d 00035813 00ec.01c4</div><div class="line">00ec 0000.0012 00 000 629b9f66 0000.0014 00000009 baadf00d 00026cc6 00a8.0164</div><div class="line">00ec 0000.001b 00 001 2f5f6520 0000.0004 00000001 baadf00d 000352c1 00ec.03a8</div><div class="line">02a8 0000.0004 00 009 00000134 0000.0002 00000009 baadf00d 0009a540 0170.0244</div><div class="line">0370 0000.0006 00 003 00000134 0000.0005 0000000b baadf00d 0002e7cd 00ec.0350</div><div class="line">0370 0000.0008 00 009 00000134 0000.0007 0000000b 01cee9e4 000838fa 0170.0244</div><div class="line">0278 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00072c09 0000.0003</div></pre></td></tr></table></figure>
-<p>For details on the optional parameters, see DbgRpc Command-Line Options.<br>For a similar example using the RPC debugger extensions, see !rpcexts.getcallinfo.</p>
-<h2 id="获取RPC客户端调用信息"><a href="#获取RPC客户端调用信息" class="headerlink" title="获取RPC客户端调用信息"></a>获取RPC客户端调用信息</h2><p>使用!rpcexts.getclientcallinfo获取客户端调用信息，或者DbgRpc的-a开关。<br>也有四个参数可选。其中三个CallID，IfStart，ProcNum是用来跟中RPC调用来标记信息的。第四个参数ProcessID是属于这个调用的进程的Pid。你可以使用你知道的参数值来缩小搜索。<br>如果没有参数指定，系统中所有可知的CCALLs都会显示。例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -a</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   PNO  IFSTART  TIDNUMBER CALLID   LASTTIME PS CLTNUMBER ENDPOINT</div><div class="line">------------------------------------------------------------------------------</div><div class="line">0390 0000.0001 0000 19bb5061 0000.0000 00000001 00072bff 07 0000.0002 1120</div></pre></td></tr></table></figure>
-<p>For details on the optional parameters, see DbgRpc Command-Line Options.<br>For a similar example using the RPC debugger extensions, see !rpcexts.getclientcallinfo.</p>
-<p>注意：<br>只有在全部状态信息都收集的时候，才有CCALLS的信息。</p>
-<h1 id="常用的RPC调试技术"><a href="#常用的RPC调试技术" class="headerlink" title="常用的RPC调试技术"></a>常用的RPC调试技术</h1><p>下面将介绍4中常见的RPC问题。RPC状态信息可以用来检查这些问题。<br>DbgRpc和RPC调试扩展命令都可以使用。</p>
-<h2 id="分析一个Stuck（卡）调用问题"><a href="#分析一个Stuck（卡）调用问题" class="headerlink" title="分析一个Stuck（卡）调用问题"></a>分析一个Stuck（卡）调用问题</h2><p>当一个进程直接或间接的进行一次RPC调用时，等待（holding）一个critical section或者资源时通过会出现这个问题。在这种情况下，RPC调用会到另一个进程或者机器，然后派遣到管理接口（服务接口）中，这个会等待很久。这导致调用方会出现等待超时。</p>
-<p>当通过调试器检查时，RPC是这个等待线程的最高层，但是不清楚究竟在等待什么。<br>下面是一个这种堆栈的例子，有很多可能性。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">0:002&gt; ~1k</div><div class="line">ChildEBP RetAddr</div><div class="line">0068fba0 77e9e8eb ntdll!ZwWaitForSingleObject+0xb</div><div class="line">0068fbc8 4efeff73 KERNEL32!WaitForSingleObjectEx+0x5a</div><div class="line">0068fbe8 4eff0012 RPCRT4!UTIL_WaitForSyncIO+0x21</div><div class="line">0068fc0c 4efe6e2b RPCRT4!UTIL_GetOverlappedResultEx+0x44</div><div class="line">0068fc44 4ef973bf RPCRT4!WS_SyncRecv+0x12a</div><div class="line">0068fc68 4ef98d5a RPCRT4!OSF_CCONNECTION__TransSendReceive+0xcb</div><div class="line">0068fce4 4ef9b682 RPCRT4!OSF_CCONNECTION__SendFragment+0x297</div><div class="line">0068fd38 4ef9a5a8 RPCRT4!OSF_CCALL__SendNextFragment+0x272</div><div class="line">0068fd88 4ef9a9cb RPCRT4!OSF_CCALL__FastSendReceive+0x165</div><div class="line">0068fda8 4ef9a7f8 RPCRT4!OSF_CCALL__SendReceiveHelper+0xed</div><div class="line">0068fdd4 4ef946a7 RPCRT4!OSF_CCALL__SendReceive+0x37</div><div class="line">0068fdf0 4efd56b3 RPCRT4!I_RpcSendReceive+0xc4</div><div class="line">0068fe08 01002850 RPCRT4!NdrSendReceive+0x4f</div><div class="line">0068ff40 01001f32 rtclnt+0x2850</div><div class="line">0068ffb4 77e92ca8 rtclnt+0x1f32</div><div class="line">0068ffec 00000000 KERNEL32!CreateFileA+0x11b</div></pre></td></tr></table></figure>
-<p>下面是怎么检查这个问题。<br><strong>Troubleshooting a stuck call problem</strong></p>
-<p>1- 保证调试器正在调试有这个stuck cell的进程。（是那个可能在等待RPC的线程所属的进程）<br>2- 或者线程的堆栈指针。堆栈就像上面例子中显示的那样，这个例子的堆栈指针是0x0068FBA0<br>3- 获取这个线程的调用信息。通过!rpcexts.rpcreadstack加上堆栈指针作为参数来获取。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.rpcreadstack 68fba0</div><div class="line">CallID: 1</div><div class="line">IfStart: 19bb5061</div><div class="line">ProcNum: 0</div><div class="line">Protocol Sequence:      &quot;ncacn_ip_tcp&quot;  (Address: 00692ED8)</div><div class="line">NetworkAddress: &quot;&quot;      (Address: 00692F38)</div><div class="line">Endpoint:       &quot;1120&quot;  (Address: 00693988)</div></pre></td></tr></table></figure>
-<p>显示的这些信息可以让你跟踪这个调用。</p>
-<p>4- 网络地址是空的，标明是本地机器。Endpoint是1120。需要确认哪个进程拥有这个endpoint。通过!rpcexts.getendpointinfo加上endpoint作为参数来获取 //应该是客户端</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getendpointinfo 1120</div><div class="line">Searching for endpoint info ...</div><div class="line">PID  CELL ID   ST PROTSEQ        ENDPOINT</div><div class="line">--------------------------------------------</div><div class="line">0278 0000.0001 01            TCP 1120</div></pre></td></tr></table></figure>
-<p>5- 根据前面的信息，可以看到进程0x278拥有这个endpoint，可以通过!rpcexts.getcallinfo<br>获取到这个call的所有信息，需要加上四个参数CallID, IfStart, and ProcNum（3步骤已经知道）和进程pid 0x278</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getcallinfo 1 19bb5061 0 278</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   ST PNO IFSTART  TIDNUMBER CALLFLAG CALLID   LASTTIME CONN/CLN</div><div class="line">----------------------------------------------------------------------------</div><div class="line">0278 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00072c09 0000.0003</div></pre></td></tr></table></figure>
-<p>6- 第5步的信息非常有用，但是有些信息太少了。第二列给出的cell id是0000.0004。如果<br>!rpcexts.getdbgcell加上这个cell id，可以显示更易读的cell信息：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getdbgcell 278 0.4</div><div class="line">Getting cell info ...</div><div class="line">Call</div><div class="line">Status: Dispatched</div><div class="line">Procedure Number: 0</div><div class="line">Interface UUID start (first DWORD only): 19BB5061</div><div class="line">Call ID: 0x1 (1)</div><div class="line">Servicing thread identifier: 0x0.2</div><div class="line">Call Flags: cached</div><div class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</div><div class="line">Owning connection identifier: 0x0.3</div></pre></td></tr></table></figure>
-<p>信息显示这个调用已经”dispatched”，表示已经离开了RPC运行时。最后更新时间是470.25，通过!rpcexts.rpctime可以看到现在的时间。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.rpctime</div><div class="line">Current time is: 6003, 422</div></pre></td></tr></table></figure>
-<p>表示这次call的最后联系在5533秒之前了，接近92分钟，因此这个肯定是一个stuck call。</p>
-<p>7- 在挂载到服务端进程之前，你可以使用Servicing thread identifier找到当前处理这个call的线程信息。也就是另一个cell number，第6步中的0x0.2，可以像下面一样使用：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getdbgcell 278 0.2</div><div class="line">Getting cell info ...</div><div class="line">Thread</div><div class="line">Status: Dispatched</div><div class="line">Thread ID: 0x1A4 (420)</div><div class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</div></pre></td></tr></table></figure>
-<p>现在你知道你要找的是0x278进程的0x1A4线程。</p>
-<p>可能这个线程已经在做其他的RPC调用了，你又必要重复这个过程跟踪这个call。</p>
-<p>##跟踪服务端进程的Contention（争用）</p>
-<p>为了能够处理发来的请求，RPC报了一个工作线程集合。理论上这个线程数量很小。然后理想的情况只存在实验室环境下，这些服务管理函数非常小心和谐（。。。）。在真实情况下，线程的数量决定于服务端的工作量，不过不管怎么样都在1-50的范围内。<br>如果工作线程数量超过了50，可能服务端进程有过多的竞争。通过引起这个的是heap的胡乱使用，内存的压力，或者服务端大部分的活动都通过一个单独的临界区。<br>使用!rpcexts.getthreadinfo获取服务进程的线程数量，或者DbgRpc的-t选项。需要指定进程ID，如下面的0xC4</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -t -P c4</div><div class="line">Searching for thread info ...</div><div class="line">PID  CELL ID   ST TID      LASTTIME</div><div class="line">-----------------------------------</div><div class="line">00c4 0000.0004 03 0000011c 000f164f</div><div class="line">00c4 0000.0007 03 00000120 008a6290</div><div class="line">00c4 0000.0015 03 0000018c 008a6236</div><div class="line">00c4 0000.0026 03 00000264 0005c443</div><div class="line">00c4 0000.002d 03 00000268 000265bb</div><div class="line">00c4 0000.0030 03 0000026c 000f1d32</div><div class="line">00c4 0000.0034 03 00000388 007251e9</div></pre></td></tr></table></figure>
-<p>在这个例子中，只有7个工作线程，是合理的。<br>如果有超过100个线程，就需要加载调试器看看问题了。<br>Note  Running queries such as dbgrpc -t remotely is expensive to the server and the network. If you use this query in a script, you should make sure this command is not run too often.</p>
-<h2 id="检查Struct的线程"><a href="#检查Struct的线程" class="headerlink" title="检查Struct的线程"></a>检查Struct的线程</h2><p>RPC需要它的工作线程来完成正常的工作，通常有个问题，在同一个进程中的组件会因为等待一个公共的临界区死锁（比如，loader lock或者heap lock）。这将导致很多线程暂停，很有可能也有RPC工作线程。<br>如果出现了这种情况，RPC服务器不会再给外界响应。RPC调用将返回RPC_S_SERVER_UNAVAILABLE或者RPC_S_SERVER_TOO_BUSY</p>
-<p>一个很小的问题可能会硬气有问题的驱动阻止IRPs完成，到达RPC服务器。<br>如果你怀疑可能出现了这个问题，使用DbgRpc –t或者!rpcexts.getthreadinfo需要进程PID作为参数。下面的列子是0xC4:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -t -P c4</div><div class="line">Searching for thread info ...</div><div class="line">PID  CELL ID   ST TID      LASTTIME</div><div class="line">-----------------------------------</div><div class="line">00c4 0000.0004 03 0000011c 000f164f</div><div class="line">00c4 0000.0007 03 00000120 008a6290</div><div class="line">00c4 0000.0015 03 0000018c 008a6236</div><div class="line">00c4 0000.0026 03 00000264 0005c443</div><div class="line">00c4 0000.002d 03 00000268 000265bb</div><div class="line">00c4 0000.0030 03 0000026c 000f1d32</div><div class="line">00c4 0000.0034 03 00000388 007251e9</div></pre></td></tr></table></figure>
-<p>TID那一列给出了每个线程的ID。LATSTIME列包含每个线程最近状态改变的时间戳。<br>只要服务器收到一个请求，至少有一个线程会改变状态，时间戳就会更新。因此，一个RPC请求失败了，但是没有任何一个线程的时间戳改变，表示这个请求没有到达RPC运行时中。你需要在研究是什么引起的。</p>
-<h2 id="在服务端标明调用者"><a href="#在服务端标明调用者" class="headerlink" title="在服务端标明调用者"></a>在服务端标明调用者</h2><p>有些时候需要确认谁发送的RPC请求，虽然你只有这次调用的服务线程信息。<br>这个非常有用-比如，找到谁传递了不合法的参数给RPC调用。<br>根据某些特别依赖于协议序列的调用，你可以或者不同程度的细节，而有些协议根本没有这些信息（比如NetBiso）</p>
-<p>Identifying the caller from the server thread<br>1- 打开用户模式调试器，挂载到目标服务线程中<br>2- 通过|命令获取到进程id</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0:001&gt; |</div><div class="line">0     id: 3d4 name: rtsvr.exe</div></pre></td></tr></table></figure>
-<p>3- !rpcexts.getcallinfo获取到进程中存在的calls。需要指定进程ID 0x3D4</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getcallinfo 0 0 FFFF 3d4</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   ST PNO IFSTART  THRDCELL  CALLFLAG CALLID   LASTTIME CONN/CLN</div><div class="line">----------------------------------------------------------------------------</div><div class="line">03d4 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00a1aced 0000.0003</div></pre></td></tr></table></figure>
-<p>查找状态时2或1（dispatched或active）的调用。在这个例子中，只有一个call，如果有更多的，你可以使用!rpcexts.getdbgcell加上cell number（THRDCELL列）来获取线程IDs，从而你可以决定哪个是你感兴趣的调用了</p>
-<p>4- 在知道你感兴趣的call之后，看看CONN/CLN所在的cell number，这个是连接对象的cell ID。这里是0000.0003。使用!rpcexts.getdbgcell加上这个id</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getdbgcell 3d4 0.3</div><div class="line">Getting cell info ...</div><div class="line">Connection</div><div class="line">Connection flags: Exclusive</div><div class="line">Authentication Level: Default</div><div class="line">Authentication Service: None</div><div class="line">Last Transmit Fragment Size: 24 (0x6F56D)</div><div class="line">Endpoint for the connection: 0x0.1</div><div class="line">Last send time (in seconds since boot):10595.565 (0x2963.235)</div><div class="line">Last receive time (in seconds since boot):10595.565 (0x2963.235)</div><div class="line">Getting endpoint info ...</div><div class="line">Process object for caller is 0xFF9DF5F0</div></pre></td></tr></table></figure>
-<p>这个命令显示了这个连接的客户端的所有信息。实际的信息会有很多不同，跟使用的transport有关系。<br>在这个例子中，使用的本地命令管道通信，调用者的进程对象地址也显示了。如果你挂载了内核调试器（或者启动一个本地调试器），你可以使用!process看到看看这个地址的信息。<br>如果使用LRPC通信，会显示进程ID和线程ID。<br>如果使用TCP通信，会显示调用者的IP地址。<br>如果使用了远程命名管道，不会显示任何信息。</p>
-<hr>
-<p>转载请注明出处，谢谢！</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h1&gt;&lt;p&gt;最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧&lt;br&gt;算是自己的笔记，有看客的话，可以多多指出问题，提提建议，不吝赐教！&lt;/p&gt;
-&lt;p&gt;微软的远程过程调用（RPC）可以轻松越过进程和机器的界限并且进行数据通信。这种网络通信标准是微软Window网络通信如此强大的原因（….太绕了，翻不来，也不重要）。&lt;br&gt;然而，因为RPC对进程隐藏了网络调用，所以隐藏了计算机之间的交互细节。这使得用户很难确认线程为什么这么做，正在做什么，为什么在支持的功能上失败。所以，调试和解决RPC错误非常困难。另外，大部分RPC错误的问题实际上出现在配置问题，网络连接问题，其他组件问题上。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="debug" scheme="https://anhkgg.github.io/categories/debug/"/>
-    
-    
-      <category term="Windbg调试" scheme="https://anhkgg.github.io/tags/Windbg%E8%B0%83%E8%AF%95/"/>
-    
-      <category term="RPC" scheme="https://anhkgg.github.io/tags/RPC/"/>
-    
-      <category term="远程过程调用" scheme="https://anhkgg.github.io/tags/%E8%BF%9C%E7%A8%8B%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8/"/>
     
   </entry>
   
