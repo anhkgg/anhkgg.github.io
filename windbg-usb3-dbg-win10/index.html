@@ -8,17 +8,17 @@
   <link rel="dns-prefetch" href="https://anhkgg.github.io">
   <title>Windbg USB3.0双机调试 | Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="配置需求 目标主机有USB3.0 xHCI主机控制器，支持调试 host主机支持USB3.0 xHCI主机控制器(使用UsbView查看) USB 3.0 调试线(国外购买地址（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）   先从淘宝买一根USB 3的A对A连线，有时也称公对公连线，很便宜。这根线需要加工一下才可以支持调试，加工的方法是选取线的某个位置，剥开外皮，然后把其中的红绿白三">
+  <meta name="description" content="配置需求1.目标主机有USB3.0 xHCI主机控制器，支持调试2.host主机支持USB3.0 xHCI主机控制器(使用UsbView查看)3.USB 3.0 调试线(国外购买地址（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）  先从淘宝买一根USB 3的A对A连线，有时也称公对公连线，很便宜。这根线需要加工一下才可以支持调试，加工的方法是选取线的某个位置，剥开外皮，然后把其中的红绿">
 <meta name="keywords" content="windbg,usb3,debug,win10">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Windbg USB3.0双机调试">
 <meta property="og:url" content="https://anhkgg.github.io/windbg-usb3-dbg-win10/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
-<meta property="og:description" content="配置需求 目标主机有USB3.0 xHCI主机控制器，支持调试 host主机支持USB3.0 xHCI主机控制器(使用UsbView查看) USB 3.0 调试线(国外购买地址（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）   先从淘宝买一根USB 3的A对A连线，有时也称公对公连线，很便宜。这根线需要加工一下才可以支持调试，加工的方法是选取线的某个位置，剥开外皮，然后把其中的红绿白三">
-<meta property="og:updated_time" content="2018-03-23T06:49:04.875Z">
+<meta property="og:description" content="配置需求1.目标主机有USB3.0 xHCI主机控制器，支持调试2.host主机支持USB3.0 xHCI主机控制器(使用UsbView查看)3.USB 3.0 调试线(国外购买地址（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）  先从淘宝买一根USB 3的A对A连线，有时也称公对公连线，很便宜。这根线需要加工一下才可以支持调试，加工的方法是选取线的某个位置，剥开外皮，然后把其中的红绿">
+<meta property="og:updated_time" content="2018-03-23T06:55:19.751Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Windbg USB3.0双机调试">
-<meta name="twitter:description" content="配置需求 目标主机有USB3.0 xHCI主机控制器，支持调试 host主机支持USB3.0 xHCI主机控制器(使用UsbView查看) USB 3.0 调试线(国外购买地址（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）   先从淘宝买一根USB 3的A对A连线，有时也称公对公连线，很便宜。这根线需要加工一下才可以支持调试，加工的方法是选取线的某个位置，剥开外皮，然后把其中的红绿白三">
+<meta name="twitter:description" content="配置需求1.目标主机有USB3.0 xHCI主机控制器，支持调试2.host主机支持USB3.0 xHCI主机控制器(使用UsbView查看)3.USB 3.0 调试线(国外购买地址（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）  先从淘宝买一根USB 3的A对A连线，有时也称公对公连线，很便宜。这根线需要加工一下才可以支持调试，加工的方法是选取线的某个位置，剥开外皮，然后把其中的红绿">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
@@ -179,17 +179,11 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="配置需求"><a href="#配置需求" class="headerlink" title="配置需求"></a>配置需求</h1><ol>
-<li>目标主机有USB3.0 xHCI主机控制器，支持调试</li>
-<li>host主机支持USB3.0 xHCI主机控制器(使用UsbView查看)</li>
-<li>USB 3.0 调试线(<a href="https://www.datapro.net/products/usb-3-0-super-speed-a-a-debugging-cable.html" target="_blank" rel="external">国外购买地址</a>（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）</li>
-</ol>
+        <h1 id="配置需求"><a href="#配置需求" class="headerlink" title="配置需求"></a>配置需求</h1><p>1.目标主机有USB3.0 xHCI主机控制器，支持调试<br>2.host主机支持USB3.0 xHCI主机控制器(使用UsbView查看)<br>3.USB 3.0 调试线(<a href="https://www.datapro.net/products/usb-3-0-super-speed-a-a-debugging-cable.html" target="_blank" rel="external">国外购买地址</a>（可以用普通USB3.0 公对公线改造，剪掉红绿百三根线）</p>
 <blockquote>
 <p>先从淘宝买一根USB 3的A对A连线，有时也称公对公连线，很便宜。这根线需要加工一下才可以支持调试，加工的方法是选取线的某个位置，剥开外皮，然后把其中的红绿白三根线剪断，然后包上就可以了。USB 3电缆的线是有固定颜色的，如图3所示，<br>其中SDP是Shielded Differential Pair的缩写，即屏蔽起来的差分信号线，是USB 3.0的数据线，UTP是Unshielded Twisted Pair的缩写，即未屏蔽的双绞线，是USB1/2使用的数据线，所谓的D+，D-。要做的加工其实就是把2.0的三根弦剪断。剥开后，很容易找到红绿白三根，胆大心细，下剪子吧:-)。</p>
 </blockquote>
-<ol>
-<li>两台主机系统必须是Win8以上</li>
-</ol>
+<p>4.两台主机系统必须是Win8以上</p>
 <blockquote>
 <p>On the host computer, an xHCI (USB 3.0) host controller<br>On the target computer, an xHCI (USB 3.0) host controller that supports debugging</p>
 </blockquote>
@@ -532,10 +526,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">010editor</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
               </li>
              
@@ -545,6 +535,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">010editor</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -684,6 +678,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
               </li>
              
@@ -697,30 +695,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">自动领币</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -761,6 +735,26 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">指令级</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">自动领币</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -832,26 +826,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">wechat</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">handle</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">patch</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">wannacry</a>
               </li>
              
@@ -869,6 +843,26 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">locky</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">wechat</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">handle</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">patch</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
              
               <li class="article-tag-list-item">
