@@ -159,6 +159,207 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-liburl-use-minihttp" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/liburl-use-minihttp/">libcurl小记-简单http封装使用-源码分析</a>
+    </h1>
+  
+
+        
+        <a href="/liburl-use-minihttp/" class="archive-article-date">
+  	<time datetime="2016-08-25T12:32:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-前面"><a href="#0x00-前面" class="headerlink" title="0x00. 前面"></a>0x00. 前面</h1><p>以前用Wininet api包了一个简单易用的http请求的lib，但是居然会遇到系统不支持的情况，难道要我自己用socket写吗？no way！</p>
+<p>以前知道liburl，第一次使用，啥都不知道，反正感觉挺强大的</p>
+<p>&lt; libcurl is a free and easy-to-use client-side URL transfer library, supporting DICT, FILE, FTP, FTPS, Gopher, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, Telnet and TFTP.</p>
+<p>须知，我这里只用到了HTTP</p>
+<p><a href="https://curl.haxx.se/" target="_blank" rel="external">home: https://curl.haxx.se/</a></p>
+<p><a href="https://curl.haxx.se/libcurl/" target="_blank" rel="external">document: https://curl.haxx.se/libcurl/</a></p>
+<p>其实使用比较简单，但对我没有认真看过文档，并且没有找到好资料的情况下，我遇到了很多弯路，并且想吐槽实例代码，搞那么复杂干嘛，还没有我想要的代码。</p>
+        
+          <a class="article-more-a" href="/liburl-use-minihttp/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">libcurl</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">http</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">minihttp</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">get_post_ajax</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/code/" class="article-tag-list-link color5">code</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/liburl-use-minihttp/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+  
+    <article id="post-pin-use-note-function-analysis" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/pin-use-note-function-analysis/">pin使用小记-函数分析</a>
+    </h1>
+  
+
+        
+        <a href="/pin-use-note-function-analysis/" class="archive-article-date">
+  	<time datetime="2016-07-28T05:27:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-07-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>相关：<a href="https://software.intel.com/en-us/articles/pintool/" target="_blank" rel="external">pin是什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/" target="_blank" rel="external">pin可以做什么</a>  <a href="https://software.intel.com/sites/landingpage/pintool/docs/76991/Pin/html/index.html#EXAMPLES" target="_blank" rel="external">pin examples</a></p>
+<p>此次使用pin目的，是为了能够应用pin在函数分析方面的功能，以及XXXInsertCall的功能</p>
+<p>由于此前对pin了解不够深入，以为可以实现相应功能，哪知撞了南墙才知道pin也有些许局限。</p>
+<p>下面将我对了解到的pin可以实现以及不能实现的各种坑写作笔记。</p>
+        
+          <a class="article-more-a" href="/pin-use-note-function-analysis/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">pin</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">pintool</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">function analysis</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">hook</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">insertcall</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">instrument</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">asm</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">插桩</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">钩子</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">指令级</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/pin-use-note-function-analysis/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+  
     <article id="post-precalculated-string-hashes-reverse-engineering-shellcode" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -625,82 +826,6 @@
 
 
   
-    <article id="post-inject-process-analyze-and-code" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/inject-process-analyze-and-code/">inject process analyze and code</a>
-    </h1>
-  
-
-        
-        <a href="/inject-process-analyze-and-code/" class="archive-article-date">
-  	<time datetime="2014-11-25T09:45:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2014-11-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a><strong>1. 起因</strong></h1><p>某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。由于没有样本，也没有搜索到资料，只能作罢。<br>某天，突然来了兴致，要分析个样本，随便在卡饭样本区下了个感觉挺啥啥的样本，一分析，你妹，咋这么熟悉呢，居然就是同类的进程注入，然后某人就有了下面的文章。</p>
-        
-          <a class="article-more-a" href="/inject-process-analyze-and-code/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">inject process</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">reverse</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/inject-process-analyze-and-code/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-  
     <article id="post-inject-process-analyze 2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -737,11 +862,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">inject process</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">reverse</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">reverse</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">inject process</a>
         		</li>
       		
 		</ul>
@@ -777,29 +902,29 @@
 
 
   
-    <article id="post-010注册算法分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-inject-process-analyze-and-code" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/010注册算法分析/">010注册算法分析</a>
+      <a class="article-title" href="/inject-process-analyze-and-code/">inject process analyze and code</a>
     </h1>
   
 
         
-        <a href="/010注册算法分析/" class="archive-article-date">
-  	<time datetime="2014-11-17T02:13:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2014-11-17</time>
+        <a href="/inject-process-analyze-and-code/" class="archive-article-date">
+  	<time datetime="2014-11-25T09:45:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2014-11-25</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="1-关键函数定位"><a href="#1-关键函数定位" class="headerlink" title="1. 关键函数定位"></a><strong>1. 关键函数定位</strong></h2><p>进入register窗口，随便填入name，然后check license，弹框信息”Invalid name or password. Please enter your name and password exactly as given when you purchased 010 Editor (make sure no quotes are included).”，通过该信息在IDA中找到对应函数地址，基本可以确认是关键函数位置，函数居然有名字，这是作者故意留下的吗。下面是整个验证函数流程：</p>
+        <h1 id="1-起因"><a href="#1-起因" class="headerlink" title="1. 起因"></a><strong>1. 起因</strong></h1><p>某次卡饭hips浏览中，看到某高大上进程注入方式(主要是某人头发长)，惊为天人，技术堪称猥琐之王(抬高了？)，额。。。不捧了。由于没有样本，也没有搜索到资料，只能作罢。<br>某天，突然来了兴致，要分析个样本，随便在卡饭样本区下了个感觉挺啥啥的样本，一分析，你妹，咋这么熟悉呢，居然就是同类的进程注入，然后某人就有了下面的文章。</p>
         
-          <a class="article-more-a" href="/010注册算法分析/#more">more >></a>
+          <a class="article-more-a" href="/inject-process-analyze-and-code/#more">more >></a>
         
       
 
@@ -813,7 +938,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">010editor</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">reverse</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">inject process</a>
         		</li>
       		
 		</ul>
@@ -825,7 +954,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/reverse/" class="article-tag-list-link color3">reverse</a>
+        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
         		</li>
       		
 		</ul>
@@ -834,79 +963,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/010注册算法分析/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-  
-    <article id="post-hctf-writeup" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/hctf-writeup/">hctf writeup</a>
-    </h1>
-  
-
-        
-        <a href="/hctf-writeup/" class="archive-article-date">
-  	<time datetime="2014-11-10T01:08:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2014-11-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><strong>1. 丘比龙的最爱</strong><br>传说，丘比龙是丘比特的弟弟，丘比龙是一只小爱神，虽然有两只翅膀，但因为吃多了，导致身体太胖，所以飞不起来~那么问题来了?!丘比龙吃什么食物吃多了变胖了<br>百度之：甜甜圈</p>
-        
-          <a class="article-more-a" href="/hctf-writeup/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">hctf</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/ctf/" class="article-tag-list-link color4">ctf</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/hctf-writeup/">展开全文 >></a>
+          <a class="article-more-a" href="/inject-process-analyze-and-code/">展开全文 >></a>
         </p>
       
 
@@ -1043,39 +1100,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">010editor</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">WM_KEYBOARD_LL</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HOOK</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">freepiano</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">inject</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1095,15 +1120,39 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">PE</a>
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">GS</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">WM_KEYBOARD_LL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">HOOK</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">freepiano</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">inject</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1143,14 +1192,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
@@ -1159,7 +1200,23 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">PE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">GS</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1187,7 +1244,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">apk</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1207,11 +1268,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">apk</a>
+                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1263,23 +1320,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
+                <a href="javascript:void(0)" class="js-tag color5">rust</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">rust</a>
+                <a href="javascript:void(0)" class="js-tag color1">linux</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1303,11 +1352,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1339,7 +1392,23 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">linux</a>
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
