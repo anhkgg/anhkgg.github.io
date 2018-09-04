@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/ssctf-2014-11-1/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="ssctf wirteup1. web8 U盘病毒UP_BOOT.img解压之后是两个文件autorun.txt和是男人你就下100层.exe，autorun.txt中的内容是”你真厉害都到这了，看看这个游戏你肯定会喜欢的，但是据说这个游戏是被加了后门的，找到后门操作的文件的内容，取文件内容的16位md5值作为key！祝你好运…….”。根据题目知道是男人你就下100层.exe添加了后门，那么在执行">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:updated_time" content="2016-07-07T04:34:56.388Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ssctf writeup by anhkgg">
@@ -181,11 +182,11 @@
       
         <h1 id="ssctf-wirteup"><a href="#ssctf-wirteup" class="headerlink" title="ssctf wirteup"></a><strong>ssctf wirteup</strong></h1><h3 id="1-web8-U盘病毒"><a href="#1-web8-U盘病毒" class="headerlink" title="1. web8 U盘病毒"></a><strong>1. web8 U盘病毒</strong></h3><p>UP_BOOT.img解压之后是两个文件autorun.txt和<code>是男人你就下100层.exe</code>，autorun.txt中的内容是”你真厉害都到这了，看看这个游戏你肯定会喜欢的，但是据说这个游戏是被加了后门的，找到后门操作的文件的内容，取文件内容的16位md5值作为key！祝你好运…….”。<br>根据题目知道<code>是男人你就下100层.exe</code>添加了后门，那么在执行的时候肯定要释放后门，所以找了一款 文件操作监控工具 进行监测，添加了文件创建，进程创建监测，然后发现在tmp目录中创建了RarSFX0目录，然后在RarSFX0中创建了1.exe, 1.vbs, 2.exe，以及test.txt，简单查看1.vbs启动1.exe和2.exe，1.exe是后门，2.exe是原始的<code>是男人你就下100层.exe</code>，test.txt时候后门生成的，题目中要后门操作文件的·内容·16位md5作为key，那么1.exe，2.exe不大可能，只有1.vbs和test.txt了，提交了两次，test.txt的内容md5成功。</p>
 <a id="more"></a>
-<h3 id="2-crack1"><a href="#2-crack1" class="headerlink" title="2.crack1"></a><strong>2.crack1</strong></h3><p>代码很简单，输入用户名密码之后，讲密码每个字符和408030所在内存的数据xor得到的值和用户名比较，相同则成功。用了个py脚本将用户名和408030内存的值xor得到密码，然后密码的md5即是key<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">k = [1, 2, 3, 4, 1, 5]#408030的值，还有其他的</div><div class="line">n = &quot;xxxxx&quot;#用户名</div><div class="line">a = &quot;&quot;</div><div class="line"></div><div class="line">for i in range(0, len(n)):</div><div class="line">    k1 = ord(n[i])</div><div class="line">    k1 = k[i] ^ k1</div><div class="line">    a = a + chr(k1)</div><div class="line">    </div><div class="line">print a</div></pre></td></tr></table></figure></p>
+<h3 id="2-crack1"><a href="#2-crack1" class="headerlink" title="2.crack1"></a><strong>2.crack1</strong></h3><p>代码很简单，输入用户名密码之后，讲密码每个字符和408030所在内存的数据xor得到的值和用户名比较，相同则成功。用了个py脚本将用户名和408030内存的值xor得到密码，然后密码的md5即是key<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">k = [1, 2, 3, 4, 1, 5]#408030的值，还有其他的</span><br><span class="line">n = &quot;xxxxx&quot;#用户名</span><br><span class="line">a = &quot;&quot;</span><br><span class="line"></span><br><span class="line">for i in range(0, len(n)):</span><br><span class="line">    k1 = ord(n[i])</span><br><span class="line">    k1 = k[i] ^ k1</span><br><span class="line">    a = a + chr(k1)</span><br><span class="line">    </span><br><span class="line">print a</span><br></pre></td></tr></table></figure></p>
 <h3 id="3-crack2"><a href="#3-crack2" class="headerlink" title="3.crack2"></a><strong>3.crack2</strong></h3><p>反调试太多，没搞定</p>
-<h3 id="4-crack3"><a href="#4-crack3" class="headerlink" title="4.crack3"></a><strong>4.crack3</strong></h3><p>程序流程是，多次右键或者左键点击，会给403070写入R或者L字符，48次之后，点击确认，如果右键活左键点击姿势正确，就可以弹出正确的key。<br>验证过程是，通过48个L或者R可到key，如果通过48个L或者R的一个算法得到”查水表“三个字，那么点击姿势正确，key也正确，所以需要通过”查水表“的值逆推得到L和R的个数，具体算法是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">do</div><div class="line">  &#123;</div><div class="line">    v11[v2] = 0;</div><div class="line">    v3 = v1;</div><div class="line">    if ( __SETO__(v1, v1 + 8) ^ 1 )</div><div class="line">    &#123;</div><div class="line">      do</div><div class="line">      &#123;</div><div class="line">	v4 = 2 * v11[v2];</div><div class="line">	v5 = a1[v3] == 0x52;</div><div class="line">	v11[v2] = v4;</div><div class="line">	if ( v5 )</div><div class="line">	  v11[v2] = v4 + 1;</div><div class="line">	++v3;</div><div class="line">      &#125;</div><div class="line">      while ( v3 &lt; v1 + 8 );</div><div class="line">    &#125;</div><div class="line">    v1 += 8;</div><div class="line">    ++v2;                                      </div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="4-crack3"><a href="#4-crack3" class="headerlink" title="4.crack3"></a><strong>4.crack3</strong></h3><p>程序流程是，多次右键或者左键点击，会给403070写入R或者L字符，48次之后，点击确认，如果右键活左键点击姿势正确，就可以弹出正确的key。<br>验证过程是，通过48个L或者R可到key，如果通过48个L或者R的一个算法得到”查水表“三个字，那么点击姿势正确，key也正确，所以需要通过”查水表“的值逆推得到L和R的个数，具体算法是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">do</span><br><span class="line">  &#123;</span><br><span class="line">    v11[v2] = 0;</span><br><span class="line">    v3 = v1;</span><br><span class="line">    if ( __SETO__(v1, v1 + 8) ^ 1 )</span><br><span class="line">    &#123;</span><br><span class="line">      do</span><br><span class="line">      &#123;</span><br><span class="line">	v4 = 2 * v11[v2];</span><br><span class="line">	v5 = a1[v3] == 0x52;</span><br><span class="line">	v11[v2] = v4;</span><br><span class="line">	if ( v5 )</span><br><span class="line">	  v11[v2] = v4 + 1;</span><br><span class="line">	++v3;</span><br><span class="line">      &#125;</span><br><span class="line">      while ( v3 &lt; v1 + 8 );</span><br><span class="line">    &#125;</span><br><span class="line">    v1 += 8;</span><br><span class="line">    ++v2;                                      </span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
 <p>”查水表“的值是B2 E9 CB AE  B1 ED，通过上面算法和B2 E9 CB AE  B1 ED推得点击姿势是:<br>RLRRLLRLRRRLRLLRRRLLRLRRRLRLRRRLRLRRLLLRRRRLRRLR<br>然后，操作一次，或者调试器内存修改，都可以得到key</p>
-<h3 id="5-crack4"><a href="#5-crack4" class="headerlink" title="5.crack4"></a><strong>5.crack4</strong></h3><p>题目是<br>”输入正确的密码，会释放出文件。key就在文件中。<br>tips:第一层密码为6为纯数字，第二层密码也是6位。“<br>粗略分析，输入第一次密码，释放并解密得到encrypt.exe，是一个exe，运行这个exe，输入第二次密码，释放并解密得到一个gif，密码验证算法是md5(md5(“HOWMPxxxxxx”)) == 09B2F924C20C5CA427EED2C5B98BEFBF，xxxxxx就是密码，先前一直想md5算出来，，没可能，后面发现释放文件之后的解密算法是xor，那么，嘿嘿，exe和gif格式的开头几个字节都是固定的，那么通过加密文件和正常文件的前6个字节xor即可得到密码，分别是564987和w!q&amp;cs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">MZ...... =&gt;4D 5A 00 00 00 00 xor 78 6C 34 39 38 37 =&gt;35 36 34 49 48 47 =》564987</div><div class="line">GIF89aX =》47 49 46 38 39 61 58 xor 30 68 37 1E 5A 12 =&gt; w!q&amp;cs</div></pre></td></tr></table></figure></p>
+<h3 id="5-crack4"><a href="#5-crack4" class="headerlink" title="5.crack4"></a><strong>5.crack4</strong></h3><p>题目是<br>”输入正确的密码，会释放出文件。key就在文件中。<br>tips:第一层密码为6为纯数字，第二层密码也是6位。“<br>粗略分析，输入第一次密码，释放并解密得到encrypt.exe，是一个exe，运行这个exe，输入第二次密码，释放并解密得到一个gif，密码验证算法是md5(md5(“HOWMPxxxxxx”)) == 09B2F924C20C5CA427EED2C5B98BEFBF，xxxxxx就是密码，先前一直想md5算出来，，没可能，后面发现释放文件之后的解密算法是xor，那么，嘿嘿，exe和gif格式的开头几个字节都是固定的，那么通过加密文件和正常文件的前6个字节xor即可得到密码，分别是564987和w!q&amp;cs<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MZ...... =&gt;4D 5A 00 00 00 00 xor 78 6C 34 39 38 37 =&gt;35 36 34 49 48 47 =》564987</span><br><span class="line">GIF89aX =》47 49 46 38 39 61 58 xor 30 68 37 1E 5A 12 =&gt; w!q&amp;cs</span><br></pre></td></tr></table></figure></p>
 <p>最后得到解密之后的图片，图片就有key</p>
 <h3 id="6-crack5"><a href="#6-crack5" class="headerlink" title="6.crack5"></a><strong>6.crack5</strong></h3><p>这到题太坑，点击注册啥反应没有，以为是没有调用注册功能函数，后来通过网上的特征码定位到了注册按钮的函数，地址是：00401640，结果一看代码全是混淆，各种int 3，jmp，，完全无法正常执行，所以点击之后无反应，尝试恢复，大概流程得到，先UpdateData获取到输入，然后一段算法比较，MessageBox注册成功或者失败。。但是加密算法那部分，实在是无力恢复了。</p>
 
@@ -526,22 +527,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -555,6 +540,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -574,7 +563,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -587,6 +584,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -626,23 +639,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -675,6 +676,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -718,30 +747,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -750,7 +755,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -786,6 +795,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -795,6 +816,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -811,26 +840,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -866,14 +875,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -887,6 +888,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

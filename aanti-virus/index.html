@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/aanti-virus/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="00. 概述什么是免杀？来自百科的注解：  免杀，也就是反病毒（AntiVirus）与反间谍（AntiSpyware）的对立面，英文为Anti-AntiVirus（简写Virus AV），逐字翻译为“反-反病毒”，翻译为“反杀毒技术”。  有本比较有名的书，想详细学习的同学可以去看看。《黑客免杀攻防》  其实我大概好像只看过目录…( ╯□╰ )  下面我介绍的是自己实践的一些方法，有没有效果，试试">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:updated_time" content="2017-05-22T00:14:21.388Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="免杀技术有一套（免杀方法大集结）(Anti-AntiVirus)">
@@ -240,7 +241,7 @@
 <li>是不是有附加数据，或者资源存储的文件。有，单独检查该文件或者数据，方法从1开始。如果没有，那去找找PE头吧。</li>
 </ol>
 <p>大致流程：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">1. sub1 //未报</div><div class="line">2. sub1 sub2 //未报</div><div class="line">3. sub1 sub2 sub3 //报</div><div class="line">4. sub1 sub2 sub3(sub31) //未报</div><div class="line">5. sub1 sub2 sub3(sub31 sub32) //报</div><div class="line">6. sub1 sub2 sub3(sub31 sub32(sub321)) //报</div><div class="line">...</div><div class="line">直到找到某API调用，或者逻辑代码（没有自定义函数调用）</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. sub1 //未报</span><br><span class="line">2. sub1 sub2 //未报</span><br><span class="line">3. sub1 sub2 sub3 //报</span><br><span class="line">4. sub1 sub2 sub3(sub31) //未报</span><br><span class="line">5. sub1 sub2 sub3(sub31 sub32) //报</span><br><span class="line">6. sub1 sub2 sub3(sub31 sub32(sub321)) //报</span><br><span class="line">...</span><br><span class="line">直到找到某API调用，或者逻辑代码（没有自定义函数调用）</span><br></pre></td></tr></table></figure>
 <p>此方法，虽然笨，但是定位特征码不会很慢，挺准确。</p>
 <h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>别找了，直接盲免杀吧（后面具体看，有效）</p>
 <h2 id="2-怎么免杀？"><a href="#2-怎么免杀？" class="headerlink" title="2. 怎么免杀？"></a>2. 怎么免杀？</h2><p>前面已经找到特征码了，怎么免杀呢？</p>
@@ -325,9 +326,9 @@
 <p><strong>4. api+5</strong></p>
 <p>ring3的API拦截通过是挂钩API头几个字节内容，然后进入杀软自己函数进行参数检查之类的。</p>
 <p>那么如果调用API时，跳过头部几字节，就可以避开这种拦截方式。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">__API:</div><div class="line">1 push ebp;</div><div class="line">2 mov ebp, esp;</div><div class="line">3 mov edi, edi;</div><div class="line">4 ...</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">__API:</span><br><span class="line">1 push ebp;</span><br><span class="line">2 mov ebp, esp;</span><br><span class="line">3 mov edi, edi;</span><br><span class="line">4 ...</span><br></pre></td></tr></table></figure>
 <p>调用时，不适用1地址，而使用4地址，然后自己函数内部还原跳过几字节的调用。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">__API_MY:</div><div class="line">push ebp;</div><div class="line">mov ebp, esp;</div><div class="line">mov edi, edi;</div><div class="line">call 4</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">__API_MY:</span><br><span class="line">push ebp;</span><br><span class="line">mov ebp, esp;</span><br><span class="line">mov edi, edi;</span><br><span class="line">call 4</span><br></pre></td></tr></table></figure>
 <p><strong>5. 底层api</strong></p>
 <p>该方法类似于2和3，杀软拦截API可能更加高层（语义更清楚），那就可以找更底层API进行调用，绕过拦截，比如使用NT函数。</p>
 <p>或者通过DeviceIoControl调用驱动功能来完成API功能。</p>
@@ -349,9 +350,9 @@
 <p>各路大神有更多的技巧和方式，请不吝赐教，相互交流。</p>
 <p>我们不做坏事，但是可以了解做坏事的手段，更好的破坏防御这些手段。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a href="http://blog.csdn.net/cwqbuptcwqbupt/article/details/7591818" target="_blank" rel="external">模糊哈希算法的原理与应用</a></li>
-<li><a href="http://www.freebuf.com/sectool/40580.html" target="_blank" rel="external">VirTest5.0特征码定位器（开源）</a></li>
-<li><a href="http://baike.baidu.com/link?url=ExY1OF52Md1Lk6G_WMZQf4fdswE2RSjuhPmXEYRwgVhkSIb-udf0AhK1cqbhmnDsnf21pUJSvHEWnMoxwZfZ5asnxw0W76Ew9t5ZIJRbLxO" target="_blank" rel="external">http://baike.baidu.com/link?url=ExY1OF52Md1Lk6G_WMZQf4fdswE2RSjuhPmXEYRwgVhkSIb-udf0AhK1cqbhmnDsnf21pUJSvHEWnMoxwZfZ5asnxw0W76Ew9t5ZIJRbLxO</a></li>
+<li><a href="http://blog.csdn.net/cwqbuptcwqbupt/article/details/7591818" target="_blank" rel="noopener">模糊哈希算法的原理与应用</a></li>
+<li><a href="http://www.freebuf.com/sectool/40580.html" target="_blank" rel="noopener">VirTest5.0特征码定位器（开源）</a></li>
+<li><a href="http://baike.baidu.com/link?url=ExY1OF52Md1Lk6G_WMZQf4fdswE2RSjuhPmXEYRwgVhkSIb-udf0AhK1cqbhmnDsnf21pUJSvHEWnMoxwZfZ5asnxw0W76Ew9t5ZIJRbLxO" target="_blank" rel="noopener">http://baike.baidu.com/link?url=ExY1OF52Md1Lk6G_WMZQf4fdswE2RSjuhPmXEYRwgVhkSIb-udf0AhK1cqbhmnDsnf21pUJSvHEWnMoxwZfZ5asnxw0W76Ew9t5ZIJRbLxO</a></li>
 </ol>
 <p>转载请注明出处：<a href="https://anhkgg.github.io/aanti-virus">https://anhkgg.github.io/aanti-virus</a></p>
 
@@ -704,22 +705,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -733,6 +718,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -752,7 +741,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -765,6 +762,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -804,23 +817,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -853,6 +854,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -896,30 +925,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -928,7 +933,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -964,6 +973,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -973,6 +994,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -989,26 +1018,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1044,14 +1053,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -1065,6 +1066,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

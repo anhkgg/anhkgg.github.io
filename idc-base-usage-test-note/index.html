@@ -15,7 +15,8 @@
 <meta property="og:url" content="https://anhkgg.github.io/idc-base-usage-test-note/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="概述IDC是IDA扩展的一种脚本语言，用于自动化，或者扩展查询IDA数据库 可以使用IDC或者python编写 语法类似C、也应用了C++类似的对象特性和异常处理 可以是单独的IDC文件，通过File-&amp;gt;Script File加载，也可以是简单的IDC命令，通过File-&amp;gt;Script Command来编写">
-<meta property="og:updated_time" content="2016-10-10T07:58:20.270Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2016-10-10T07:58:20.271Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="IDC脚本小试笔记">
 <meta name="twitter:description" content="概述IDC是IDA扩展的一种脚本语言，用于自动化，或者扩展查询IDA数据库 可以使用IDC或者python编写 语法类似C、也应用了C++类似的对象特性和异常处理 可以是单独的IDC文件，通过File-&amp;gt;Script File加载，也可以是简单的IDC命令，通过File-&amp;gt;Script Command来编写">
@@ -187,29 +188,29 @@
 <h1 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h1><p>包括字符串、整形、浮点型，后来又增加了对象、引用、函数指针等变量类型。</p>
 <p>字符串是IDC的本地数据类型。</p>
 <p>变量通过auto声明，在使用前都需要声明，没有知名明确的变量类型。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">auto addr, reg, val; /*xxxx*/</div><div class="line">auto count = 0; // xxx</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">auto addr, reg, val; /*xxxx*/</span><br><span class="line">auto count = 0; // xxx</span><br></pre></td></tr></table></figure>
 <p>注释使用//或者/**/，语句使用；作为结束</p>
 <p>不支持C风格数组（使用分片）、指针（使用引用）、结构体和联合体之类的复杂数据结构，之后引入了类的概念。</p>
 <p>extern引入全局变量声明，不能声明中初始化值，可以在任何函数内外声明。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">extern outglobal;</div><div class="line">static mian()</div><div class="line">&#123;</div><div class="line">    extern inglobal;</div><div class="line">    outglobal = &quot;xx&quot;;</div><div class="line">    inglobal = 1;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">extern outglobal;</span><br><span class="line">static mian()</span><br><span class="line">&#123;</span><br><span class="line">    extern inglobal;</span><br><span class="line">    outglobal = &quot;xx&quot;;</span><br><span class="line">    inglobal = 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="表达式"><a href="#表达式" class="headerlink" title="表达式"></a>表达式</h1><p>支持几乎所有的C算术和逻辑运算符，除了几个特例外（？？）。包括三元运算？：，不支持op=(+=，*=， &gt;&gt;=)等复合运算符。后来可以支持逗号运算，</p>
 <p>所有整数操作都是有符号的值处理。所以在整数比较和右移运算（&gt;&gt;）收到影响。</p>
-<p>如果需要逻辑右移位，必须自己修改结果的最高位。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">result = (x &gt;&gt; 1)&amp;0x7fffffff;</div></pre></td></tr></table></figure></p>
-<p>字符串操作、分片（语法类似python字符串操作）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">auto str = &quot;string to slice&quot;;</div><div class="line">auto s1, s2, s3, s4;</div><div class="line">s1 = str[7:9];</div><div class="line">s2 = str[:6];</div><div class="line">s3 = str[10:];</div><div class="line">s4 = str[5];</div></pre></td></tr></table></figure></p>
-<h1 id="IDC语句"><a href="#IDC语句" class="headerlink" title="IDC语句"></a>IDC语句</h1><p>唯一不支持C中的switch语句<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">auto i;</div><div class="line">for(i = 0; i&lt;10; i = i+1) &#123;&#125;</div></pre></td></tr></table></figure></p>
+<p>如果需要逻辑右移位，必须自己修改结果的最高位。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = (x &gt;&gt; 1)&amp;0x7fffffff;</span><br></pre></td></tr></table></figure></p>
+<p>字符串操作、分片（语法类似python字符串操作）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">auto str = &quot;string to slice&quot;;</span><br><span class="line">auto s1, s2, s3, s4;</span><br><span class="line">s1 = str[7:9];</span><br><span class="line">s2 = str[:6];</span><br><span class="line">s3 = str[10:];</span><br><span class="line">s4 = str[5];</span><br></pre></td></tr></table></figure></p>
+<h1 id="IDC语句"><a href="#IDC语句" class="headerlink" title="IDC语句"></a>IDC语句</h1><p>唯一不支持C中的switch语句<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">auto i;</span><br><span class="line">for(i = 0; i&lt;10; i = i+1) &#123;&#125;</span><br></pre></td></tr></table></figure></p>
 <p>可以在花括号开始声明变量，但是变量没有具体作用域，可以在外面使用。但是函数中不能使用其他函数内部声明的变量。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if(1) &#123;</div><div class="line">    auto x; x = 10;</div><div class="line">&#125;</div><div class="line">Message(&quot;x = %d\n&quot;, x);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if(1) &#123;</span><br><span class="line">    auto x; x = 10;</span><br><span class="line">&#125;</span><br><span class="line">Message(&quot;x = %d\n&quot;, x);</span><br></pre></td></tr></table></figure>
 <h1 id="IDC函数"><a href="#IDC函数" class="headerlink" title="IDC函数"></a>IDC函数</h1><p>只有独立IDC文件才支持函数，IDC命令框不支持函数。</p>
-<p>使用static引入一个函数定义。函数参数只有参数名列表，逗号分隔。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">static test(x, y, z) </div><div class="line">&#123;</div><div class="line">    auto a, b, c;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>IDA5.6之前，函数参数严格使用传值传递，之后引入了传地址参数传递机制。采用哪种方式传递参数，使用调用者来决定的，而不是函数声明决定的。<br>传地址方式在调用方参数前加入&amp;。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">auto q=1, r=0, s=2;</div><div class="line">test(q,r, s);</div><div class="line">test(q, &amp;r, s);//</div></pre></td></tr></table></figure></p>
+<p>使用static引入一个函数定义。函数参数只有参数名列表，逗号分隔。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">static test(x, y, z) </span><br><span class="line">&#123;</span><br><span class="line">    auto a, b, c;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>IDA5.6之前，函数参数严格使用传值传递，之后引入了传地址参数传递机制。采用哪种方式传递参数，使用调用者来决定的，而不是函数声明决定的。<br>传地址方式在调用方参数前加入&amp;。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">auto q=1, r=0, s=2;</span><br><span class="line">test(q,r, s);</span><br><span class="line">test(q, &amp;r, s);//</span><br></pre></td></tr></table></figure></p>
 <p>函数声明不会指明要返回一个值，以及返回什么类型的值。</p>
 <p>如果需要返回值，使用return返回指定的值即可。</p>
 <p>可以在不同的路径返回不同类型的值。任何不显示返回值的函数默认返回为0.</p>
 <p>IDA5.6之后，函数离成为IDC中第一类对象更近了一布，函数引用可以作为参数传给另一个函数，也可以将函数引用作为函数返回值。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static ret() &#123;</div><div class="line">    return Message;</div><div class="line">&#125;</div><div class="line">staic call(fun, arg) &#123;</div><div class="line">    fun(arg);</div><div class="line">&#125;</div><div class="line">static main() &#123;</div><div class="line">    auto f = ret();</div><div class="line">    call(f, &quot;Message Call&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h1 id="IDC对象"><a href="#IDC对象" class="headerlink" title="IDC对象"></a>IDC对象</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">class People</div><div class="line">&#123;</div><div class="line">    People(name, age) &#123;</div><div class="line">        this.name = name;</div><div class="line">        this.age = age;</div><div class="line">    &#125;</div><div class="line">    ~People() &#123;</div><div class="line">    &#125;</div><div class="line">    print() &#123;</div><div class="line">        Message(&quot;name: %s, age: %d&quot;, this.name, this.age);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">static main() &#123;</div><div class="line">    People p;//error</div><div class="line">    auto p = People(&quot;john&quot;, 12);</div><div class="line">    p.print();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h1 id="常用函数"><a href="#常用函数" class="headerlink" title="常用函数"></a>常用函数</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">//Array操作</div><div class="line">class MyArray</div><div class="line">&#123;</div><div class="line">	MyArray(name) &#123;</div><div class="line">		this.name = name;</div><div class="line">		this.id = CreateArray(name);</div><div class="line">		if(this.id == -1) &#123;</div><div class="line">			this.id = GetArrayId(name);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	~MyArray() &#123;</div><div class="line">		if(this.id != -1) &#123;</div><div class="line">			DeleteArray(this.id);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	SetArrayData(tag, idx, val) &#123;</div><div class="line">		if(tag == AR_LONG) &#123;</div><div class="line">			SetArrayLong(this.id, idx, val);</div><div class="line">		&#125;</div><div class="line">		else if(tag == AR_STR) &#123;</div><div class="line">			SetArrayString(this.id, idx, val);</div><div class="line">		&#125;else &#123;</div><div class="line">			return 0;</div><div class="line">		&#125;</div><div class="line">		return 1;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	GetArrayData(tag, idx) &#123;</div><div class="line">		return GetArrayElement(tag, this.id, idx);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	DelArrayData(tag, idx) &#123;</div><div class="line">		return DelArrayElement(tag, this.id, idx);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">auto val;</div><div class="line">val = Byte(0x00EEEC1A);</div><div class="line">Message(&quot;val = %08x \n&quot;, val);</div><div class="line">print(&quot;xxxxxxxxxxxxxxxxxxxxxxxxxx&quot;);</div><div class="line">//Warning(&quot;val = %08x\n&quot;, val);</div><div class="line"></div><div class="line">//交互</div><div class="line">val = AskStr(&quot;124&quot;, &quot;enter a val&quot;); //AskFile, AskYN</div><div class="line">if(val == 0) &#123;</div><div class="line">	print(&quot;no enter val&quot;);</div><div class="line">&#125;else &#123;</div><div class="line">	Message(&quot;val = %08x \n&quot;, val);</div><div class="line">&#125;</div><div class="line">Jump(0x400000);</div><div class="line">Message(&quot;cursor = %08x\n&quot;, ScreenEA());</div><div class="line"></div><div class="line">//字符串操作</div><div class="line">//val= 0000302d</div><div class="line">val = sprintf(&quot;%08x&quot;, 12333);//form</div><div class="line">Message(&quot;val = %s \n&quot;, val);</div><div class="line"></div><div class="line">////val = 0000302d 12333</div><div class="line">Message(&quot;val = %08x %d\n&quot;, xtol(val), xtol(val));//atol xtol </div><div class="line">Message(&quot;A = %d %02x\n&quot;, ord(&quot;A&quot;), ord(&quot;A&quot;)); //A = 65 41</div><div class="line">Message(&quot;val size = %d\n&quot;, strlen(val));//strstr, substr, str[s:e]</div><div class="line"></div><div class="line">//文件操作</div><div class="line">class MyFile</div><div class="line">&#123;</div><div class="line">	MyFile(name, mode) &#123;</div><div class="line">		this.h = fopen(name, mode);</div><div class="line">		if(this.h == 0) &#123;</div><div class="line">			//error</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	~MyFile() &#123;</div><div class="line">		if(this.h != 0) &#123;</div><div class="line">			fclose(this.h);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	length() &#123;</div><div class="line">		return filelength(this.h);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_fgetc() &#123;</div><div class="line">		return fgetc(this.h);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_fputc(val) &#123;</div><div class="line">		return fputs(val, this.h);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	//_fprintf(format, ...) &#123;</div><div class="line">		//return fprintf(this.h, format, ...);</div><div class="line">	//&#125;</div><div class="line">	</div><div class="line">	_writestr(str) &#123;</div><div class="line">		return writestr(this.h, str);</div><div class="line">	&#125;</div><div class="line">	_readstr() &#123;</div><div class="line">		return readstr(this.h);//-1=end</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writelongb(val) &#123;</div><div class="line">		return writelong(this.h, val, 1);//大端</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writelongs(val) &#123;</div><div class="line">		return writelong(this.h, val, 0);//小端</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readlongb() &#123;</div><div class="line">		return readlong(this.h, 1);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readlongs() &#123;</div><div class="line">		return readlong(this.h, 0);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writeshortb(val) &#123;</div><div class="line">		return writeshort(this.h, val, 1);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_writeshorts(val) &#123;</div><div class="line">		return writeshort(this.h, val, 0);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readshortb() &#123;</div><div class="line">		return readshort(this.h, 1);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_readshorts() &#123;</div><div class="line">		return readshort(this.h, 0);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_loadfile(pos, addr, length) &#123;</div><div class="line">		return loadfile(this.h, pos, addr, length);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	_savefile(pos, addr, length) &#123;</div><div class="line">		return savefile(this.h, pos, addr, length);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">//file</div><div class="line">auto fn = AskFile(1, &quot;*.txt&quot;, &quot;save file&quot;);//1=save, 0=open</div><div class="line">Message(&quot;save file = %s\n&quot;, fn);</div><div class="line">auto mf = MyFile(fn, &apos;w&apos;);</div><div class="line">//mf._writelongb(122222);</div><div class="line">//mf._writestr(&quot;test file write data&quot;);</div><div class="line">//writestr(mf.h, &quot;test file write data&quot;);</div><div class="line">//mf._savefile(0, 0x400000, 50);</div><div class="line">Message(&quot;file data = %s&quot;, mf._readstr());</div><div class="line">//Message(&quot;file data = %s&quot;, mf._readlongb());</div><div class="line"></div><div class="line"></div><div class="line">//name, address</div><div class="line">Message(&quot;%08x, %s\n&quot;, 0x400016, Name(0x400016));</div><div class="line">//Message(&quot;xxx = %s\n&quot;, NameEx(0x0040BD14, 0x0040BD1C));</div><div class="line">MakeNameEx(0x0040BD1C, &quot;testxxxx&quot;, 1);</div><div class="line">Message(&quot;xxx = %08x\n&quot;, LocByName(&quot;testxxxx&quot;));</div><div class="line">Message(&quot;xxx = %08x\n&quot;, LocByNameEx(0x0040BD14, &quot;testxxxx&quot;));</div><div class="line"></div><div class="line">//function</div><div class="line">Message(&quot;end = %08x, start = %08x\n&quot;, GetFunctionAttr(0x0040BD14, FUNCATTR_END), GetFunctionAttr(0x0040BD14, FUNCATTR_START));</div><div class="line">Message(&quot;f = %s\n&quot;, GetFunctionName(0x0040BD1C));</div><div class="line">Message(&quot;f_next = %08x\n&quot;, NextFunction(0x0040BD1C));</div><div class="line">Message(&quot;f_prev = %08x\n&quot;, PrevFunction(0x0040BD1C));</div><div class="line"></div><div class="line">//代码xref</div><div class="line">auto cur = Rfirst(0x0040BD1C);//跳到哪里去，第一个</div><div class="line">Message(&quot;to = %08x\n&quot;, cur);</div><div class="line">Message(&quot;to = %08x\n&quot;, Rnext(0x0040BD1C, cur));//跳到哪里去，下一个</div><div class="line">Message(&quot;to = %08x\n&quot;, XrefType());//fl_CN, fl_CF, fl_JN, fl_JF, fl_F</div><div class="line">cur = RfirstB(0x40B928);//什么地方跳来的，第一个</div><div class="line">Message(&quot;from = %08x\n&quot;, cur );</div><div class="line">Message(&quot;from = %08x\n&quot;, RnextB(0x40B928, cur));//什么地方跳来的，下一个</div><div class="line"></div><div class="line">//数据xref</div><div class="line">cur = Dfirst(0x01410559);//改地址引用的第一个数据的地址</div><div class="line">Message(&quot;to d = %08x\n&quot;, cur);</div><div class="line">Message(&quot;to d = %08x\n&quot;, Dnext(0x01410559, cur));</div><div class="line">Message(&quot;to = %08x\n&quot;, XrefType());//dr_O偏移量, dr_W数据写入, dr_R数据读取</div><div class="line">cur = DfirstB(0x01411EF0);//引用该数据的第一个地址</div><div class="line">Message(&quot;from d = %08x\n&quot;, cur);</div><div class="line">Message(&quot;from d = %08x\n&quot;, DnextB(0x01411EF0, cur));//引用该数据的下一个地址</div><div class="line"></div><div class="line">//database</div><div class="line">MakeUnkn(0x0043DC57, DOUNK_SIMPLE);//undefine</div><div class="line">MakeCode(0x0043DC57);//转为code</div><div class="line">//MakeUnkn(0x0043DC57, DOUNK_SIMPLE);//undefine</div><div class="line">//MakeUnkn(0x0043DC58, DOUNK_SIMPLE);//</div><div class="line">//MakeWord(0x0043DC57);//转为数据 MakeWord, MakeDword</div><div class="line">MakeComm(0x0043DC57, &quot;just for test comment&quot;);//</div><div class="line">//MakeFunction(s, e);//</div><div class="line">//MakeStr(s, e);//</div><div class="line"></div><div class="line">//search SEARCH_DOWN, SEARCH_NEXT, SEARCH_CASE</div><div class="line">Message(&quot;code = %08x\n&quot;, FindCode(0x400000, 1));//从这开始搜索一条指令</div><div class="line">Message(&quot;data = %08x\n&quot;, FindData(0x400000, 1));//从这开始搜索一个数据</div><div class="line">//Message(&quot;find = %08x\n&quot;, FindBinary(0x400000, 1, &quot;FFAB3740&quot;));//从这开始搜索hex数据</div><div class="line">auto row = 0;</div><div class="line">auto column = 0;</div><div class="line">//Message(&quot;find = %08x\n&quot;, FindText(0x400000, 1, row, column, &quot;http://&quot;));</div><div class="line"></div><div class="line">//asm</div><div class="line">Message(&quot;asm = %s\n&quot;, GetDisasm(0x0043D7D8));//asm = push    ebp             ; xxxxxxxxxxxxxxxx</div><div class="line">Message(&quot;asm = %s\n&quot;, GetMnem(0x0043D7D8));//asm = push</div><div class="line">Message(&quot;asm = %s\n&quot;, GetOpnd(0x0043D7D8, 0));//asm = ebp</div><div class="line">Message(&quot;asm = %d\n&quot;, GetOpType(0x0043D7D8, 0));//asm = 1</div><div class="line">Message(&quot;asm = %08x\n&quot;, GetOperandValue(0x0043D7D8, 0));//asm = 00000005</div><div class="line">Message(&quot;asm = %s\n&quot;, CommentEx(0x0043D7D8, 0));//asm = xxxxxxxxxxxxxxxx</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">static ret() &#123;</span><br><span class="line">    return Message;</span><br><span class="line">&#125;</span><br><span class="line">staic call(fun, arg) &#123;</span><br><span class="line">    fun(arg);</span><br><span class="line">&#125;</span><br><span class="line">static main() &#123;</span><br><span class="line">    auto f = ret();</span><br><span class="line">    call(f, &quot;Message Call&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="IDC对象"><a href="#IDC对象" class="headerlink" title="IDC对象"></a>IDC对象</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">class People</span><br><span class="line">&#123;</span><br><span class="line">    People(name, age) &#123;</span><br><span class="line">        this.name = name;</span><br><span class="line">        this.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">    ~People() &#123;</span><br><span class="line">    &#125;</span><br><span class="line">    print() &#123;</span><br><span class="line">        Message(&quot;name: %s, age: %d&quot;, this.name, this.age);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">static main() &#123;</span><br><span class="line">    People p;//error</span><br><span class="line">    auto p = People(&quot;john&quot;, 12);</span><br><span class="line">    p.print();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="常用函数"><a href="#常用函数" class="headerlink" title="常用函数"></a>常用函数</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">//Array操作</span><br><span class="line">class MyArray</span><br><span class="line">&#123;</span><br><span class="line">	MyArray(name) &#123;</span><br><span class="line">		this.name = name;</span><br><span class="line">		this.id = CreateArray(name);</span><br><span class="line">		if(this.id == -1) &#123;</span><br><span class="line">			this.id = GetArrayId(name);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	~MyArray() &#123;</span><br><span class="line">		if(this.id != -1) &#123;</span><br><span class="line">			DeleteArray(this.id);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	SetArrayData(tag, idx, val) &#123;</span><br><span class="line">		if(tag == AR_LONG) &#123;</span><br><span class="line">			SetArrayLong(this.id, idx, val);</span><br><span class="line">		&#125;</span><br><span class="line">		else if(tag == AR_STR) &#123;</span><br><span class="line">			SetArrayString(this.id, idx, val);</span><br><span class="line">		&#125;else &#123;</span><br><span class="line">			return 0;</span><br><span class="line">		&#125;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	GetArrayData(tag, idx) &#123;</span><br><span class="line">		return GetArrayElement(tag, this.id, idx);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	DelArrayData(tag, idx) &#123;</span><br><span class="line">		return DelArrayElement(tag, this.id, idx);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">auto val;</span><br><span class="line">val = Byte(0x00EEEC1A);</span><br><span class="line">Message(&quot;val = %08x \n&quot;, val);</span><br><span class="line">print(&quot;xxxxxxxxxxxxxxxxxxxxxxxxxx&quot;);</span><br><span class="line">//Warning(&quot;val = %08x\n&quot;, val);</span><br><span class="line"></span><br><span class="line">//交互</span><br><span class="line">val = AskStr(&quot;124&quot;, &quot;enter a val&quot;); //AskFile, AskYN</span><br><span class="line">if(val == 0) &#123;</span><br><span class="line">	print(&quot;no enter val&quot;);</span><br><span class="line">&#125;else &#123;</span><br><span class="line">	Message(&quot;val = %08x \n&quot;, val);</span><br><span class="line">&#125;</span><br><span class="line">Jump(0x400000);</span><br><span class="line">Message(&quot;cursor = %08x\n&quot;, ScreenEA());</span><br><span class="line"></span><br><span class="line">//字符串操作</span><br><span class="line">//val= 0000302d</span><br><span class="line">val = sprintf(&quot;%08x&quot;, 12333);//form</span><br><span class="line">Message(&quot;val = %s \n&quot;, val);</span><br><span class="line"></span><br><span class="line">////val = 0000302d 12333</span><br><span class="line">Message(&quot;val = %08x %d\n&quot;, xtol(val), xtol(val));//atol xtol </span><br><span class="line">Message(&quot;A = %d %02x\n&quot;, ord(&quot;A&quot;), ord(&quot;A&quot;)); //A = 65 41</span><br><span class="line">Message(&quot;val size = %d\n&quot;, strlen(val));//strstr, substr, str[s:e]</span><br><span class="line"></span><br><span class="line">//文件操作</span><br><span class="line">class MyFile</span><br><span class="line">&#123;</span><br><span class="line">	MyFile(name, mode) &#123;</span><br><span class="line">		this.h = fopen(name, mode);</span><br><span class="line">		if(this.h == 0) &#123;</span><br><span class="line">			//error</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	~MyFile() &#123;</span><br><span class="line">		if(this.h != 0) &#123;</span><br><span class="line">			fclose(this.h);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	length() &#123;</span><br><span class="line">		return filelength(this.h);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_fgetc() &#123;</span><br><span class="line">		return fgetc(this.h);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_fputc(val) &#123;</span><br><span class="line">		return fputs(val, this.h);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	//_fprintf(format, ...) &#123;</span><br><span class="line">		//return fprintf(this.h, format, ...);</span><br><span class="line">	//&#125;</span><br><span class="line">	</span><br><span class="line">	_writestr(str) &#123;</span><br><span class="line">		return writestr(this.h, str);</span><br><span class="line">	&#125;</span><br><span class="line">	_readstr() &#123;</span><br><span class="line">		return readstr(this.h);//-1=end</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_writelongb(val) &#123;</span><br><span class="line">		return writelong(this.h, val, 1);//大端</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_writelongs(val) &#123;</span><br><span class="line">		return writelong(this.h, val, 0);//小端</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_readlongb() &#123;</span><br><span class="line">		return readlong(this.h, 1);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_readlongs() &#123;</span><br><span class="line">		return readlong(this.h, 0);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_writeshortb(val) &#123;</span><br><span class="line">		return writeshort(this.h, val, 1);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_writeshorts(val) &#123;</span><br><span class="line">		return writeshort(this.h, val, 0);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_readshortb() &#123;</span><br><span class="line">		return readshort(this.h, 1);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_readshorts() &#123;</span><br><span class="line">		return readshort(this.h, 0);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_loadfile(pos, addr, length) &#123;</span><br><span class="line">		return loadfile(this.h, pos, addr, length);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_savefile(pos, addr, length) &#123;</span><br><span class="line">		return savefile(this.h, pos, addr, length);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">//file</span><br><span class="line">auto fn = AskFile(1, &quot;*.txt&quot;, &quot;save file&quot;);//1=save, 0=open</span><br><span class="line">Message(&quot;save file = %s\n&quot;, fn);</span><br><span class="line">auto mf = MyFile(fn, &apos;w&apos;);</span><br><span class="line">//mf._writelongb(122222);</span><br><span class="line">//mf._writestr(&quot;test file write data&quot;);</span><br><span class="line">//writestr(mf.h, &quot;test file write data&quot;);</span><br><span class="line">//mf._savefile(0, 0x400000, 50);</span><br><span class="line">Message(&quot;file data = %s&quot;, mf._readstr());</span><br><span class="line">//Message(&quot;file data = %s&quot;, mf._readlongb());</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//name, address</span><br><span class="line">Message(&quot;%08x, %s\n&quot;, 0x400016, Name(0x400016));</span><br><span class="line">//Message(&quot;xxx = %s\n&quot;, NameEx(0x0040BD14, 0x0040BD1C));</span><br><span class="line">MakeNameEx(0x0040BD1C, &quot;testxxxx&quot;, 1);</span><br><span class="line">Message(&quot;xxx = %08x\n&quot;, LocByName(&quot;testxxxx&quot;));</span><br><span class="line">Message(&quot;xxx = %08x\n&quot;, LocByNameEx(0x0040BD14, &quot;testxxxx&quot;));</span><br><span class="line"></span><br><span class="line">//function</span><br><span class="line">Message(&quot;end = %08x, start = %08x\n&quot;, GetFunctionAttr(0x0040BD14, FUNCATTR_END), GetFunctionAttr(0x0040BD14, FUNCATTR_START));</span><br><span class="line">Message(&quot;f = %s\n&quot;, GetFunctionName(0x0040BD1C));</span><br><span class="line">Message(&quot;f_next = %08x\n&quot;, NextFunction(0x0040BD1C));</span><br><span class="line">Message(&quot;f_prev = %08x\n&quot;, PrevFunction(0x0040BD1C));</span><br><span class="line"></span><br><span class="line">//代码xref</span><br><span class="line">auto cur = Rfirst(0x0040BD1C);//跳到哪里去，第一个</span><br><span class="line">Message(&quot;to = %08x\n&quot;, cur);</span><br><span class="line">Message(&quot;to = %08x\n&quot;, Rnext(0x0040BD1C, cur));//跳到哪里去，下一个</span><br><span class="line">Message(&quot;to = %08x\n&quot;, XrefType());//fl_CN, fl_CF, fl_JN, fl_JF, fl_F</span><br><span class="line">cur = RfirstB(0x40B928);//什么地方跳来的，第一个</span><br><span class="line">Message(&quot;from = %08x\n&quot;, cur );</span><br><span class="line">Message(&quot;from = %08x\n&quot;, RnextB(0x40B928, cur));//什么地方跳来的，下一个</span><br><span class="line"></span><br><span class="line">//数据xref</span><br><span class="line">cur = Dfirst(0x01410559);//改地址引用的第一个数据的地址</span><br><span class="line">Message(&quot;to d = %08x\n&quot;, cur);</span><br><span class="line">Message(&quot;to d = %08x\n&quot;, Dnext(0x01410559, cur));</span><br><span class="line">Message(&quot;to = %08x\n&quot;, XrefType());//dr_O偏移量, dr_W数据写入, dr_R数据读取</span><br><span class="line">cur = DfirstB(0x01411EF0);//引用该数据的第一个地址</span><br><span class="line">Message(&quot;from d = %08x\n&quot;, cur);</span><br><span class="line">Message(&quot;from d = %08x\n&quot;, DnextB(0x01411EF0, cur));//引用该数据的下一个地址</span><br><span class="line"></span><br><span class="line">//database</span><br><span class="line">MakeUnkn(0x0043DC57, DOUNK_SIMPLE);//undefine</span><br><span class="line">MakeCode(0x0043DC57);//转为code</span><br><span class="line">//MakeUnkn(0x0043DC57, DOUNK_SIMPLE);//undefine</span><br><span class="line">//MakeUnkn(0x0043DC58, DOUNK_SIMPLE);//</span><br><span class="line">//MakeWord(0x0043DC57);//转为数据 MakeWord, MakeDword</span><br><span class="line">MakeComm(0x0043DC57, &quot;just for test comment&quot;);//</span><br><span class="line">//MakeFunction(s, e);//</span><br><span class="line">//MakeStr(s, e);//</span><br><span class="line"></span><br><span class="line">//search SEARCH_DOWN, SEARCH_NEXT, SEARCH_CASE</span><br><span class="line">Message(&quot;code = %08x\n&quot;, FindCode(0x400000, 1));//从这开始搜索一条指令</span><br><span class="line">Message(&quot;data = %08x\n&quot;, FindData(0x400000, 1));//从这开始搜索一个数据</span><br><span class="line">//Message(&quot;find = %08x\n&quot;, FindBinary(0x400000, 1, &quot;FFAB3740&quot;));//从这开始搜索hex数据</span><br><span class="line">auto row = 0;</span><br><span class="line">auto column = 0;</span><br><span class="line">//Message(&quot;find = %08x\n&quot;, FindText(0x400000, 1, row, column, &quot;http://&quot;));</span><br><span class="line"></span><br><span class="line">//asm</span><br><span class="line">Message(&quot;asm = %s\n&quot;, GetDisasm(0x0043D7D8));//asm = push    ebp             ; xxxxxxxxxxxxxxxx</span><br><span class="line">Message(&quot;asm = %s\n&quot;, GetMnem(0x0043D7D8));//asm = push</span><br><span class="line">Message(&quot;asm = %s\n&quot;, GetOpnd(0x0043D7D8, 0));//asm = ebp</span><br><span class="line">Message(&quot;asm = %d\n&quot;, GetOpType(0x0043D7D8, 0));//asm = 1</span><br><span class="line">Message(&quot;asm = %08x\n&quot;, GetOperandValue(0x0043D7D8, 0));//asm = 00000005</span><br><span class="line">Message(&quot;asm = %s\n&quot;, CommentEx(0x0043D7D8, 0));//asm = xxxxxxxxxxxxxxxx</span><br></pre></td></tr></table></figure>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总的来说，idc语法真的挺简单的，跟c基本一样，写起来不需要多大力气，就是需要熟悉idc提供的各类功能函数，应用起来才能得心应手。</p>
 
       
@@ -557,22 +558,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -586,6 +571,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -605,7 +594,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -618,6 +615,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -657,23 +670,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -706,6 +707,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -749,30 +778,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -781,7 +786,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -817,6 +826,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -826,6 +847,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -842,26 +871,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -897,14 +906,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -918,6 +919,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

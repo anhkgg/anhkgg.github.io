@@ -15,7 +15,8 @@
 <meta property="og:url" content="https://anhkgg.github.io/ssctf-crack5-study/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="crack5中的坑注册验证函数中，各种int 3，致使进入通过SetUnhandledExceptionFilter设置的异常处理函数TopLevelExceptionFilter，在TopLevelExceptionFilter控制验证函数中的执行流程，由于先前我用的win7 x64调试，注册毫无反应，以为验证函数无法正常完整执行，so手工乱恢复，看了writeup之后，在xp中调试，你妹，居然">
-<meta property="og:updated_time" content="2016-07-07T04:35:06.621Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2016-07-07T04:35:06.622Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ssctf crack5详述">
 <meta name="twitter:description" content="crack5中的坑注册验证函数中，各种int 3，致使进入通过SetUnhandledExceptionFilter设置的异常处理函数TopLevelExceptionFilter，在TopLevelExceptionFilter控制验证函数中的执行流程，由于先前我用的win7 x64调试，注册毫无反应，以为验证函数无法正常完整执行，so手工乱恢复，看了writeup之后，在xp中调试，你妹，居然">
@@ -185,13 +186,13 @@
 <li>geek710 FROM SSEg33k</li>
 </ol>
 <p>在TopLevelExceptionFilter亦有花，geek710大神的想法是，走一遍TopLevelExceptionFilter，去除功能代码，然后再要跳去执行验证函数的位置，nop验证函数中所有花，这样，一次执行完整之后，就可以得到无花的验证函数，beautiful，跟着这个思想走了一下，不晓得那弄错了，每次都异常退出，下面是提取的TopLevelExceptionFilter的大致代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div></pre></td><td class="code"><pre><div class="line">00401336    87ED            xchg ebp,ebp</div><div class="line">0040134A    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</div><div class="line"></div><div class="line">00401354    8B4424 04       mov eax,dword ptr ss:[esp+0x4]//STRUCT _EXCEPTION_POINTERS *ExceptionInfo </div><div class="line">00401442    8B08            mov ecx,dword ptr ds:[eax]//exp-&gt;ExceptionRecord</div><div class="line">0040139A    8139 03000080   cmp dword ptr ds:[ecx],0x80000003 //exp-&gt;ExceptionRecord == int 3</div><div class="line">0040144A  ^\0F85 14FFFFFF   jnz CrackMe.00401364</div><div class="line"></div><div class="line">//不是 int 3</div><div class="line">00401391    33C0            xor eax,eax</div><div class="line">0040140D    C2 0400         retn 0x4</div><div class="line"></div><div class="line">//是int 3</div><div class="line">0040138A    56              push esi                                 ; kernel32.7C885780</div><div class="line">00401471    8B70 04         mov esi,dword ptr ds:[eax+0x4]//exp-&gt;ContextRecord; </div><div class="line">0040149F    8B96 B8000000   mov edx,dword ptr ds:[esi+0xB8]          ; CrackMe.0040164B</div><div class="line"></div><div class="line">004014B8    803A CC         cmp byte ptr ds:[edx],0xCC</div><div class="line"></div><div class="line">004012F2   /0F85 D6000000   jnz CrackMe.004013CE </div><div class="line"></div><div class="line">//是int 3</div><div class="line">00401329    42              inc edx                                  ; CrackMe.0040164B</div><div class="line">004013B0    87ED            xchg ebp,ebp</div><div class="line">004013C4    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</div><div class="line">jmp 004014A8</div><div class="line"></div><div class="line">//不是int 3了，0xCC</div><div class="line">004014A8    8A0A            mov cl,byte ptr ds:[edx]</div><div class="line">004013F1    8AC1            mov al,cl</div><div class="line">004014D0    C0E0 06         shl al,0x6</div><div class="line">00401477    C0E9 02         shr cl,0x2</div><div class="line">00401495    02C1            add al,cl</div><div class="line">0040149A    34 0D           xor al,0xD</div><div class="line">004014B0    8AC8            mov cl,al</div><div class="line">00401430    C0E9 05         shr cl,0x5</div><div class="line">004014CA    C0E0 03         shl al,0x3</div><div class="line">004014D6    87ED            xchg ebp,ebp</div><div class="line">004014EA    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</div><div class="line">004014F4    02C8            add cl,al</div><div class="line">004014C1    80C1 11         add cl,0x11</div><div class="line">004012FF    8AC1            mov al,cl</div><div class="line">004013AA    C0E0 05         shl al,0x5</div><div class="line">004013DA    C0E9 03         shr cl,0x3</div><div class="line">0040146C    02C1            add al,cl</div><div class="line">0040141F    34 51           xor al,0x51</div><div class="line">0040147D    8AC8            mov cl,al</div><div class="line">004013D4    C0E1 07         shl cl,0x7</div><div class="line">004013FF    D0E8            shr al,1</div><div class="line">00401367    87ED            xchg ebp,ebp</div><div class="line">0040137B    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</div><div class="line">00401385    02C8            add cl,al</div><div class="line">00401407    80E9 6F         sub cl,0x6F</div><div class="line">0040145A    81E1 FF000000   and ecx,0xFF</div><div class="line">00401463    81E1 07000080   and ecx,0x80000007</div><div class="line"></div><div class="line">00401424    03D1            add edx,ecx</div><div class="line">00401307    87ED            xchg ebp,ebp</div><div class="line">0040131B    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</div><div class="line">00401325    42              inc edx                                  ; CrackMe.00401653</div><div class="line">004013E7    83C8 FF         or eax,0xFFFFFFFF</div><div class="line">00401416    8996 B8000000   mov dword ptr ds:[esi+0xB8],edx          ; CrackMe.00401654</div><div class="line"></div><div class="line">//清楚混淆的代码，填充0x90</div><div class="line">0040136E    8BCA            mov ecx,edx</div><div class="line">00401370    2BCF            sub ecx,edi</div><div class="line">00401372    B0 90           mov al,0x90</div><div class="line">00401374    F3:AA           rep stos byte ptr es:[edi]</div><div class="line"></div><div class="line">004013E7    83C8 FF         or eax,0xFFFFFFFF</div><div class="line"></div><div class="line">0040142C    5E              pop esi                                  ; kernel32.7C885780</div><div class="line">00401439    C2 0400         retn 0x4</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">00401336    87ED            xchg ebp,ebp</span><br><span class="line">0040134A    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</span><br><span class="line"></span><br><span class="line">00401354    8B4424 04       mov eax,dword ptr ss:[esp+0x4]//STRUCT _EXCEPTION_POINTERS *ExceptionInfo </span><br><span class="line">00401442    8B08            mov ecx,dword ptr ds:[eax]//exp-&gt;ExceptionRecord</span><br><span class="line">0040139A    8139 03000080   cmp dword ptr ds:[ecx],0x80000003 //exp-&gt;ExceptionRecord == int 3</span><br><span class="line">0040144A  ^\0F85 14FFFFFF   jnz CrackMe.00401364</span><br><span class="line"></span><br><span class="line">//不是 int 3</span><br><span class="line">00401391    33C0            xor eax,eax</span><br><span class="line">0040140D    C2 0400         retn 0x4</span><br><span class="line"></span><br><span class="line">//是int 3</span><br><span class="line">0040138A    56              push esi                                 ; kernel32.7C885780</span><br><span class="line">00401471    8B70 04         mov esi,dword ptr ds:[eax+0x4]//exp-&gt;ContextRecord; </span><br><span class="line">0040149F    8B96 B8000000   mov edx,dword ptr ds:[esi+0xB8]          ; CrackMe.0040164B</span><br><span class="line"></span><br><span class="line">004014B8    803A CC         cmp byte ptr ds:[edx],0xCC</span><br><span class="line"></span><br><span class="line">004012F2   /0F85 D6000000   jnz CrackMe.004013CE </span><br><span class="line"></span><br><span class="line">//是int 3</span><br><span class="line">00401329    42              inc edx                                  ; CrackMe.0040164B</span><br><span class="line">004013B0    87ED            xchg ebp,ebp</span><br><span class="line">004013C4    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</span><br><span class="line">jmp 004014A8</span><br><span class="line"></span><br><span class="line">//不是int 3了，0xCC</span><br><span class="line">004014A8    8A0A            mov cl,byte ptr ds:[edx]</span><br><span class="line">004013F1    8AC1            mov al,cl</span><br><span class="line">004014D0    C0E0 06         shl al,0x6</span><br><span class="line">00401477    C0E9 02         shr cl,0x2</span><br><span class="line">00401495    02C1            add al,cl</span><br><span class="line">0040149A    34 0D           xor al,0xD</span><br><span class="line">004014B0    8AC8            mov cl,al</span><br><span class="line">00401430    C0E9 05         shr cl,0x5</span><br><span class="line">004014CA    C0E0 03         shl al,0x3</span><br><span class="line">004014D6    87ED            xchg ebp,ebp</span><br><span class="line">004014EA    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</span><br><span class="line">004014F4    02C8            add cl,al</span><br><span class="line">004014C1    80C1 11         add cl,0x11</span><br><span class="line">004012FF    8AC1            mov al,cl</span><br><span class="line">004013AA    C0E0 05         shl al,0x5</span><br><span class="line">004013DA    C0E9 03         shr cl,0x3</span><br><span class="line">0040146C    02C1            add al,cl</span><br><span class="line">0040141F    34 51           xor al,0x51</span><br><span class="line">0040147D    8AC8            mov cl,al</span><br><span class="line">004013D4    C0E1 07         shl cl,0x7</span><br><span class="line">004013FF    D0E8            shr al,1</span><br><span class="line">00401367    87ED            xchg ebp,ebp</span><br><span class="line">0040137B    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</span><br><span class="line">00401385    02C8            add cl,al</span><br><span class="line">00401407    80E9 6F         sub cl,0x6F</span><br><span class="line">0040145A    81E1 FF000000   and ecx,0xFF</span><br><span class="line">00401463    81E1 07000080   and ecx,0x80000007</span><br><span class="line"></span><br><span class="line">00401424    03D1            add edx,ecx</span><br><span class="line">00401307    87ED            xchg ebp,ebp</span><br><span class="line">0040131B    8BDB            mov ebx,ebx                              ; CrackMe.004012F0</span><br><span class="line">00401325    42              inc edx                                  ; CrackMe.00401653</span><br><span class="line">004013E7    83C8 FF         or eax,0xFFFFFFFF</span><br><span class="line">00401416    8996 B8000000   mov dword ptr ds:[esi+0xB8],edx          ; CrackMe.00401654</span><br><span class="line"></span><br><span class="line">//清楚混淆的代码，填充0x90</span><br><span class="line">0040136E    8BCA            mov ecx,edx</span><br><span class="line">00401370    2BCF            sub ecx,edi</span><br><span class="line">00401372    B0 90           mov al,0x90</span><br><span class="line">00401374    F3:AA           rep stos byte ptr es:[edi]</span><br><span class="line"></span><br><span class="line">004013E7    83C8 FF         or eax,0xFFFFFFFF</span><br><span class="line"></span><br><span class="line">0040142C    5E              pop esi                                  ; kernel32.7C885780</span><br><span class="line">00401439    C2 0400         retn 0x4</span><br></pre></td></tr></table></figure>
 <p>本来这个是很妙的方法，但是无奈没成功，换一个思路</p>
 <ol>
 <li>Anonymous</li>
 </ol>
 <p>这个方法较麻烦，在 <code>00401416   mov dword ptr ds:[esi+0xB8],edx</code> 处下条件断点，<code>byte ptr[edx] != 0xCC</code>，每次断下之后，记录edx指向的代码（新的int 3之前），完整记录之后，就是注册验证的代码，手工记录如下（不会脚本啊）：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div></pre></td><td class="code"><pre><div class="line">0040168D    6A 01           push 0x1</div><div class="line">0040168F    E8 30100000     call &lt;jmp.&amp;MFC42.#6334&gt;</div><div class="line">004016CE    BB E2D90100     mov ebx,0x1D9E2</div><div class="line">00401715    8D77 64         lea esi,dword ptr ds:[edi+0x64]</div><div class="line">00401718    6A 00           push 0x0</div><div class="line">0040171A    8BCE            mov ecx,esi</div><div class="line">0040171C    E8 9D0F0000     call &lt;jmp.&amp;MFC42.#2915&gt;</div><div class="line">00401721    8945 F8         mov dword ptr ss:[ebp-0x8],eax</div><div class="line">0040175A    8B06            mov eax,dword ptr ds:[esi]</div><div class="line">0040175C    8B48 F8         mov ecx,dword ptr ds:[eax-0x8]</div><div class="line">0040175F    894D FC         mov dword ptr ss:[ebp-0x4],ecx</div><div class="line">004017A1    8B36            mov esi,dword ptr ds:[esi]</div><div class="line">004017A3    68 0C414000     push CrackMe.0040410C</div><div class="line">004017A8    56              push esi</div><div class="line">004017A9    8B35 B4314000   mov esi,dword ptr ds:[&lt;&amp;MSVCRT._mbscmp&gt;] ; msvcrt._mbscmp</div><div class="line">004017AF    FFD6            call esi</div><div class="line">004017B1    83C4 08         add esp,0x8</div><div class="line">004017B4    85C0            test eax,eax</div><div class="line">004017B6    74 4C           je short CrackMe.00401804</div><div class="line">004017F2    8B47 60         mov eax,dword ptr ds:[edi+0x60]</div><div class="line">004017F5    68 0C414000     push CrackMe.0040410C</div><div class="line">004017FA    50              push eax</div><div class="line">004017FB    FFD6            call esi</div><div class="line">004017FD    83C4 08         add esp,0x8</div><div class="line">00401800    85C0            test eax,eax</div><div class="line">00401802    75 17           jnz short CrackMe.0040181B</div><div class="line">00401804    6A 00           push 0x0</div><div class="line">00401806    6A 00           push 0x0</div><div class="line">00401808    68 2C404000     push CrackMe.0040402C                    ; ASCII &quot;注册失败！&quot;</div><div class="line">0040180D    8BCF            mov ecx,edi</div><div class="line">0040180F    E8 A40E0000     call &lt;jmp.&amp;MFC42.#4224&gt;</div><div class="line">00401814    5F              pop edi</div><div class="line">00401815    5E              pop esi</div><div class="line">00401816    5B              pop ebx</div><div class="line">00401817    8BE5            mov esp,ebp</div><div class="line">00401819    5D              pop ebp</div><div class="line">0040181A    C3              retn</div><div class="line"></div><div class="line">004018ED    8B45 FC         mov eax,dword ptr ss:[ebp-0x4]</div><div class="line">004018F0    8B55 F8         mov edx,dword ptr ss:[ebp-0x8]</div><div class="line">004018F3    83C9 FF         or ecx,0xFFFFFFFF</div><div class="line">004018F6    8D7410 01       lea esi,dword ptr ds:[eax+edx+0x1]</div><div class="line">004018FA    2BCA            sub ecx,edx</div><div class="line"></div><div class="line">004018FC    8BC6            mov eax,esi</div><div class="line"></div><div class="line">00401947    0FBE50 FE       movsx edx,byte ptr ds:[eax-0x2]</div><div class="line">0040194B    48              dec eax</div><div class="line">0040194C    03DA            add ebx,edx</div><div class="line">00401994    8D149B          lea edx,dword ptr ds:[ebx+ebx*4]</div><div class="line">00401997    8D14D3          lea edx,dword ptr ds:[ebx+edx*8]</div><div class="line">0040199A    8D1C52          lea ebx,dword ptr ds:[edx+edx*2]</div><div class="line">004019E4    8818            mov byte ptr ds:[eax],bl</div><div class="line">00401A22    81F3 3A45AC14   xor ebx,0x14AC453A</div><div class="line">00401A66    0018            add byte ptr ds:[eax],bl</div><div class="line">00401AA1    8D1401          lea edx,dword ptr ds:[ecx+eax]</div><div class="line">00401AA4    85D2            test edx,edx</div><div class="line">00401AA6  ^ 0F8F 52FEFFFF   jg CrackMe.004018FE</div><div class="line"></div><div class="line">00401B42    8BC6            mov eax,esi</div><div class="line"></div><div class="line">00401B96    0FBE50 FE       movsx edx,byte ptr ds:[eax-0x2]</div><div class="line">00401B9A    48              dec eax</div><div class="line">00401B9B    03DA            add ebx,edx</div><div class="line">00401BD6    8D149B          lea edx,dword ptr ds:[ebx+ebx*4]</div><div class="line">00401BD9    8D14D3          lea edx,dword ptr ds:[ebx+edx*8]</div><div class="line">00401BDC    8D1C52          lea ebx,dword ptr ds:[edx+edx*2]</div><div class="line">00401C2F    8818            mov byte ptr ds:[eax],bl</div><div class="line">00401C6C    81E3 46A554A4   and ebx,0xA454A546</div><div class="line">00401CAE    0018            add byte ptr ds:[eax],bl</div><div class="line">00401CF8    8D1408          lea edx,dword ptr ds:[eax+ecx]</div><div class="line">00401CFB    85D2            test edx,edx</div><div class="line">00401CFD  ^ 0F8F 41FEFFFF   jg CrackMe.00401B44</div><div class="line"></div><div class="line">00401D92    8BC6            mov eax,esi</div><div class="line"></div><div class="line">00401DDC    0FBE50 FE       movsx edx,byte ptr ds:[eax-0x2]</div><div class="line">00401DE0    48              dec eax</div><div class="line">00401DE1    03DA            add ebx,edx</div><div class="line">00401E27    8D149B          lea edx,dword ptr ds:[ebx+ebx*4]</div><div class="line">00401E2A    8D14D3          lea edx,dword ptr ds:[ebx+edx*8]</div><div class="line">00401E2D    8D1C52          lea ebx,dword ptr ds:[edx+edx*2]</div><div class="line">00401E75    8818            mov byte ptr ds:[eax],bl</div><div class="line">00401ECD    81CB 37214715   or ebx,0x15472137</div><div class="line">00401F0A    0018            add byte ptr ds:[eax],bl</div><div class="line">00401F4E    8D1408          lea edx,dword ptr ds:[eax+ecx]</div><div class="line">00401F51    85D2            test edx,edx</div><div class="line">00401F53  ^ 0F8F 3BFEFFFF   jg CrackMe.00401D94</div><div class="line"></div><div class="line">00401F9E    8BC3            mov eax,ebx</div><div class="line">00401FA0    33D2            xor edx,edx</div><div class="line">00401FA2    B9 1F011500     mov ecx,0x15011F</div><div class="line">00401FA7    F7F1            div ecx</div><div class="line">00401FA9    8BDA            mov ebx,edx</div><div class="line"></div><div class="line">00401FF0    8D77 60         lea esi,dword ptr ds:[edi+0x60]</div><div class="line">00401FF3    6A 00           push 0x0</div><div class="line">00401FF5    8BCE            mov ecx,esi</div><div class="line">00401FF7    E8 C2060000     call &lt;jmp.&amp;MFC42.#2915&gt;</div><div class="line"></div><div class="line">00402043    8B16            mov edx,dword ptr ds:[esi]</div><div class="line">00402045    8B52 F8         mov edx,dword ptr ds:[edx-0x8]</div><div class="line">004020D5    33C9            xor ecx,ecx</div><div class="line">00402111    83CE FF         or esi,0xFFFFFFFF</div><div class="line">00402114    8D5402 01       lea edx,dword ptr ds:[edx+eax+0x1]</div><div class="line">00402118    2BF0            sub esi,eax</div><div class="line"></div><div class="line">004021A6    0FBE42 FE       movsx eax,byte ptr ds:[edx-0x2]</div><div class="line">004021AA    4A              dec edx</div><div class="line">004021AB    8D0C89          lea ecx,dword ptr ds:[ecx+ecx*4]</div><div class="line">004021AE    8D4C48 D0       lea ecx,dword ptr ds:[eax+ecx*2-0x30]</div><div class="line">004021F9    880A            mov byte ptr ds:[edx],cl</div><div class="line">00402245    8D0432          lea eax,dword ptr ds:[edx+esi]</div><div class="line">00402248    85C0            test eax,eax</div><div class="line">0040224A  ^ 0F8F CAFEFFFF   jg CrackMe.0040211A</div><div class="line"></div><div class="line">00402290    3BD9            cmp ebx,ecx</div><div class="line">00402292    75 17           jnz short CrackMe.004022AB</div><div class="line">00402294    6A 00           push 0x0</div><div class="line">00402296    6A 00           push 0x0</div><div class="line">00402298    68 20404000     push CrackMe.00404020                    ; ASCII &quot;注册成功！&quot;</div><div class="line">0040229D    8BCF            mov ecx,edi</div><div class="line">0040229F    E8 14040000     call &lt;jmp.&amp;MFC42.#4224&gt;</div><div class="line">004022A4    5F              pop edi</div><div class="line">004022A5    5E              pop esi</div><div class="line">004022A6    5B              pop ebx</div><div class="line">004022A7    8BE5            mov esp,ebp</div><div class="line">004022A9    5D              pop ebp</div><div class="line">004022AA    C3              retn</div><div class="line"></div><div class="line">00402384    6A 00           push 0x0</div><div class="line">00402386    6A 00           push 0x0</div><div class="line">00402388    68 2C404000     push CrackMe.0040402C                    ; ASCII &quot;注册失败！&quot;</div><div class="line">0040238D    8BCF            mov ecx,edi</div><div class="line">0040238F    E8 24030000     call &lt;jmp.&amp;MFC42.#4224&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line">0040168D    6A 01           push 0x1</span><br><span class="line">0040168F    E8 30100000     call &lt;jmp.&amp;MFC42.#6334&gt;</span><br><span class="line">004016CE    BB E2D90100     mov ebx,0x1D9E2</span><br><span class="line">00401715    8D77 64         lea esi,dword ptr ds:[edi+0x64]</span><br><span class="line">00401718    6A 00           push 0x0</span><br><span class="line">0040171A    8BCE            mov ecx,esi</span><br><span class="line">0040171C    E8 9D0F0000     call &lt;jmp.&amp;MFC42.#2915&gt;</span><br><span class="line">00401721    8945 F8         mov dword ptr ss:[ebp-0x8],eax</span><br><span class="line">0040175A    8B06            mov eax,dword ptr ds:[esi]</span><br><span class="line">0040175C    8B48 F8         mov ecx,dword ptr ds:[eax-0x8]</span><br><span class="line">0040175F    894D FC         mov dword ptr ss:[ebp-0x4],ecx</span><br><span class="line">004017A1    8B36            mov esi,dword ptr ds:[esi]</span><br><span class="line">004017A3    68 0C414000     push CrackMe.0040410C</span><br><span class="line">004017A8    56              push esi</span><br><span class="line">004017A9    8B35 B4314000   mov esi,dword ptr ds:[&lt;&amp;MSVCRT._mbscmp&gt;] ; msvcrt._mbscmp</span><br><span class="line">004017AF    FFD6            call esi</span><br><span class="line">004017B1    83C4 08         add esp,0x8</span><br><span class="line">004017B4    85C0            test eax,eax</span><br><span class="line">004017B6    74 4C           je short CrackMe.00401804</span><br><span class="line">004017F2    8B47 60         mov eax,dword ptr ds:[edi+0x60]</span><br><span class="line">004017F5    68 0C414000     push CrackMe.0040410C</span><br><span class="line">004017FA    50              push eax</span><br><span class="line">004017FB    FFD6            call esi</span><br><span class="line">004017FD    83C4 08         add esp,0x8</span><br><span class="line">00401800    85C0            test eax,eax</span><br><span class="line">00401802    75 17           jnz short CrackMe.0040181B</span><br><span class="line">00401804    6A 00           push 0x0</span><br><span class="line">00401806    6A 00           push 0x0</span><br><span class="line">00401808    68 2C404000     push CrackMe.0040402C                    ; ASCII &quot;注册失败！&quot;</span><br><span class="line">0040180D    8BCF            mov ecx,edi</span><br><span class="line">0040180F    E8 A40E0000     call &lt;jmp.&amp;MFC42.#4224&gt;</span><br><span class="line">00401814    5F              pop edi</span><br><span class="line">00401815    5E              pop esi</span><br><span class="line">00401816    5B              pop ebx</span><br><span class="line">00401817    8BE5            mov esp,ebp</span><br><span class="line">00401819    5D              pop ebp</span><br><span class="line">0040181A    C3              retn</span><br><span class="line"></span><br><span class="line">004018ED    8B45 FC         mov eax,dword ptr ss:[ebp-0x4]</span><br><span class="line">004018F0    8B55 F8         mov edx,dword ptr ss:[ebp-0x8]</span><br><span class="line">004018F3    83C9 FF         or ecx,0xFFFFFFFF</span><br><span class="line">004018F6    8D7410 01       lea esi,dword ptr ds:[eax+edx+0x1]</span><br><span class="line">004018FA    2BCA            sub ecx,edx</span><br><span class="line"></span><br><span class="line">004018FC    8BC6            mov eax,esi</span><br><span class="line"></span><br><span class="line">00401947    0FBE50 FE       movsx edx,byte ptr ds:[eax-0x2]</span><br><span class="line">0040194B    48              dec eax</span><br><span class="line">0040194C    03DA            add ebx,edx</span><br><span class="line">00401994    8D149B          lea edx,dword ptr ds:[ebx+ebx*4]</span><br><span class="line">00401997    8D14D3          lea edx,dword ptr ds:[ebx+edx*8]</span><br><span class="line">0040199A    8D1C52          lea ebx,dword ptr ds:[edx+edx*2]</span><br><span class="line">004019E4    8818            mov byte ptr ds:[eax],bl</span><br><span class="line">00401A22    81F3 3A45AC14   xor ebx,0x14AC453A</span><br><span class="line">00401A66    0018            add byte ptr ds:[eax],bl</span><br><span class="line">00401AA1    8D1401          lea edx,dword ptr ds:[ecx+eax]</span><br><span class="line">00401AA4    85D2            test edx,edx</span><br><span class="line">00401AA6  ^ 0F8F 52FEFFFF   jg CrackMe.004018FE</span><br><span class="line"></span><br><span class="line">00401B42    8BC6            mov eax,esi</span><br><span class="line"></span><br><span class="line">00401B96    0FBE50 FE       movsx edx,byte ptr ds:[eax-0x2]</span><br><span class="line">00401B9A    48              dec eax</span><br><span class="line">00401B9B    03DA            add ebx,edx</span><br><span class="line">00401BD6    8D149B          lea edx,dword ptr ds:[ebx+ebx*4]</span><br><span class="line">00401BD9    8D14D3          lea edx,dword ptr ds:[ebx+edx*8]</span><br><span class="line">00401BDC    8D1C52          lea ebx,dword ptr ds:[edx+edx*2]</span><br><span class="line">00401C2F    8818            mov byte ptr ds:[eax],bl</span><br><span class="line">00401C6C    81E3 46A554A4   and ebx,0xA454A546</span><br><span class="line">00401CAE    0018            add byte ptr ds:[eax],bl</span><br><span class="line">00401CF8    8D1408          lea edx,dword ptr ds:[eax+ecx]</span><br><span class="line">00401CFB    85D2            test edx,edx</span><br><span class="line">00401CFD  ^ 0F8F 41FEFFFF   jg CrackMe.00401B44</span><br><span class="line"></span><br><span class="line">00401D92    8BC6            mov eax,esi</span><br><span class="line"></span><br><span class="line">00401DDC    0FBE50 FE       movsx edx,byte ptr ds:[eax-0x2]</span><br><span class="line">00401DE0    48              dec eax</span><br><span class="line">00401DE1    03DA            add ebx,edx</span><br><span class="line">00401E27    8D149B          lea edx,dword ptr ds:[ebx+ebx*4]</span><br><span class="line">00401E2A    8D14D3          lea edx,dword ptr ds:[ebx+edx*8]</span><br><span class="line">00401E2D    8D1C52          lea ebx,dword ptr ds:[edx+edx*2]</span><br><span class="line">00401E75    8818            mov byte ptr ds:[eax],bl</span><br><span class="line">00401ECD    81CB 37214715   or ebx,0x15472137</span><br><span class="line">00401F0A    0018            add byte ptr ds:[eax],bl</span><br><span class="line">00401F4E    8D1408          lea edx,dword ptr ds:[eax+ecx]</span><br><span class="line">00401F51    85D2            test edx,edx</span><br><span class="line">00401F53  ^ 0F8F 3BFEFFFF   jg CrackMe.00401D94</span><br><span class="line"></span><br><span class="line">00401F9E    8BC3            mov eax,ebx</span><br><span class="line">00401FA0    33D2            xor edx,edx</span><br><span class="line">00401FA2    B9 1F011500     mov ecx,0x15011F</span><br><span class="line">00401FA7    F7F1            div ecx</span><br><span class="line">00401FA9    8BDA            mov ebx,edx</span><br><span class="line"></span><br><span class="line">00401FF0    8D77 60         lea esi,dword ptr ds:[edi+0x60]</span><br><span class="line">00401FF3    6A 00           push 0x0</span><br><span class="line">00401FF5    8BCE            mov ecx,esi</span><br><span class="line">00401FF7    E8 C2060000     call &lt;jmp.&amp;MFC42.#2915&gt;</span><br><span class="line"></span><br><span class="line">00402043    8B16            mov edx,dword ptr ds:[esi]</span><br><span class="line">00402045    8B52 F8         mov edx,dword ptr ds:[edx-0x8]</span><br><span class="line">004020D5    33C9            xor ecx,ecx</span><br><span class="line">00402111    83CE FF         or esi,0xFFFFFFFF</span><br><span class="line">00402114    8D5402 01       lea edx,dword ptr ds:[edx+eax+0x1]</span><br><span class="line">00402118    2BF0            sub esi,eax</span><br><span class="line"></span><br><span class="line">004021A6    0FBE42 FE       movsx eax,byte ptr ds:[edx-0x2]</span><br><span class="line">004021AA    4A              dec edx</span><br><span class="line">004021AB    8D0C89          lea ecx,dword ptr ds:[ecx+ecx*4]</span><br><span class="line">004021AE    8D4C48 D0       lea ecx,dword ptr ds:[eax+ecx*2-0x30]</span><br><span class="line">004021F9    880A            mov byte ptr ds:[edx],cl</span><br><span class="line">00402245    8D0432          lea eax,dword ptr ds:[edx+esi]</span><br><span class="line">00402248    85C0            test eax,eax</span><br><span class="line">0040224A  ^ 0F8F CAFEFFFF   jg CrackMe.0040211A</span><br><span class="line"></span><br><span class="line">00402290    3BD9            cmp ebx,ecx</span><br><span class="line">00402292    75 17           jnz short CrackMe.004022AB</span><br><span class="line">00402294    6A 00           push 0x0</span><br><span class="line">00402296    6A 00           push 0x0</span><br><span class="line">00402298    68 20404000     push CrackMe.00404020                    ; ASCII &quot;注册成功！&quot;</span><br><span class="line">0040229D    8BCF            mov ecx,edi</span><br><span class="line">0040229F    E8 14040000     call &lt;jmp.&amp;MFC42.#4224&gt;</span><br><span class="line">004022A4    5F              pop edi</span><br><span class="line">004022A5    5E              pop esi</span><br><span class="line">004022A6    5B              pop ebx</span><br><span class="line">004022A7    8BE5            mov esp,ebp</span><br><span class="line">004022A9    5D              pop ebp</span><br><span class="line">004022AA    C3              retn</span><br><span class="line"></span><br><span class="line">00402384    6A 00           push 0x0</span><br><span class="line">00402386    6A 00           push 0x0</span><br><span class="line">00402388    68 2C404000     push CrackMe.0040402C                    ; ASCII &quot;注册失败！&quot;</span><br><span class="line">0040238D    8BCF            mov ecx,edi</span><br><span class="line">0040238F    E8 24030000     call &lt;jmp.&amp;MFC42.#4224&gt;</span><br></pre></td></tr></table></figure>
 <p>根据这个写出注册机就行</p>
 <h2 id="注册算法"><a href="#注册算法" class="headerlink" title="注册算法"></a><strong>注册算法</strong></h2><p>待续</p>
 
@@ -532,22 +533,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -561,6 +546,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -580,7 +569,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -593,6 +590,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -632,23 +645,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -681,6 +682,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -724,30 +753,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -756,7 +761,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -792,6 +801,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -801,6 +822,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -817,26 +846,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -872,14 +881,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -893,6 +894,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

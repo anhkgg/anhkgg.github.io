@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/how-to-get-GS-cookie/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="Stack cookieStack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，详见。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:updated_time" content="2016-07-07T04:33:15.101Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="how to get GS cookie">
@@ -179,19 +180,19 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Stack-cookie"><a href="#Stack-cookie" class="headerlink" title="Stack cookie"></a><strong>Stack cookie</strong></h1><p>Stack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，<a href="http://www.pediy.com/kssd/pediy12/102719/724039/39112.pdf" target="_blank" rel="external">详见</a>。</p>
+        <h1 id="Stack-cookie"><a href="#Stack-cookie" class="headerlink" title="Stack cookie"></a><strong>Stack cookie</strong></h1><p>Stack cookies (/GS Switch cookie)，windows防止栈溢出的一种机制，<a href="http://www.pediy.com/kssd/pediy12/102719/724039/39112.pdf" target="_blank" rel="noopener">详见</a>。</p>
 <a id="more"></a>
 <blockquote>
 <p><strong>栈中的 cookie/GS保护</strong></p>
 <p>/GS 编译选项会在函数的开头和结尾添加代码来阻止对典型的栈溢出漏洞（字符串缓冲区）的利用。<br>当应用程序启动时，程序的 cookie（4 字节（dword），无符号整型）被计算出来（伪随机数）并保存在<br>加载模块的.data 节中,在函数的开头这个 cookie 被拷贝到栈中，位于 EBP 和返回地址的正前方（位于返<br>回地址和局部变量的中间）。<br>[buffer][cookie][saved EBP][saved EIP]<br>在函数的结尾处，程序会把这个 cookie 和保存在.data 节中的 cookie 进行比较。<br>如果不相等，就说明进程栈被破坏，进程必须被终止。</p>
 <p><strong>栈中的 cookie/GS绕过方法</strong><br>挫败这种栈溢出保护机制的最直接的方法是检索/猜测/计算出 cookie 值（这样就可以用相同的 cookie<br>覆盖栈中的 cookie），这个 cookie 有时候（很少）是一个静态值…但即使如此，它也可能包含一些不利<br>的字符而导致不能使用它。</p>
 </blockquote>
-<h1 id="如何通过PE来获取GS-cookie的值"><a href="#如何通过PE来获取GS-cookie的值" class="headerlink" title="如何通过PE来获取GS cookie的值"></a><strong>如何通过PE来获取GS cookie的值</strong></h1><p>在PE的DataDirectory中，第10序号的是一个叫做LoadConfig的东西，保存了映像的配置数据，里面就有GS cookie，来看看这个数据结构<br><a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms680328(v=vs.85).aspx" title="loadconfig" target="_blank" rel="external">IMAGE_LOAD_CONFIG_DIRECTORY32</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">typedef struct &#123;</div><div class="line">    DWORD   Size;</div><div class="line">    DWORD   TimeDateStamp;</div><div class="line">    WORD    MajorVersion;</div><div class="line">    WORD    MinorVersion;</div><div class="line">    DWORD   GlobalFlagsClear;</div><div class="line">    DWORD   GlobalFlagsSet;</div><div class="line">    DWORD   CriticalSectionDefaultTimeout;</div><div class="line">    DWORD   DeCommitFreeBlockThreshold;</div><div class="line">    DWORD   DeCommitTotalFreeThreshold;</div><div class="line">    DWORD   LockPrefixTable;            // VA</div><div class="line">    DWORD   MaximumAllocationSize;</div><div class="line">    DWORD   VirtualMemoryThreshold;</div><div class="line">    DWORD   ProcessHeapFlags;</div><div class="line">    DWORD   ProcessAffinityMask;</div><div class="line">    WORD    CSDVersion;</div><div class="line">    WORD    Reserved1;</div><div class="line">    DWORD   EditList;                   // VA</div><div class="line">    DWORD   SecurityCookie;             // VA</div><div class="line">    DWORD   SEHandlerTable;             // VA</div><div class="line">    DWORD   SEHandlerCount;</div><div class="line">&#125; IMAGE_LOAD_CONFIG_DIRECTORY32, *PIMAGE_LOAD_CONFIG_DIRECTORY32;</div></pre></td></tr></table></figure>
+<h1 id="如何通过PE来获取GS-cookie的值"><a href="#如何通过PE来获取GS-cookie的值" class="headerlink" title="如何通过PE来获取GS cookie的值"></a><strong>如何通过PE来获取GS cookie的值</strong></h1><p>在PE的DataDirectory中，第10序号的是一个叫做LoadConfig的东西，保存了映像的配置数据，里面就有GS cookie，来看看这个数据结构<br><a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms680328(v=vs.85).aspx" title="loadconfig" target="_blank" rel="noopener">IMAGE_LOAD_CONFIG_DIRECTORY32</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">    DWORD   Size;</span><br><span class="line">    DWORD   TimeDateStamp;</span><br><span class="line">    WORD    MajorVersion;</span><br><span class="line">    WORD    MinorVersion;</span><br><span class="line">    DWORD   GlobalFlagsClear;</span><br><span class="line">    DWORD   GlobalFlagsSet;</span><br><span class="line">    DWORD   CriticalSectionDefaultTimeout;</span><br><span class="line">    DWORD   DeCommitFreeBlockThreshold;</span><br><span class="line">    DWORD   DeCommitTotalFreeThreshold;</span><br><span class="line">    DWORD   LockPrefixTable;            // VA</span><br><span class="line">    DWORD   MaximumAllocationSize;</span><br><span class="line">    DWORD   VirtualMemoryThreshold;</span><br><span class="line">    DWORD   ProcessHeapFlags;</span><br><span class="line">    DWORD   ProcessAffinityMask;</span><br><span class="line">    WORD    CSDVersion;</span><br><span class="line">    WORD    Reserved1;</span><br><span class="line">    DWORD   EditList;                   // VA</span><br><span class="line">    DWORD   SecurityCookie;             // VA</span><br><span class="line">    DWORD   SEHandlerTable;             // VA</span><br><span class="line">    DWORD   SEHandlerCount;</span><br><span class="line">&#125; IMAGE_LOAD_CONFIG_DIRECTORY32, *PIMAGE_LOAD_CONFIG_DIRECTORY32;</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p><strong>SecurityCookie</strong><br>A pointer to a cookie that is used by Visual C++ or GS implementation.</p>
 </blockquote>
-<p>所以，可以通过解析pe的方式，获取到SecurityCookie，进而绕过cookie/GS保护，这只是我的想法，也没测试过，是在分析某个sys的时间想到的，下面贴出获取Cookie的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">unsigned int __stdcall myGetGSSecureCookie(PVOID ImageBase, ULONG Size)</div><div class="line">&#123;</div><div class="line">  ULONG v2; // edi@1</div><div class="line">  PVOID v3; // esi@1</div><div class="line">  PVOID v4; // eax@2</div><div class="line">  unsigned int result; // eax@7</div><div class="line"></div><div class="line">  v3 = ImageBase;</div><div class="line">  v2 = Size;</div><div class="line">  if ( (signed int)myGetValidNtHeader(1, (unsigned int)ImageBase, Size, (int)&amp;ImageBase) &lt; 0//myGetValidNtHeader获取nt头地址</div><div class="line">    || (v4 = RtlImageDirectoryEntryToData(v3, 1u, 0xAu, &amp;Size), !v4)// 通过加载配置目录信息找到SecureCookie</div><div class="line">    || !Size</div><div class="line">    || Size != 0x40 &amp;&amp; Size != *(_DWORD *)v4</div><div class="line">    || *(_DWORD *)v4 &lt; 0x48u</div><div class="line">    || (result = *((_DWORD *)v4 + 15), result &lt;= (unsigned int)v3)// loadcofig-&gt;SecurityCookie</div><div class="line">						// A pointer to a cookie that is used by Visual C++ or GS implementation.</div><div class="line">    || result &gt;= (unsigned int)(v3 + v2 - 4) )</div><div class="line">    result = 0;</div><div class="line">  return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>所以，可以通过解析pe的方式，获取到SecurityCookie，进而绕过cookie/GS保护，这只是我的想法，也没测试过，是在分析某个sys的时间想到的，下面贴出获取Cookie的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">unsigned int __stdcall myGetGSSecureCookie(PVOID ImageBase, ULONG Size)</span><br><span class="line">&#123;</span><br><span class="line">  ULONG v2; // edi@1</span><br><span class="line">  PVOID v3; // esi@1</span><br><span class="line">  PVOID v4; // eax@2</span><br><span class="line">  unsigned int result; // eax@7</span><br><span class="line"></span><br><span class="line">  v3 = ImageBase;</span><br><span class="line">  v2 = Size;</span><br><span class="line">  if ( (signed int)myGetValidNtHeader(1, (unsigned int)ImageBase, Size, (int)&amp;ImageBase) &lt; 0//myGetValidNtHeader获取nt头地址</span><br><span class="line">    || (v4 = RtlImageDirectoryEntryToData(v3, 1u, 0xAu, &amp;Size), !v4)// 通过加载配置目录信息找到SecureCookie</span><br><span class="line">    || !Size</span><br><span class="line">    || Size != 0x40 &amp;&amp; Size != *(_DWORD *)v4</span><br><span class="line">    || *(_DWORD *)v4 &lt; 0x48u</span><br><span class="line">    || (result = *((_DWORD *)v4 + 15), result &lt;= (unsigned int)v3)// loadcofig-&gt;SecurityCookie</span><br><span class="line">						// A pointer to a cookie that is used by Visual C++ or GS implementation.</span><br><span class="line">    || result &gt;= (unsigned int)(v3 + v2 - 4) )</span><br><span class="line">    result = 0;</span><br><span class="line">  return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a><strong>其他</strong></h1><p>没来得及查资料，是否有完整的绕过方法，这只是自己突然分析到这，想到的，不对之处，敬请见谅。</p>
 
       
@@ -539,22 +540,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -568,6 +553,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -587,7 +576,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -600,6 +597,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -639,23 +652,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -688,6 +689,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -731,30 +760,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -763,7 +768,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -799,6 +808,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -808,6 +829,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -824,26 +853,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -879,14 +888,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -900,6 +901,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

@@ -15,7 +15,8 @@
 <meta property="og:url" content="https://anhkgg.github.io/rustls-source-code-analyze/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="作者：anhkgg  日期：2017-11-16  rustls已经支持tls1.3，但是测试分析中使用的tls1.2，所以后面分析主要集中在tls1.2。 主要分析的源码内容：  client和server的握手协议流程 rustls是如何进行数据传输的 数据传输是如何加密解密的">
-<meta property="og:updated_time" content="2017-11-17T05:35:17.809Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-11-17T05:35:17.810Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rustls之源码分析总结（一）">
 <meta name="twitter:description" content="作者：anhkgg  日期：2017-11-16  rustls已经支持tls1.3，但是测试分析中使用的tls1.2，所以后面分析主要集中在tls1.2。 主要分析的源码内容：  client和server的握手协议流程 rustls是如何进行数据传输的 数据传输是如何加密解密的">
@@ -194,7 +195,7 @@
 <h2 id="源码结构"><a href="#源码结构" class="headerlink" title="源码结构"></a>源码结构</h2><p><strong>分为client和server两部分</strong></p>
 <h3 id="公共接口"><a href="#公共接口" class="headerlink" title="公共接口"></a>公共接口</h3><p><strong>session.rs</strong>定义了SessionCommon，包括了数据传输、数据加密、包处理相关接口。</p>
 <p><strong>主要字段</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">pub struct SessionCommon &#123;</div><div class="line">    pub negotiated_version: Option&lt;ProtocolVersion&gt;, //协商好的协议版本</div><div class="line">    pub is_client: bool, //是客户端true，是服务端false</div><div class="line">    message_encrypter: Box&lt;MessageEncrypter&gt;, //数据加密接口</div><div class="line">    message_decrypter: Box&lt;MessageDecrypter&gt;, //数据解密接口</div><div class="line">    key_schedule: Option&lt;KeySchedule&gt;,</div><div class="line">    suite: Option&lt;&amp;&apos;static SupportedCipherSuite&gt;,</div><div class="line">    write_seq: u64,</div><div class="line">    read_seq: u64,</div><div class="line">    peer_eof: bool,</div><div class="line">    pub peer_encrypting: bool,</div><div class="line">    pub we_encrypting: bool,</div><div class="line">    pub traffic: bool, // 默认false，握手完成字段为true</div><div class="line">    pub want_write_key_update: bool,</div><div class="line">    pub message_deframer: MessageDeframer, //消息帧处理对象，保存所有Message包</div><div class="line">    pub handshake_joiner: HandshakeJoiner,</div><div class="line">    pub message_fragmenter: MessageFragmenter,</div><div class="line">    received_plaintext: ChunkVecBuffer, //缓存接收到的数据明文</div><div class="line">    sendable_plaintext: ChunkVecBuffer,//缓存握手后需要传输的数据明文</div><div class="line">    pub sendable_tls: ChunkVecBuffer, //缓存握手数据包</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">pub struct SessionCommon &#123;</span><br><span class="line">    pub negotiated_version: Option&lt;ProtocolVersion&gt;, //协商好的协议版本</span><br><span class="line">    pub is_client: bool, //是客户端true，是服务端false</span><br><span class="line">    message_encrypter: Box&lt;MessageEncrypter&gt;, //数据加密接口</span><br><span class="line">    message_decrypter: Box&lt;MessageDecrypter&gt;, //数据解密接口</span><br><span class="line">    key_schedule: Option&lt;KeySchedule&gt;,</span><br><span class="line">    suite: Option&lt;&amp;&apos;static SupportedCipherSuite&gt;,</span><br><span class="line">    write_seq: u64,</span><br><span class="line">    read_seq: u64,</span><br><span class="line">    peer_eof: bool,</span><br><span class="line">    pub peer_encrypting: bool,</span><br><span class="line">    pub we_encrypting: bool,</span><br><span class="line">    pub traffic: bool, // 默认false，握手完成字段为true</span><br><span class="line">    pub want_write_key_update: bool,</span><br><span class="line">    pub message_deframer: MessageDeframer, //消息帧处理对象，保存所有Message包</span><br><span class="line">    pub handshake_joiner: HandshakeJoiner,</span><br><span class="line">    pub message_fragmenter: MessageFragmenter,</span><br><span class="line">    received_plaintext: ChunkVecBuffer, //缓存接收到的数据明文</span><br><span class="line">    sendable_plaintext: ChunkVecBuffer,//缓存握手后需要传输的数据明文</span><br><span class="line">    pub sendable_tls: ChunkVecBuffer, //缓存握手数据包</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>主要接口</strong></p>
 <table>
 <thead>
@@ -268,62 +269,62 @@
 </table>
 <p><strong>ciper.rs</strong>定义了加密解密的接口。</p>
 <p><code>MessageEncrypter</code>,<code>MessageDecrypter</code>，具体使用加解密方法在握手过程中ExpectTLS12ServerDone::handle/ExpectTLS12ClientKX::handle设置。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//client端</div><div class="line">// 5e. Now commit secrets.</div><div class="line">let hashalg = sess.common.get_suite().get_hash();</div><div class="line">if st.handshake.using_ems &#123;</div><div class="line">    sess.secrets = Some(SessionSecrets::new_ems(&amp;st.handshake.randoms,</div><div class="line">                                                &amp;handshake_hash,</div><div class="line">                                                hashalg,</div><div class="line">                                                &amp;kxd.premaster_secret));</div><div class="line">&#125; else &#123;</div><div class="line">    sess.secrets = Some(SessionSecrets::new(&amp;st.handshake.randoms,</div><div class="line">                                            hashalg,</div><div class="line">                                            &amp;kxd.premaster_secret));</div><div class="line">&#125;</div><div class="line">sess.start_encryption_tls12();</div><div class="line">//----------</div><div class="line">pub fn start_encryption_tls12(&amp;mut self, secrets: &amp;SessionSecrets) &#123;</div><div class="line">        let (dec, enc) = cipher::new_tls12(self.get_suite(), secrets);</div><div class="line">        self.message_encrypter = enc;</div><div class="line">        self.message_decrypter = dec;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<h3 id="client详解"><a href="#client详解" class="headerlink" title="client详解"></a>client详解</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">src/client/mod.rs 导出ClientSession接口，外部使用</div><div class="line">src/client/hs.rs tls协议中所有包处理，包括握手和传输</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">//client端</span><br><span class="line">// 5e. Now commit secrets.</span><br><span class="line">let hashalg = sess.common.get_suite().get_hash();</span><br><span class="line">if st.handshake.using_ems &#123;</span><br><span class="line">    sess.secrets = Some(SessionSecrets::new_ems(&amp;st.handshake.randoms,</span><br><span class="line">                                                &amp;handshake_hash,</span><br><span class="line">                                                hashalg,</span><br><span class="line">                                                &amp;kxd.premaster_secret));</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    sess.secrets = Some(SessionSecrets::new(&amp;st.handshake.randoms,</span><br><span class="line">                                            hashalg,</span><br><span class="line">                                            &amp;kxd.premaster_secret));</span><br><span class="line">&#125;</span><br><span class="line">sess.start_encryption_tls12();</span><br><span class="line">//----------</span><br><span class="line">pub fn start_encryption_tls12(&amp;mut self, secrets: &amp;SessionSecrets) &#123;</span><br><span class="line">        let (dec, enc) = cipher::new_tls12(self.get_suite(), secrets);</span><br><span class="line">        self.message_encrypter = enc;</span><br><span class="line">        self.message_decrypter = dec;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="client详解"><a href="#client详解" class="headerlink" title="client详解"></a>client详解</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">src/client/mod.rs 导出ClientSession接口，外部使用</span><br><span class="line">src/client/hs.rs tls协议中所有包处理，包括握手和传输</span><br></pre></td></tr></table></figure>
 <p><code>ClientSession</code>内部由<code>ClientSessionImpl</code>实现。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">pub struct ClientSessionImpl &#123;</div><div class="line">    pub config: Arc&lt;ClientConfig&gt;, //保存client端的证书，密钥配置等信息</div><div class="line">    pub secrets: Option&lt;SessionSecrets&gt;, //保存握手后的会话密钥</div><div class="line">    pub alpn_protocol: Option&lt;String&gt;,</div><div class="line">    pub common: SessionCommon, // 完成具体消息传输、加解密等</div><div class="line">    pub error: Option&lt;TLSError&gt;,</div><div class="line">    pub state: Option&lt;Box&lt;hs::State + Send&gt;&gt;, // 保存握手过程中的交互状态，握手中处理对象都实现State接口</div><div class="line">    pub server_cert_chain: CertificatePayload, // 服务端证书链</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pub struct ClientSessionImpl &#123;</span><br><span class="line">    pub config: Arc&lt;ClientConfig&gt;, //保存client端的证书，密钥配置等信息</span><br><span class="line">    pub secrets: Option&lt;SessionSecrets&gt;, //保存握手后的会话密钥</span><br><span class="line">    pub alpn_protocol: Option&lt;String&gt;,</span><br><span class="line">    pub common: SessionCommon, // 完成具体消息传输、加解密等</span><br><span class="line">    pub error: Option&lt;TLSError&gt;,</span><br><span class="line">    pub state: Option&lt;Box&lt;hs::State + Send&gt;&gt;, // 保存握手过程中的交互状态，握手中处理对象都实现State接口</span><br><span class="line">    pub server_cert_chain: CertificatePayload, // 服务端证书链</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>握手，准备第一个数据包</strong>。</p>
 <p><code>ClientSessionImpl::new</code>内部就会准备握手要发送的第一个数据包。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">cs.state = Some(hs::start_handshake(&amp;mut cs, hostname));</div><div class="line">//cs.state保存下一次将处理数据对象</div><div class="line">---&gt; //进入hs.rs</div><div class="line">InitialState::emit_initial_client_hello</div><div class="line">---&gt;</div><div class="line">emit_client_hello_for_retry</div><div class="line">---&gt; //构造发送的数据包</div><div class="line">let mut chp = HandshakeMessagePayload &#123;</div><div class="line">        typ: HandshakeType::ClientHello,</div><div class="line">        payload: HandshakePayload::ClientHello(ClientHelloPayload &#123;</div><div class="line">            client_version: ProtocolVersion::TLSv1_2,</div><div class="line">            random: Random::from_slice(&amp;handshake.randoms.client),</div><div class="line">            session_id: session_id,</div><div class="line">            cipher_suites: sess.get_cipher_suites(),</div><div class="line">            compression_methods: vec![Compression::Null],</div><div class="line">            extensions: exts,</div><div class="line">        &#125;),</div><div class="line">    &#125;;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">cs.state = Some(hs::start_handshake(&amp;mut cs, hostname));</span><br><span class="line">//cs.state保存下一次将处理数据对象</span><br><span class="line">---&gt; //进入hs.rs</span><br><span class="line">InitialState::emit_initial_client_hello</span><br><span class="line">---&gt;</span><br><span class="line">emit_client_hello_for_retry</span><br><span class="line">---&gt; //构造发送的数据包</span><br><span class="line">let mut chp = HandshakeMessagePayload &#123;</span><br><span class="line">        typ: HandshakeType::ClientHello,</span><br><span class="line">        payload: HandshakePayload::ClientHello(ClientHelloPayload &#123;</span><br><span class="line">            client_version: ProtocolVersion::TLSv1_2,</span><br><span class="line">            random: Random::from_slice(&amp;handshake.randoms.client),</span><br><span class="line">            session_id: session_id,</span><br><span class="line">            cipher_suites: sess.get_cipher_suites(),</span><br><span class="line">            compression_methods: vec![Compression::Null],</span><br><span class="line">            extensions: exts,</span><br><span class="line">        &#125;),</span><br><span class="line">    &#125;;</span><br></pre></td></tr></table></figure>
 <p>然后，收到返回数据之后，会在<code>ClientSessionImpl::process_main_protocol</code>调用<code>state.handle</code>来处理收到的数据，然后返回新的state，用于下次处理，如此循环，知道握手完成。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">fn process_main_protocol(&amp;mut self, msg: Message) -&gt; Result&lt;(), TLSError&gt; &#123;</div><div class="line">	//检查消息是否合法</div><div class="line">    let state = self.state.take().unwrap();</div><div class="line">    state</div><div class="line">        .check_message(&amp;msg)</div><div class="line">        .map_err(|err| &#123;</div><div class="line">            self.queue_unexpected_alert();</div><div class="line">            err</div><div class="line">        &#125;)?;</div><div class="line">    //处理本次数据，返回下次需要处理的数据对象</div><div class="line">    self.state = Some(state.handle(self, msg)?);</div><div class="line">    Ok(())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">fn process_main_protocol(&amp;mut self, msg: Message) -&gt; Result&lt;(), TLSError&gt; &#123;</span><br><span class="line">	//检查消息是否合法</span><br><span class="line">    let state = self.state.take().unwrap();</span><br><span class="line">    state</span><br><span class="line">        .check_message(&amp;msg)</span><br><span class="line">        .map_err(|err| &#123;</span><br><span class="line">            self.queue_unexpected_alert();</span><br><span class="line">            err</span><br><span class="line">        &#125;)?;</span><br><span class="line">    //处理本次数据，返回下次需要处理的数据对象</span><br><span class="line">    self.state = Some(state.handle(self, msg)?);</span><br><span class="line">    Ok(())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>消息处理调用流程如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//ClientSessionImpl</div><div class="line">process_new_packets-&gt;process_msg-&gt;process_main_protocol-&gt;state.handle</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//ClientSessionImpl</span><br><span class="line">process_new_packets-&gt;process_msg-&gt;process_main_protocol-&gt;state.handle</span><br></pre></td></tr></table></figure>
 <p>下面直接列出client端握手处理流程：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ExpectServerHelloOrHelloRetryRequest:handle </div><div class="line">ExpectServerHello:handle // 处理serverhello</div><div class="line">ExpectTLS12Certificate: handle //验证证书</div><div class="line">ExpectTLS12ServerKX: handle  // 密钥交换</div><div class="line">ExpectTLS12ServerDoneOrCertReq: handle</div><div class="line">ExpectTLS12ServerDone: handle</div><div class="line">emit_clientkx</div><div class="line">emit_ccs</div><div class="line">ExpectTLS12CCS:handle //通知使用加密方式发送报文，sess.common.peer_now_encrypting();设置后面数据会加密的状态</div><div class="line">emit_finished</div><div class="line">ExpectTLS12Finished:handle // 握手结束</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ExpectServerHelloOrHelloRetryRequest:handle </span><br><span class="line">ExpectServerHello:handle // 处理serverhello</span><br><span class="line">ExpectTLS12Certificate: handle //验证证书</span><br><span class="line">ExpectTLS12ServerKX: handle  // 密钥交换</span><br><span class="line">ExpectTLS12ServerDoneOrCertReq: handle</span><br><span class="line">ExpectTLS12ServerDone: handle</span><br><span class="line">emit_clientkx</span><br><span class="line">emit_ccs</span><br><span class="line">ExpectTLS12CCS:handle //通知使用加密方式发送报文，sess.common.peer_now_encrypting();设置后面数据会加密的状态</span><br><span class="line">emit_finished</span><br><span class="line">ExpectTLS12Finished:handle // 握手结束</span><br></pre></td></tr></table></figure>
 <p>在<code>ExpectTLS12Finished::handle</code>中，会保存<code>session</code>，开始传输数据，以及返回下次的<code>state</code>，<strong>此时握手协议已经完成</strong>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">save_session(&amp;mut st.handshake,</div><div class="line">             &amp;mut st.ticket,</div><div class="line">             sess);</div><div class="line"></div><div class="line">if st.resuming &#123;</div><div class="line">    emit_ccs(sess);</div><div class="line">    emit_finished(&amp;mut st.handshake, sess);</div><div class="line">&#125;</div><div class="line"></div><div class="line">sess.common.we_now_encrypting();</div><div class="line">sess.common.start_traffic(); //发送数据</div><div class="line">Ok(st.into_expect_tls12_traffic(fin)) // 下次需要ExpectTLS12Traffic</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">save_session(&amp;mut st.handshake,</span><br><span class="line">             &amp;mut st.ticket,</span><br><span class="line">             sess);</span><br><span class="line"></span><br><span class="line">if st.resuming &#123;</span><br><span class="line">    emit_ccs(sess);</span><br><span class="line">    emit_finished(&amp;mut st.handshake, sess);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">sess.common.we_now_encrypting();</span><br><span class="line">sess.common.start_traffic(); //发送数据</span><br><span class="line">Ok(st.into_expect_tls12_traffic(fin)) // 下次需要ExpectTLS12Traffic</span><br></pre></td></tr></table></figure>
 <p>后面数据传输的所有流程都会进入<code>ExpectTLS12Traffic::handle</code>，也就是开始<strong>传输协议</strong>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">impl State for ExpectTLS12Traffic &#123;</div><div class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ClientSessionImpl, mut m: Message) -&gt; StateResult &#123;</div><div class="line">   sess.common.take_received_plaintext(m.take_opaque_payload().unwrap());</div><div class="line">        Ok(self) //返回的依然是ExpectTLS12Traffic给state，所以以后都会进入这里</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">impl State for ExpectTLS12Traffic &#123;</span><br><span class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ClientSessionImpl, mut m: Message) -&gt; StateResult &#123;</span><br><span class="line">   sess.common.take_received_plaintext(m.take_opaque_payload().unwrap());</span><br><span class="line">        Ok(self) //返回的依然是ExpectTLS12Traffic给state，所以以后都会进入这里</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>传输数据的处理</strong>。</p>
 <p><strong>接收数据</strong></p>
 <p>调用<code>take_received_plaintext</code>将获取到的明文Message传给内部处理，存入<code>SessionCommon</code>的<code>received_plaintext</code>，等待用户的提取。</p>
 <p>那明文Message是怎么来的呢？是在前面说到的消息处理流程中，到handle之前。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">process_new_packets-&gt;process_msg-&gt;process_main_protocol-&gt;state.handle</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">process_new_packets-&gt;process_msg-&gt;process_main_protocol-&gt;state.handle</span><br></pre></td></tr></table></figure>
 <p>在<code>process_msg</code>中会判断<code>peer_encrypting</code>状态为真则将数据解密，而该状态是在握手中<code>ExpectTLS12CCS::handle</code> 被设置为true的。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">pub fn process_msg(&amp;mut self, mut msg: Message) -&gt; Result&lt;(), TLSError&gt; &#123;</div><div class="line">	// Decrypt if demanded by current state.</div><div class="line">	if self.common.peer_encrypting &#123;</div><div class="line">	    let dm = self.common.decrypt_incoming(msg)?; //解密数据</div><div class="line">	    msg = dm;</div><div class="line">	&#125;</div><div class="line">        </div><div class="line">//self.common.peer_encrypting</div><div class="line">pub fn peer_now_encrypting(&amp;mut self) &#123;</div><div class="line">    self.peer_encrypting = true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pub fn process_msg(&amp;mut self, mut msg: Message) -&gt; Result&lt;(), TLSError&gt; &#123;</span><br><span class="line">	// Decrypt if demanded by current state.</span><br><span class="line">	if self.common.peer_encrypting &#123;</span><br><span class="line">	    let dm = self.common.decrypt_incoming(msg)?; //解密数据</span><br><span class="line">	    msg = dm;</span><br><span class="line">	&#125;</span><br><span class="line">        </span><br><span class="line">//self.common.peer_encrypting</span><br><span class="line">pub fn peer_now_encrypting(&amp;mut self) &#123;</span><br><span class="line">    self.peer_encrypting = true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>发送数据</strong></p>
 <p><strong>握手过程中</strong>，发送数据包使用<code>sess.common.send_msg(ch, false)</code>。<code>send_msg</code>内部根据是否加密状态（<code>must_encrypt</code>）进行不同处理，直接缓存或者调用<code>send_msg_encrypt</code>加密之后缓存。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">send_msg_encrypt-&gt;send_single_fragment-&gt;encrypt_outgoing(加密)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">send_msg_encrypt-&gt;send_single_fragment-&gt;encrypt_outgoing(加密)</span><br></pre></td></tr></table></figure>
 <p>最后都是通过<code>queue_tls_message</code>将数据先缓存，然后在调用<code>write_tls</code>之后将数据发送。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">pub fn write_tls(&amp;mut self, wr: &amp;mut Write) -&gt; io::Result&lt;usize&gt; &#123;</div><div class="line">    self.sendable_tls.write_to(wr)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pub fn write_tls(&amp;mut self, wr: &amp;mut Write) -&gt; io::Result&lt;usize&gt; &#123;</span><br><span class="line">    self.sendable_tls.write_to(wr)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>握手完成后</strong>，通过<code>ClientSession</code>实现的<code>io::write</code>（或者<code>write_all</code>）接口发送明文数据。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">impl io::Write for ClientSession &#123;</div><div class="line">	//先缓存数据</div><div class="line">    fn write(&amp;mut self, buf: &amp;[u8]) -&gt; io::Result&lt;usize&gt;&#123;</div><div class="line">            self.imp.common.send_some_plaintext(buf)</div><div class="line">    &#125;</div><div class="line">	//flush时才发送数据</div><div class="line">    fn flush(&amp;mut self) -&gt; io::Result&lt;()&gt; &#123;</div><div class="line">        self.imp.common.flush_plaintext();</div><div class="line">        Ok(())</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">impl io::Write for ClientSession &#123;</span><br><span class="line">	//先缓存数据</span><br><span class="line">    fn write(&amp;mut self, buf: &amp;[u8]) -&gt; io::Result&lt;usize&gt;&#123;</span><br><span class="line">            self.imp.common.send_some_plaintext(buf)</span><br><span class="line">    &#125;</span><br><span class="line">	//flush时才发送数据</span><br><span class="line">    fn flush(&amp;mut self) -&gt; io::Result&lt;()&gt; &#123;</span><br><span class="line">        self.imp.common.flush_plaintext();</span><br><span class="line">        Ok(())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>send_some_plaintext</code>在根据是否握手完成有不同的操作，握手未完成时，先缓存明文到<code>sendable_plaintext</code>，握手完成后，直接调用<code>send_appdata_encrypt</code>缓存密文（进入<code>send_single_fragment</code>过程加密）。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">pub fn send_some_plaintext(&amp;mut self, data: &amp;[u8]) -&gt; io::Result&lt;usize&gt; &#123;</div><div class="line">    self.send_plain(data, Limit::Yes)</div><div class="line">&#125;</div><div class="line"></div><div class="line">fn send_plain(&amp;mut self, data: &amp;[u8], limit: Limit) -&gt; io::Result&lt;usize&gt; &#123;</div><div class="line">    if !self.traffic &#123; //握手未完成</div><div class="line">        let len = match limit &#123; //缓存明文</div><div class="line">            Limit::Yes =&gt; self.sendable_plaintext.append_limited_copy(data),</div><div class="line">            Limit::No =&gt; self.sendable_plaintext.append(data.to_vec())</div><div class="line">        &#125;;</div><div class="line">        return Ok(len);</div><div class="line">    &#125;</div><div class="line">    //握手完成，直接缓存加密数据</div><div class="line">    Ok(self.send_appdata_encrypt(data, limit))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pub fn send_some_plaintext(&amp;mut self, data: &amp;[u8]) -&gt; io::Result&lt;usize&gt; &#123;</span><br><span class="line">    self.send_plain(data, Limit::Yes)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fn send_plain(&amp;mut self, data: &amp;[u8], limit: Limit) -&gt; io::Result&lt;usize&gt; &#123;</span><br><span class="line">    if !self.traffic &#123; //握手未完成</span><br><span class="line">        let len = match limit &#123; //缓存明文</span><br><span class="line">            Limit::Yes =&gt; self.sendable_plaintext.append_limited_copy(data),</span><br><span class="line">            Limit::No =&gt; self.sendable_plaintext.append(data.to_vec())</span><br><span class="line">        &#125;;</span><br><span class="line">        return Ok(len);</span><br><span class="line">    &#125;</span><br><span class="line">    //握手完成，直接缓存加密数据</span><br><span class="line">    Ok(self.send_appdata_encrypt(data, limit))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>握手完成时，之前缓存的明文数据通过<code>start_traffic</code>实际将数据加密缓存到sendable_tls，最后也是通过write_tls发送出去。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">pub fn start_traffic(&amp;mut self) &#123;</div><div class="line">        self.traffic = true;</div><div class="line">        self.flush_plaintext();</div><div class="line">    &#125;</div><div class="line">-&gt;</div><div class="line">flush_plaintext-&gt;send_plain-&gt;send_appdata_encrypt-&gt;send_single_fragment-&gt; encrypt_outgoing(加密)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pub fn start_traffic(&amp;mut self) &#123;</span><br><span class="line">        self.traffic = true;</span><br><span class="line">        self.flush_plaintext();</span><br><span class="line">    &#125;</span><br><span class="line">-&gt;</span><br><span class="line">flush_plaintext-&gt;send_plain-&gt;send_appdata_encrypt-&gt;send_single_fragment-&gt; encrypt_outgoing(加密)</span><br></pre></td></tr></table></figure>
 <p>握手完成之后调用的<code>send_some_plaintext</code>是直接将数据加密缓存，在write_tls后发送出去。</p>
-<h3 id="server详解"><a href="#server详解" class="headerlink" title="server详解"></a>server详解</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">src/server/mod.rs 导出ServerSession接口，外部使用</div><div class="line">src/server/hs.rs tls协议中所有包处理，包括握手和传输</div><div class="line">src/client/</div></pre></td></tr></table></figure>
+<h3 id="server详解"><a href="#server详解" class="headerlink" title="server详解"></a>server详解</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">src/server/mod.rs 导出ServerSession接口，外部使用</span><br><span class="line">src/server/hs.rs tls协议中所有包处理，包括握手和传输</span><br><span class="line">src/client/</span><br></pre></td></tr></table></figure>
 <p>公开外部使用的借口ServerSession，内部由ServerSessionImpl实现。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">pub struct ServerSessionImpl &#123;</div><div class="line">    pub config: Arc&lt;ServerConfig&gt;, //证书、密钥等配置</div><div class="line">    pub secrets: Option&lt;SessionSecrets&gt;, //会话密钥</div><div class="line">    pub common: SessionCommon, // 实际握手传输数据处理对象</div><div class="line">    sni: Option&lt;webpki::DNSName&gt;, //SNI(Server Name Indication) ，解决一个服务器使用多个域名和证书的SSL/TLS扩展</div><div class="line">    pub alpn_protocol: Option&lt;String&gt;,</div><div class="line">    pub error: Option&lt;TLSError&gt;,</div><div class="line">    pub state: Option&lt;Box&lt;hs::State + Send&gt;&gt;, //握手和传输中处理数据包的状态，每个状态的数据包处理对象</div><div class="line">    pub client_cert_chain: Option&lt;Vec&lt;key::Certificate&gt;&gt;, //client证书链</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pub struct ServerSessionImpl &#123;</span><br><span class="line">    pub config: Arc&lt;ServerConfig&gt;, //证书、密钥等配置</span><br><span class="line">    pub secrets: Option&lt;SessionSecrets&gt;, //会话密钥</span><br><span class="line">    pub common: SessionCommon, // 实际握手传输数据处理对象</span><br><span class="line">    sni: Option&lt;webpki::DNSName&gt;, //SNI(Server Name Indication) ，解决一个服务器使用多个域名和证书的SSL/TLS扩展</span><br><span class="line">    pub alpn_protocol: Option&lt;String&gt;,</span><br><span class="line">    pub error: Option&lt;TLSError&gt;,</span><br><span class="line">    pub state: Option&lt;Box&lt;hs::State + Send&gt;&gt;, //握手和传输中处理数据包的状态，每个状态的数据包处理对象</span><br><span class="line">    pub client_cert_chain: Option&lt;Vec&lt;key::Certificate&gt;&gt;, //client证书链</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>接口基本和ClientSession类似，不再详述</strong></p>
 <p><strong>握手流程</strong></p>
 <p>server和client处理握手的方式都一样，每个握手包处理对象都会实现State接口。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">pub trait State &#123;</div><div class="line">    fn check_message(&amp;self, m: &amp;Message) -&gt; CheckResult;</div><div class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ServerSessionImpl, m: Message) -&gt; StateResult;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pub trait State &#123;</span><br><span class="line">    fn check_message(&amp;self, m: &amp;Message) -&gt; CheckResult;</span><br><span class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ServerSessionImpl, m: Message) -&gt; StateResult;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>然后在收到client消息之后，在<code>process_main_protocol</code>中调用对应握手包对象的handle函数，并且会返回握手期望处理的下次数据包对象给state，以便下次收到消息继续处理。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//process_main_protocol</div><div class="line">self.state = Some(st.handle(self, msg)?);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//process_main_protocol</span><br><span class="line">self.state = Some(st.handle(self, msg)?);</span><br></pre></td></tr></table></figure>
 <p>握手流程：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">-----ExpectClientHello::handle</div><div class="line">-----ExpectTLS12Certificate::handle //如果需要验证client的证书，有这步</div><div class="line">-----ExpectTLS12ClientKX::handle //密钥交换</div><div class="line">-----ExpectTLS12CertificateVerify::handle //验证client证书</div><div class="line">-----ExpectTLS12CCS::handle //通知使用加密方式发送报文</div><div class="line">-----ExpectTLS12Finished::handle //握手完成</div><div class="line">-----ExpectTLS12Traffic:: handle //开发传输数据</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-----ExpectClientHello::handle</span><br><span class="line">-----ExpectTLS12Certificate::handle //如果需要验证client的证书，有这步</span><br><span class="line">-----ExpectTLS12ClientKX::handle //密钥交换</span><br><span class="line">-----ExpectTLS12CertificateVerify::handle //验证client证书</span><br><span class="line">-----ExpectTLS12CCS::handle //通知使用加密方式发送报文</span><br><span class="line">-----ExpectTLS12Finished::handle //握手完成</span><br><span class="line">-----ExpectTLS12Traffic:: handle //开发传输数据</span><br></pre></td></tr></table></figure>
 <p><strong>消息传输</strong></p>
 <p>同样，握手完成后，server在<code>ExpectTLS12Traffic::handle</code>中处理后续的传输协议中的消息。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">impl State for ExpectTLS12Traffic &#123;</div><div class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ServerSessionImpl, mut m: Message) -&gt; StateResult &#123;</div><div class="line">        println!(&quot;-----ExpectTLS12Traffic::handle&quot;);</div><div class="line">        sess.common.take_received_plaintext(m.take_opaque_payload().unwrap());</div><div class="line">        Ok(self)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">impl State for ExpectTLS12Traffic &#123;</span><br><span class="line">    fn handle(self: Box&lt;Self&gt;, sess: &amp;mut ServerSessionImpl, mut m: Message) -&gt; StateResult &#123;</span><br><span class="line">        println!(&quot;-----ExpectTLS12Traffic::handle&quot;);</span><br><span class="line">        sess.common.take_received_plaintext(m.take_opaque_payload().unwrap());</span><br><span class="line">        Ok(self)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>数据加密和解密流程基本和client类似，不再详述。</p>
 <p><strong>另外，client和server握手中需要发送的数据包构造都在hs.rs::emit_xxx函数中</strong></p>
 <h3 id="消息相关"><a href="#消息相关" class="headerlink" title="消息相关"></a>消息相关</h3><p>该部分存在单独的msgs目录下，包含了握手过程中各种消息类型的定义，消息传输具体设计的<code>fragment/deframe</code>等。</p>
 <p>所有消息统一的结构<code>Message</code>，<code>Message</code>也定义了一下方便获取字段和数据的借口，这里不再详述。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">pub struct Message &#123;</div><div class="line">    pub typ: ContentType,</div><div class="line">    pub version: ProtocolVersion,</div><div class="line">    pub payload: MessagePayload,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">//msgs/message.rs</div><div class="line">MessagePayload</div><div class="line">BorrowMessage</div><div class="line"></div><div class="line">//msgs/handshake.rs</div><div class="line">包含握手过程中，证书、密钥交换的一些数据结构</div><div class="line"></div><div class="line">//msgs/deframe.rs</div><div class="line">定义了MessageDeframer，管理Message数据，read/deframe_one</div><div class="line"></div><div class="line">//msgs/hsjoiner.rs</div><div class="line">HandshakeJoiner，重建握手数据，验证数据等定义</div><div class="line"></div><div class="line">//msgs/enums.rs</div><div class="line">各种版本号，算法类型号，握手包类型序号等等的enum定义</div><div class="line"></div><div class="line">//msgs/ccs.rs</div><div class="line">密钥交换相关定义</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pub struct Message &#123;</span><br><span class="line">    pub typ: ContentType,</span><br><span class="line">    pub version: ProtocolVersion,</span><br><span class="line">    pub payload: MessagePayload,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">//msgs/message.rs</span><br><span class="line">MessagePayload</span><br><span class="line">BorrowMessage</span><br><span class="line"></span><br><span class="line">//msgs/handshake.rs</span><br><span class="line">包含握手过程中，证书、密钥交换的一些数据结构</span><br><span class="line"></span><br><span class="line">//msgs/deframe.rs</span><br><span class="line">定义了MessageDeframer，管理Message数据，read/deframe_one</span><br><span class="line"></span><br><span class="line">//msgs/hsjoiner.rs</span><br><span class="line">HandshakeJoiner，重建握手数据，验证数据等定义</span><br><span class="line"></span><br><span class="line">//msgs/enums.rs</span><br><span class="line">各种版本号，算法类型号，握手包类型序号等等的enum定义</span><br><span class="line"></span><br><span class="line">//msgs/ccs.rs</span><br><span class="line">密钥交换相关定义</span><br></pre></td></tr></table></figure>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><table>
 <thead>
 <tr>
@@ -718,22 +719,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -747,6 +732,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -766,7 +755,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -779,6 +776,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -818,23 +831,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -867,6 +868,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -910,30 +939,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -942,7 +947,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -978,6 +987,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -987,6 +1008,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1003,26 +1032,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1058,14 +1067,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -1079,6 +1080,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/wechat-multi-pc/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/webchat.png">
 <meta property="og:updated_time" content="2017-05-16T15:01:04.001Z">
 <meta name="twitter:card" content="summary">
@@ -193,7 +194,7 @@
 <p>使用procexp找到微信进程，然后翻了一遍句柄。</p>
 <p>找到疑是的一段句柄。</p>
 <p><img src="/img/webchat.png" alt="img"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">\Sessions\1\BaseNamedObjects\_WeChat_App_Instance_Identity_Mutex_Name</div><div class="line">\Sessions\1\BaseNamedObjects\WeChat_GlobalConfig_Multi_Process_Mutex</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">\Sessions\1\BaseNamedObjects\_WeChat_App_Instance_Identity_Mutex_Name</span><br><span class="line">\Sessions\1\BaseNamedObjects\WeChat_GlobalConfig_Multi_Process_Mutex</span><br></pre></td></tr></table></figure>
 <p>感觉这两个都像，不管了，上pchunter，kill掉句柄试一下。</p>
 <p>经过尝试，发现<code>_WeChat_App_Instance_Identity_Mutex_Name</code>是单实例标志（kill句柄后可以开第二个客户端），<code>WeChat_GlobalConfig_Multi_Process_Mutex</code>没用。</p>
 <p>既然如此，那开始码代码吧。</p>
@@ -211,15 +212,15 @@
 <li>启动微信</li>
 </ol>
 <p>下面是主要代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">//步骤1和2的代码</div><div class="line">//获取到微信所有进程句柄</div><div class="line">DWORD Num = GetProcIds(L&quot;WeChat.exe&quot;, Pids);</div><div class="line">...</div><div class="line"></div><div class="line">Status = ZwQuerySystemInformation(SystemHandleInformation, pbuffer, 0x1000, &amp;dwSize);</div><div class="line"></div><div class="line">PSYSTEM_HANDLE_INFORMATION1 pHandleInfo = (PSYSTEM_HANDLE_INFORMATION1)pbuffer;</div><div class="line"></div><div class="line">	for(nIndex = 0; nIndex &lt; pHandleInfo-&gt;NumberOfHandles; nIndex++)</div><div class="line">	&#123;</div><div class="line">	    //句柄在Pids中，就是微信进程的句柄信息</div><div class="line">		if(IsTargetPid(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, Pids, Num))</div><div class="line">		&#123;</div><div class="line">		    HANDLE hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </div><div class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</div><div class="line">						DUPLICATE_SAME_ACCESS</div><div class="line">						);</div><div class="line">						</div><div class="line">			//对象名</div><div class="line">			Status = NtQueryObject(hHandle, ObjectNameInformation, szName, 512, &amp;dwFlags);</div><div class="line">			//对象类型名</div><div class="line">			Status = NtQueryObject(hHandle,  ObjectTypeInformation, szType, 128, &amp;dwFlags);</div><div class="line">			</div><div class="line">			//找到微信的标志</div><div class="line">			if (0 == wcscmp(TypName, L&quot;Mutant&quot;))</div><div class="line">			&#123;</div><div class="line">				if (wcsstr(Name, L&quot;_WeChat_App_Instance_Identity_Mutex_Name&quot;))</div><div class="line">				&#123;</div><div class="line">				    </div><div class="line">				    //DUPLICATE_CLOSE_SOURCE标志很重要，不明白的查一查</div><div class="line">    				hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </div><div class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</div><div class="line">						DUPLICATE_CLOSE_SOURCE</div><div class="line">						);</div><div class="line">					if(hHandle)</div><div class="line">					&#123;</div><div class="line">						printf(&quot;+ Patch wechat success!\n&quot;);</div><div class="line">						CloseHandle(hHandle);</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">步骤3的代码</div><div class="line"></div><div class="line">//通过注册表找到微信安装目录</div><div class="line">if(ERROR_SUCCESS != RegOpenKey(HKEY_CURRENT_USER, L&quot;Software\\Tencent\\WeChat&quot;, &amp;hKey))</div><div class="line">&#123;</div><div class="line">	return;</div><div class="line">&#125;</div><div class="line"></div><div class="line">DWORD Type = REG_SZ;</div><div class="line">WCHAR Path[MAX_PATH] = &#123;0&#125;;</div><div class="line">DWORD cbData = MAX_PATH*sizeof(WCHAR);</div><div class="line">if(ERROR_SUCCESS != RegQueryValueEx(hKey, L&quot;InstallPath&quot;, 0, &amp;Type, (LPBYTE)Path, &amp;cbData))</div><div class="line">&#123;</div><div class="line">	goto __exit;</div><div class="line">&#125;</div><div class="line"></div><div class="line">PathAppend(Path, L&quot;WeChat.exe&quot;);</div><div class="line"></div><div class="line">//启动微信客户端</div><div class="line">ShellExecute(NULL, L&quot;Open&quot;, Path, NULL, NULL, SW_SHOW);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">//步骤1和2的代码</span><br><span class="line">//获取到微信所有进程句柄</span><br><span class="line">DWORD Num = GetProcIds(L&quot;WeChat.exe&quot;, Pids);</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">Status = ZwQuerySystemInformation(SystemHandleInformation, pbuffer, 0x1000, &amp;dwSize);</span><br><span class="line"></span><br><span class="line">PSYSTEM_HANDLE_INFORMATION1 pHandleInfo = (PSYSTEM_HANDLE_INFORMATION1)pbuffer;</span><br><span class="line"></span><br><span class="line">	for(nIndex = 0; nIndex &lt; pHandleInfo-&gt;NumberOfHandles; nIndex++)</span><br><span class="line">	&#123;</span><br><span class="line">	    //句柄在Pids中，就是微信进程的句柄信息</span><br><span class="line">		if(IsTargetPid(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, Pids, Num))</span><br><span class="line">		&#123;</span><br><span class="line">		    HANDLE hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </span><br><span class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</span><br><span class="line">						DUPLICATE_SAME_ACCESS</span><br><span class="line">						);</span><br><span class="line">						</span><br><span class="line">			//对象名</span><br><span class="line">			Status = NtQueryObject(hHandle, ObjectNameInformation, szName, 512, &amp;dwFlags);</span><br><span class="line">			//对象类型名</span><br><span class="line">			Status = NtQueryObject(hHandle,  ObjectTypeInformation, szType, 128, &amp;dwFlags);</span><br><span class="line">			</span><br><span class="line">			//找到微信的标志</span><br><span class="line">			if (0 == wcscmp(TypName, L&quot;Mutant&quot;))</span><br><span class="line">			&#123;</span><br><span class="line">				if (wcsstr(Name, L&quot;_WeChat_App_Instance_Identity_Mutex_Name&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">				    </span><br><span class="line">				    //DUPLICATE_CLOSE_SOURCE标志很重要，不明白的查一查</span><br><span class="line">    				hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </span><br><span class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</span><br><span class="line">						DUPLICATE_CLOSE_SOURCE</span><br><span class="line">						);</span><br><span class="line">					if(hHandle)</span><br><span class="line">					&#123;</span><br><span class="line">						printf(&quot;+ Patch wechat success!\n&quot;);</span><br><span class="line">						CloseHandle(hHandle);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">步骤3的代码</span><br><span class="line"></span><br><span class="line">//通过注册表找到微信安装目录</span><br><span class="line">if(ERROR_SUCCESS != RegOpenKey(HKEY_CURRENT_USER, L&quot;Software\\Tencent\\WeChat&quot;, &amp;hKey))</span><br><span class="line">&#123;</span><br><span class="line">	return;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">DWORD Type = REG_SZ;</span><br><span class="line">WCHAR Path[MAX_PATH] = &#123;0&#125;;</span><br><span class="line">DWORD cbData = MAX_PATH*sizeof(WCHAR);</span><br><span class="line">if(ERROR_SUCCESS != RegQueryValueEx(hKey, L&quot;InstallPath&quot;, 0, &amp;Type, (LPBYTE)Path, &amp;cbData))</span><br><span class="line">&#123;</span><br><span class="line">	goto __exit;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PathAppend(Path, L&quot;WeChat.exe&quot;);</span><br><span class="line"></span><br><span class="line">//启动微信客户端</span><br><span class="line">ShellExecute(NULL, L&quot;Open&quot;, Path, NULL, NULL, SW_SHOW);</span><br></pre></td></tr></table></figure>
 <p>代码就这样，有注释，就不再啰嗦。</p>
 <p>完整代码，请看后面的地址。</p>
 <h1 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h1><p>一个小玩意，供大家一笑。</p>
 <p>编译好的可执行文件：</p>
-<p><a href="https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe" target="_blank" rel="external">https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe</a></p>
+<p><a href="https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe" target="_blank" rel="noopener">https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe</a></p>
 <p>源码地址：</p>
-<p><a href="https://github.com/anhkgg/multi_wechat_pc" target="_blank" rel="external">https://github.com/anhkgg/multi_wechat_pc</a></p>
+<p><a href="https://github.com/anhkgg/multi_wechat_pc" target="_blank" rel="noopener">https://github.com/anhkgg/multi_wechat_pc</a></p>
 <p>博客原文：</p>
 <p><a href="https://anhkgg.github.io/wechat-multi-pc">https://anhkgg.github.io/wechat-multi-pc</a></p>
 <p>转载请注明出处：<a href="https://anhkgg.github.io/wechat-multi-pc">https://anhkgg.github.io/wechat-multi-pc</a></p>
@@ -569,22 +570,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -598,6 +583,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -617,7 +606,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -630,6 +627,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -669,23 +682,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -718,6 +719,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -761,30 +790,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -793,7 +798,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -829,6 +838,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -838,6 +859,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -854,26 +883,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -909,14 +918,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -930,6 +931,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

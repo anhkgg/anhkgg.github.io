@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/pylogin-v2ex-login-analyze/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="概述最近开始混v2ex，v2ex发主题、回复都要收钱，发帖收钱还跟字数相关，之前不知道这些，发个帖子内容太多，kao，没钱了！ 虽然主题有人回复会收到钱，但是也没人回复啊，也不知道v2ex大佬们喜欢什么内容！ 幸好v2ex有个登录领币任务，每天还可以攒点钱，但是有些时候会忘啊，怎么办？… 嗯，程序员嘛，偷懒的办法多…这就开始分析接口，自动领币！">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/wechat_public.png">
 <meta property="og:updated_time" content="2017-08-22T05:31:40.082Z">
 <meta name="twitter:card" content="summary">
@@ -193,12 +194,12 @@
 <p>所以呢，还得加上自动消息提醒功能！</p>
 <p>废话完毕，开始干活！</p>
 <p>工具：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1. chrome/firefox</div><div class="line">2. f12，network</div><div class="line">3. python：requests、re</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1. chrome/firefox</span><br><span class="line">2. f12，network</span><br><span class="line">3. python：requests、re</span><br></pre></td></tr></table></figure>
 <h1 id="登录"><a href="#登录" class="headerlink" title="登录"></a>登录</h1><p>开始分析登录接口。打开chrome，f12，进入登录页面。只需要输入名字和密码，没有验证码，真好！</p>
 <p>访问的链接是：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">https://www.v2ex.com/signin</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.v2ex.com/signin</span><br></pre></td></tr></table></figure>
 <p>然后随便输入什么名字和密码，点击登录，肯定失败，页面有提示。再看网络请求数据：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">POST https://www.v2ex.com/signin</div><div class="line">Host: www.v2ex.com</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:54.0) </div><div class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div><div class="line"></div><div class="line">//发送数据</div><div class="line">6b79e5fdb638c190396648c486c313dca73ad9f6e4e122fafc356e54522eedc4:&quot;111111111111111&quot; //name</div><div class="line">bb4419eb55aef4106a853ce9f4642d5d58ac021f4e1fef29a230e2352da74802:&quot;11111111111&quot; //password</div><div class="line">once:&quot;95083&quot;</div><div class="line">next:&quot;/&quot;</div><div class="line"></div><div class="line"></div><div class="line">//登录错误</div><div class="line">&lt;div class=&quot;box&quot;&gt;</div><div class="line">    &lt;div class=&quot;header&quot;&gt;&lt;a href=&quot;/&quot;&gt;V2EX&lt;/a&gt; &lt;span class=&quot;chevron&quot;&gt;&amp;nbsp;›&amp;nbsp;&lt;/span&gt; 登录 &amp;nbsp;&lt;li class=&quot;fa fa-lock&quot;&gt;&lt;/li&gt;&lt;/div&gt;</div><div class="line">    &lt;div class=&quot;problem&quot;&gt;请解决以下问题然后再提交：&lt;ul&gt;&lt;li&gt;用户名和密码无法匹配&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</div><div class="line">    </div><div class="line">    ...</div><div class="line">    </div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">POST https://www.v2ex.com/signin</span><br><span class="line">Host: www.v2ex.com</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:54.0) </span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"></span><br><span class="line">//发送数据</span><br><span class="line">6b79e5fdb638c190396648c486c313dca73ad9f6e4e122fafc356e54522eedc4:&quot;111111111111111&quot; //name</span><br><span class="line">bb4419eb55aef4106a853ce9f4642d5d58ac021f4e1fef29a230e2352da74802:&quot;11111111111&quot; //password</span><br><span class="line">once:&quot;95083&quot;</span><br><span class="line">next:&quot;/&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//登录错误</span><br><span class="line">&lt;div class=&quot;box&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;header&quot;&gt;&lt;a href=&quot;/&quot;&gt;V2EX&lt;/a&gt; &lt;span class=&quot;chevron&quot;&gt;&amp;nbsp;›&amp;nbsp;&lt;/span&gt; 登录 &amp;nbsp;&lt;li class=&quot;fa fa-lock&quot;&gt;&lt;/li&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div class=&quot;problem&quot;&gt;请解决以下问题然后再提交：&lt;ul&gt;&lt;li&gt;用户名和密码无法匹配&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
 <p>这个请求关键点:</p>
 <ol>
 <li>POST请求，url是<code>https://www.v2ex.com/signin</code></li>
@@ -207,7 +208,7 @@
 </ol>
 <p>在仔细看发送的4个数据。<br>名字和密码对应的字段都是一长串字符，猜想这个是变化的，每次刷新登录页面都不一样，多次尝试下确认该猜想！</p>
 <p>如何获取呢，肯定是在打开登录页面时就会收到服务器返回的这两个字符串的。在登录html内容中一翻，看到如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">&lt;div class=&quot;box&quot;&gt;</div><div class="line">    &lt;div class=&quot;header&quot;&gt;&lt;a href=&quot;/&quot;&gt;V2EX&lt;/a&gt; &lt;span class=&quot;chevron&quot;&gt;&amp;nbsp;›&amp;nbsp;&lt;/span&gt; 登录 &amp;nbsp;&lt;li class=&quot;fa fa-lock&quot;&gt;&lt;/li&gt;&lt;/div&gt;</div><div class="line">    &lt;div class=&quot;cell&quot;&gt;</div><div class="line">        &lt;form method=&quot;post&quot; action=&quot;/signin&quot;&gt;</div><div class="line">        &lt;table cellpadding=&quot;5&quot; cellspacing=&quot;0&quot; border=&quot;0&quot; width=&quot;100%&quot;&gt;</div><div class="line">            &lt;tr&gt;</div><div class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;用户名&lt;/td&gt;</div><div class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;input type=&quot;text&quot; class=&quot;sl&quot; name=&quot;804c76d3f1472cdd8721d16f21de446186f2bae893748542ffda39963ff293f4&quot; value=&quot;111111111111111&quot; autofocus=&quot;autofocus&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; autocapitalize=&quot;off&quot; placeholder=&quot;用户名或电子邮箱地址&quot; /&gt;&lt;/td&gt;</div><div class="line">            &lt;/tr&gt;</div><div class="line">            &lt;tr&gt;</div><div class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;密码&lt;/td&gt;</div><div class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;input type=&quot;password&quot; class=&quot;sl&quot; name=&quot;359a3968b3b6f37b05fceed766bd8995090a4fd5cdc74ba0a8cd17b44d2bc86e&quot; value=&quot;&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; autocapitalize=&quot;off&quot; /&gt;&lt;/td&gt;</div><div class="line">            &lt;/tr&gt;</div><div class="line">            &lt;tr&gt;</div><div class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;&lt;/td&gt;</div><div class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;input type=&quot;hidden&quot; value=&quot;79599&quot; name=&quot;once&quot; /&gt;&lt;input type=&quot;submit&quot; class=&quot;super normal button&quot; value=&quot;登录&quot; /&gt;&lt;/td&gt;</div><div class="line">            &lt;/tr&gt;</div><div class="line">            &lt;tr&gt;</div><div class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;&lt;/td&gt;</div><div class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;a href=&quot;/forgot&quot;&gt;我忘记密码了&lt;/a&gt;&lt;/td&gt;</div><div class="line">            &lt;/tr&gt;</div><div class="line">        &lt;/table&gt;</div><div class="line">        &lt;input type=&quot;hidden&quot; value=&quot;/&quot; name=&quot;next&quot; /&gt;</div><div class="line">        &lt;/form&gt;</div><div class="line">    &lt;/div&gt;</div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&lt;div class=&quot;box&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;header&quot;&gt;&lt;a href=&quot;/&quot;&gt;V2EX&lt;/a&gt; &lt;span class=&quot;chevron&quot;&gt;&amp;nbsp;›&amp;nbsp;&lt;/span&gt; 登录 &amp;nbsp;&lt;li class=&quot;fa fa-lock&quot;&gt;&lt;/li&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div class=&quot;cell&quot;&gt;</span><br><span class="line">        &lt;form method=&quot;post&quot; action=&quot;/signin&quot;&gt;</span><br><span class="line">        &lt;table cellpadding=&quot;5&quot; cellspacing=&quot;0&quot; border=&quot;0&quot; width=&quot;100%&quot;&gt;</span><br><span class="line">            &lt;tr&gt;</span><br><span class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;用户名&lt;/td&gt;</span><br><span class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;input type=&quot;text&quot; class=&quot;sl&quot; name=&quot;804c76d3f1472cdd8721d16f21de446186f2bae893748542ffda39963ff293f4&quot; value=&quot;111111111111111&quot; autofocus=&quot;autofocus&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; autocapitalize=&quot;off&quot; placeholder=&quot;用户名或电子邮箱地址&quot; /&gt;&lt;/td&gt;</span><br><span class="line">            &lt;/tr&gt;</span><br><span class="line">            &lt;tr&gt;</span><br><span class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;密码&lt;/td&gt;</span><br><span class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;input type=&quot;password&quot; class=&quot;sl&quot; name=&quot;359a3968b3b6f37b05fceed766bd8995090a4fd5cdc74ba0a8cd17b44d2bc86e&quot; value=&quot;&quot; autocorrect=&quot;off&quot; spellcheck=&quot;false&quot; autocapitalize=&quot;off&quot; /&gt;&lt;/td&gt;</span><br><span class="line">            &lt;/tr&gt;</span><br><span class="line">            &lt;tr&gt;</span><br><span class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;&lt;/td&gt;</span><br><span class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;input type=&quot;hidden&quot; value=&quot;79599&quot; name=&quot;once&quot; /&gt;&lt;input type=&quot;submit&quot; class=&quot;super normal button&quot; value=&quot;登录&quot; /&gt;&lt;/td&gt;</span><br><span class="line">            &lt;/tr&gt;</span><br><span class="line">            &lt;tr&gt;</span><br><span class="line">                &lt;td width=&quot;120&quot; align=&quot;right&quot;&gt;&lt;/td&gt;</span><br><span class="line">                &lt;td width=&quot;auto&quot; align=&quot;left&quot;&gt;&lt;a href=&quot;/forgot&quot;&gt;我忘记密码了&lt;/a&gt;&lt;/td&gt;</span><br><span class="line">            &lt;/tr&gt;</span><br><span class="line">        &lt;/table&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; value=&quot;/&quot; name=&quot;next&quot; /&gt;</span><br><span class="line">        &lt;/form&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
 <p>名字对应字段是<code>&lt;input type=&quot;text&quot; class=&quot;sl&quot; name=&quot;804c76d3f1472cdd8721d16f21de446186f2bae893748542ffda39963ff293f4&quot;</code>，</p>
 <p>密码对应字段是<code>&lt;input type=&quot;password&quot; class=&quot;sl&quot; name=&quot;359a3968b3b6f37b05fceed766bd8995090a4fd5cdc74ba0a8cd17b44d2bc86e&quot;</code>，</p>
 <p>可以通过正则获取到字段名。</p>
@@ -215,36 +216,36 @@
 <p>密码正则：<code>r&#39;&lt;input type=&quot;password&quot; class=&quot;sl&quot; name=&quot;([\d\w]*?)&quot;&#39;</code></p>
 <p>也看到了其他两个数据字段，<code>&lt;input type=&quot;hidden&quot; value=&quot;79599&quot; name=&quot;once&quot; /&gt;</code> 和 <code>&lt;input type=&quot;hidden&quot; value=&quot;/&quot; name=&quot;next&quot; /&gt;</code>。</p>
 <p><code>once</code>对应的值每次都不一样，<code>next</code>的值应该是固定的<code>/</code>，但是为了保险，都通过正则来获取</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">r&apos;&lt;input type=&quot;hidden&quot; value=&quot;([\d\w]+?)&quot; name=&quot;once&quot; /&gt;&apos;</div><div class="line">r&apos;&lt;input type=&quot;hidden&quot; value=&quot;(.+?)&quot; name=&quot;next&quot; /&gt;&apos;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">r&apos;&lt;input type=&quot;hidden&quot; value=&quot;([\d\w]+?)&quot; name=&quot;once&quot; /&gt;&apos;</span><br><span class="line">r&apos;&lt;input type=&quot;hidden&quot; value=&quot;(.+?)&quot; name=&quot;next&quot; /&gt;&apos;</span><br></pre></td></tr></table></figure>
 <p>好了，到此登录请求需要的东西都分析完了，然后就是模拟接口发送请求了。</p>
 <p>忘了还有一点，返回状态的判断。</p>
 <p>前面看到登录错误的有提示信息，为了更人性化，把这个信息拿到吧。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">//登录错误</div><div class="line">&lt;div class=&quot;box&quot;&gt;</div><div class="line">    &lt;div class=&quot;header&quot;&gt;&lt;a href=&quot;/&quot;&gt;V2EX&lt;/a&gt; &lt;span class=&quot;chevron&quot;&gt;&amp;nbsp;›&amp;nbsp;&lt;/span&gt; 登录 &amp;nbsp;&lt;li class=&quot;fa fa-lock&quot;&gt;&lt;/li&gt;&lt;/div&gt;</div><div class="line">    &lt;div class=&quot;problem&quot;&gt;请解决以下问题然后再提交：&lt;ul&gt;&lt;li&gt;用户名和密码无法匹配&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//登录错误</span><br><span class="line">&lt;div class=&quot;box&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;header&quot;&gt;&lt;a href=&quot;/&quot;&gt;V2EX&lt;/a&gt; &lt;span class=&quot;chevron&quot;&gt;&amp;nbsp;›&amp;nbsp;&lt;/span&gt; 登录 &amp;nbsp;&lt;li class=&quot;fa fa-lock&quot;&gt;&lt;/li&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div class=&quot;problem&quot;&gt;请解决以下问题然后再提交：&lt;ul&gt;&lt;li&gt;用户名和密码无法匹配&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
 <p>获取错误信息正则是这样：<code>r&#39;&lt;div class=&quot;problem&quot;&gt;.+?&lt;ul&gt;&lt;li&gt;(.*?)&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&#39;</code></p>
 <p>登录成功判断待会儿再分析。</p>
 <p>通过py发送模拟登陆请求，代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">payload = &#123;</div><div class="line">                self.form_name:name,</div><div class="line">                self.form_pass:pwd,</div><div class="line">                &apos;once&apos;: self.form_once,</div><div class="line">                &apos;next&apos;: self.form_next</div><div class="line">                &#125;</div><div class="line">r = self.s.post(url, data=payload, headers=headers)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">payload = &#123;</span><br><span class="line">                self.form_name:name,</span><br><span class="line">                self.form_pass:pwd,</span><br><span class="line">                &apos;once&apos;: self.form_once,</span><br><span class="line">                &apos;next&apos;: self.form_next</span><br><span class="line">                &#125;</span><br><span class="line">r = self.s.post(url, data=payload, headers=headers)</span><br></pre></td></tr></table></figure>
 <p>保存了返回数据一看，没成功啊，还是未登录的首页。</p>
 <p>重新再浏览器登录一下，仔细分析了一下。</p>
 <p>发送了登录请求之后，登录成功之后，页面自动跳转到<code>https://www.v2ex.com</code>，有登录信息了。</p>
 <p>猜测对请求的头部数据做了某些校验。</p>
 <p>看看请求的头部数据，如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Host: www.v2ex.com</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:54.0) ...</div><div class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div><div class="line">Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3</div><div class="line">Accept-Encoding: gzip, deflate, br</div><div class="line">Content-Type: application/x-www-form-urlencoded</div><div class="line">Content-Length: 167</div><div class="line">Referer: https://www.v2ex.com/signin</div><div class="line">Connection: keep-alive</div><div class="line">Upgrade-Insecure-Requests: 1</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Host: www.v2ex.com</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:54.0) ...</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 167</span><br><span class="line">Referer: https://www.v2ex.com/signin</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br></pre></td></tr></table></figure>
 <p>一般来说可能会对host，referer等字段检查，加入尝试一下。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">headers = &#123;</div><div class="line">    #&apos;Host&apos;: &apos;www.v2ex.com&apos;,</div><div class="line">    #&apos;origin&apos;:&apos;https://www.v2ex.com&apos;,</div><div class="line">    &apos;referer&apos;:&apos;https://www.v2ex.com/signin&apos;,                </div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">headers = &#123;</span><br><span class="line">    #&apos;Host&apos;: &apos;www.v2ex.com&apos;,</span><br><span class="line">    #&apos;origin&apos;:&apos;https://www.v2ex.com&apos;,</span><br><span class="line">    &apos;referer&apos;:&apos;https://www.v2ex.com/signin&apos;,                </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 <p>成功登录，屏蔽其中一些字段，发现只需要加入referer即可登录。</p>
 <p>获取登录成功状态，可以看到登录成功后，会有用户账户信息，如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;a href=&quot;/member/anhkgg&quot; class=&quot;top&quot;&gt;anhkgg&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;</div><div class="line">&lt;a href=&quot;https://workspace.v2ex.com/&quot; target=&quot;_blank&quot; class=&quot;top&quot;&gt;工作空间&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;</div><div class="line">&lt;a href=&quot;/notes&quot; class=&quot;top&quot;&gt;记事本&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;a href=&quot;/t&quot; class=&quot;top&quot;&gt;时间轴&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;a href=&quot;/settings&quot; class=&quot;top&quot;&gt;设置&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;</div><div class="line">&lt;a href=&quot;#;&quot; onclick=&quot;if (confirm(&apos;确定要从 V2EX 登出？&apos;)) &#123; location.href= &apos;/signout?once=54090&apos;; &#125;&quot; class=&quot;top&quot;&gt;登出&lt;/a&gt;&lt;/td&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=&quot;/member/anhkgg&quot; class=&quot;top&quot;&gt;anhkgg&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;</span><br><span class="line">&lt;a href=&quot;https://workspace.v2ex.com/&quot; target=&quot;_blank&quot; class=&quot;top&quot;&gt;工作空间&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;</span><br><span class="line">&lt;a href=&quot;/notes&quot; class=&quot;top&quot;&gt;记事本&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;a href=&quot;/t&quot; class=&quot;top&quot;&gt;时间轴&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;a href=&quot;/settings&quot; class=&quot;top&quot;&gt;设置&lt;/a&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;</span><br><span class="line">&lt;a href=&quot;#;&quot; onclick=&quot;if (confirm(&apos;确定要从 V2EX 登出？&apos;)) &#123; location.href= &apos;/signout?once=54090&apos;; &#125;&quot; class=&quot;top&quot;&gt;登出&lt;/a&gt;&lt;/td&gt;</span><br></pre></td></tr></table></figure>
 <p>那么只需要搜索是否存在<code>&lt;a href=&quot;/member/anhkgg&quot;</code>即可。正则表达式是：<code>r&#39;&lt;a href=&quot;/member/.+?&quot;&gt;&#39;</code>。找到该内容表示登录成功。</p>
 <h1 id="退出"><a href="#退出" class="headerlink" title="退出"></a>退出</h1><p>登录成功了，顺便看一下退出的接口。抓包看一下，发现访问了如下链接：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">https://www.v2ex.com/signout?once=71351</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.v2ex.com/signout?once=71351</span><br></pre></td></tr></table></figure>
 <p>又见到once字段，值又是每次不同的。那么也只有动态获取一下了。在前面登录成功的信息中其实可以看到有退出接口的内容。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">onclick=&quot;if (confirm(&apos;确定要从 V2EX 登出？&apos;)) &#123; location.href= &apos;/signout?once=54090&apos;; &#125;&quot; class=&quot;top&quot;&gt;登出&lt;/a&gt;&lt;/td&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">onclick=&quot;if (confirm(&apos;确定要从 V2EX 登出？&apos;)) &#123; location.href= &apos;/signout?once=54090&apos;; &#125;&quot; class=&quot;top&quot;&gt;登出&lt;/a&gt;&lt;/td&gt;</span><br></pre></td></tr></table></figure>
 <p>通过正则获取一下once：<code>r&quot;location.href= &#39;/signout\?once=([\d\w]+?)&#39;&quot;</code>，然后模拟退出。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">url = &apos;https://www.v2ex.com/signout&apos;</div><div class="line">payload = &#123; &apos;once&apos;: self.signout_once&#125;</div><div class="line">self.s.get(url, params=payload)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">url = &apos;https://www.v2ex.com/signout&apos;</span><br><span class="line">payload = &#123; &apos;once&apos;: self.signout_once&#125;</span><br><span class="line">self.s.get(url, params=payload)</span><br></pre></td></tr></table></figure>
 <h1 id="新评论"><a href="#新评论" class="headerlink" title="新评论"></a>新评论</h1><p>接着就看看我需要的功能了。</p>
 <p>首先是获取最新评论条数。找到对应html的内容，如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;/a&gt;&lt;/div&gt;&lt;a href=&quot;/notifications&quot; class=&quot;fade&quot;&gt;0 条未读提醒&lt;/a&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;/a&gt;&lt;/div&gt;&lt;a href=&quot;/notifications&quot; class=&quot;fade&quot;&gt;0 条未读提醒&lt;/a&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
 <p>非常简单，关键字notifications，正则一搜即可拿到。</p>
 <p><code>r&#39;&lt;a href=&quot;/notifications&quot;.*?&gt;(\d+)(.*?)&lt;/a&gt;&#39;</code></p>
 <p>不在细说。</p>
@@ -253,14 +254,14 @@
 <h1 id="领取每日奖励"><a href="#领取每日奖励" class="headerlink" title="领取每日奖励"></a>领取每日奖励</h1><p>嗯，钱的事还是挺重要的。</p>
 <p>首页右侧，每天会出现领取今日奖励的按钮，什么时候出现不知道（过了凌晨12点？），点击后跳转到领取页面，再点击领取按钮就拿到钱了！</p>
 <p>第一步，拿到领取页面的链接。看下面，是固定的，终于省了一点点事。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;div class=&quot;box&quot;&gt;&lt;div class=&quot;inner&quot;&gt;&lt;li class=&quot;fa fa-gift&quot; style=&quot;color: #f90;&quot;&gt;&lt;/li&gt; &amp;nbsp;&lt;a href=&quot;/mission/daily&quot;&gt;领取今日的登录奖励&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;div class=&quot;box&quot;&gt;&lt;div class=&quot;inner&quot;&gt;&lt;li class=&quot;fa fa-gift&quot; style=&quot;color: #f90;&quot;&gt;&lt;/li&gt; &amp;nbsp;&lt;a href=&quot;/mission/daily&quot;&gt;领取今日的登录奖励&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
 <p>通过下面的代码跳到领取页面。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">url = &apos;https://www.v2ex.com/mission/daily&apos;</div><div class="line">r= self.s.get(url)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">url = &apos;https://www.v2ex.com/mission/daily&apos;</span><br><span class="line">r= self.s.get(url)</span><br></pre></td></tr></table></figure>
 <p>然后看看领取按钮对应的链接，又见once！so，链接不是固定的了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;div class=&quot;cell&quot;&gt;</div><div class="line">        &lt;h1&gt;每日登录奖励 20170818&lt;/h1&gt;</div><div class="line">        &lt;input type=&quot;button&quot; class=&quot;super normal button&quot; value=&quot;领取 X 铜币&quot; onclick=&quot;location.href = &apos;/mission/daily/redeem?once=48881&apos;;&quot; /&gt;</div><div class="line">    &lt;/div&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;div class=&quot;cell&quot;&gt;</span><br><span class="line">        &lt;h1&gt;每日登录奖励 20170818&lt;/h1&gt;</span><br><span class="line">        &lt;input type=&quot;button&quot; class=&quot;super normal button&quot; value=&quot;领取 X 铜币&quot; onclick=&quot;location.href = &apos;/mission/daily/redeem?once=48881&apos;;&quot; /&gt;</span><br><span class="line">    &lt;/div&gt;</span><br></pre></td></tr></table></figure>
 <p>动态获取once对应的值，正则跟退出接口很像：<code>r&quot;&#39;/mission/daily/redeem\?once=([\d\w]+?)&#39;&quot;</code></p>
 <p>然后模拟请求领取奖励。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">url = &apos;https://www.v2ex.com/mission/daily/redeem&apos;</div><div class="line">payload = &#123; &apos;once&apos;: once&#125;</div><div class="line">r = self.s.get(url, params=payload)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">url = &apos;https://www.v2ex.com/mission/daily/redeem&apos;</span><br><span class="line">payload = &#123; &apos;once&apos;: once&#125;</span><br><span class="line">r = self.s.get(url, params=payload)</span><br></pre></td></tr></table></figure>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>好了，到这里分析就完成了。分析内容非常详细，然后也贴了些关键代码，所以完整代码就暂时不提供了！</p>
 <p>v2ex登录通过变化的名字和密码字段，以及once的值，增加了一定的分析成本，但是总的来说，还是没什么难度！挡不了多少人！</p>
 <p>其他自动回复啊，最新主题啊…等等，各位看官自行脑洞了！</p>
@@ -626,22 +627,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -655,6 +640,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -674,7 +663,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -687,6 +684,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -726,23 +739,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -775,6 +776,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -818,30 +847,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -850,7 +855,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -886,6 +895,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -895,6 +916,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -911,26 +940,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -966,14 +975,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -987,6 +988,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

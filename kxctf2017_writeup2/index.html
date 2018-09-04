@@ -15,7 +15,8 @@
 <meta property="og:url" content="https://anhkgg.github.io/kxctf2017_writeup2/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="题目入口：http://ctf.pediy.com/game-fight-32.htm，可下载相关文件 0. 定位算法位置由于是console程序，并且没有隐藏字符串，通过OD/IDA找到关键字符串，所在函数就是关键算法函数：1234.data:00409058 aWellDone       db &amp;apos;WELL DONE!&amp;apos;,0Ah,0   ; DATA XREF: _main">
-<meta property="og:updated_time" content="2017-06-14T01:45:43.027Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-06-14T01:45:43.028Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="看雪CTF2017第二题lelfeiCM的writeup">
 <meta name="twitter:description" content="题目入口：http://ctf.pediy.com/game-fight-32.htm，可下载相关文件 0. 定位算法位置由于是console程序，并且没有隐藏字符串，通过OD/IDA找到关键字符串，所在函数就是关键算法函数：1234.data:00409058 aWellDone       db &amp;apos;WELL DONE!&amp;apos;,0Ah,0   ; DATA XREF: _main">
@@ -179,43 +180,43 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>题目入口：<a href="http://ctf.pediy.com/game-fight-32.htm" target="_blank" rel="external">http://ctf.pediy.com/game-fight-32.htm</a>，可下载相关文件</p>
-<h1 id="0-定位算法位置"><a href="#0-定位算法位置" class="headerlink" title="0. 定位算法位置"></a>0. 定位算法位置</h1><p>由于是console程序，并且没有隐藏字符串，通过OD/IDA找到关键字符串，所在函数就是关键算法函数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">.data:00409058 aWellDone       db &apos;WELL DONE!&apos;,0Ah,0   ; DATA XREF: _main:loc_401257o</div><div class="line">.data:00409064 aWrongKey___    db &apos;WRONG KEY...&apos;,0Ah,0 ; DATA XREF: _main+231o</div><div class="line">.data:00409072                 align 4</div><div class="line">.data:00409074 aKeyFormatError db &apos;key format error...&apos;,0Ah,0 ; DATA XREF: _main+9Ao</div></pre></td></tr></table></figure></p>
+        <p>题目入口：<a href="http://ctf.pediy.com/game-fight-32.htm" target="_blank" rel="noopener">http://ctf.pediy.com/game-fight-32.htm</a>，可下载相关文件</p>
+<h1 id="0-定位算法位置"><a href="#0-定位算法位置" class="headerlink" title="0. 定位算法位置"></a>0. 定位算法位置</h1><p>由于是console程序，并且没有隐藏字符串，通过OD/IDA找到关键字符串，所在函数就是关键算法函数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.data:00409058 aWellDone       db &apos;WELL DONE!&apos;,0Ah,0   ; DATA XREF: _main:loc_401257o</span><br><span class="line">.data:00409064 aWrongKey___    db &apos;WRONG KEY...&apos;,0Ah,0 ; DATA XREF: _main+231o</span><br><span class="line">.data:00409072                 align 4</span><br><span class="line">.data:00409074 aKeyFormatError db &apos;key format error...&apos;,0Ah,0 ; DATA XREF: _main+9Ao</span><br></pre></td></tr></table></figure></p>
 <a id="more"></a>
-<p>其实就在main函数中，然后看获取输入之后干了什么。<br>首先检查输入长度是不是在8到20之间，不是提示key len error<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">.text:00401066                 cmp     ecx, 8</div><div class="line">.text:00401069                 jl      loc_40127A</div><div class="line">.text:0040106F                 cmp     ecx, 14h</div><div class="line">.text:00401072                 jg      loc_40127A</div><div class="line">.text:00401078                 xor     esi, esi</div><div class="line">.text:0040107A                 xor     edx, edx</div><div class="line">.text:0040107C                 test    ecx, ecx</div></pre></td></tr></table></figure></p>
-<p>是不是都是数值，不是就提示key format error…<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">.text:00401082                 jle     short loc_4010AC</div><div class="line">.text:00401084</div><div class="line">.text:00401084 loc_401084:                             ; CODE XREF: _main+94j</div><div class="line">.text:00401084                 mov     al, [esp+edx+4138h+key]</div><div class="line">.text:00401088                 cmp     al, 30h</div><div class="line">.text:0040108A                 jle     short loc_401090</div><div class="line">.text:0040108C                 cmp     al, 39h</div><div class="line">.text:0040108E                 jle     short loc_401091</div><div class="line">.text:00401090</div><div class="line">.text:00401090 loc_401090:                             ; CODE XREF: _main+8Aj</div><div class="line">.text:00401090                 inc     esi</div><div class="line">.text:00401091</div><div class="line">.text:00401091 loc_401091:                             ; CODE XREF: _main+8Ej</div><div class="line">.text:00401091                 inc     edx</div><div class="line">.text:00401092                 cmp     edx, ecx</div><div class="line">.text:00401094                 jl      short loc_401084</div><div class="line">.text:00401096                 test    esi, esi</div><div class="line">.text:00401098                 jz      short loc_4010AC</div><div class="line">.text:0040109A                 push    offset aKeyFormatError ; &quot;key format error...\n&quot;</div><div class="line">.text:0040109F                 call    f_printf_401BE0</div></pre></td></tr></table></figure></p>
-<p>下面接着就是算法的重要部分了，一看到下面的函数，就知道有点小类结构了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">.text:004012C0 ; KEY_OBJ1 *__thiscall f_keyobj_init_4012C0(KEY_OBJ1 *this)</div><div class="line">.text:004012C0 f_keyobj_init_4012C0 proc near          ; CODE XREF: _main+B3 p</div><div class="line">.text:004012C0                                         ; f_keyobj_calc_mul_401730+29p ...</div><div class="line">.text:004012C0                 push    esi</div><div class="line">.text:004012C1                 mov     esi, ecx</div><div class="line">.text:004012C3                 mov     dword ptr [esi], offset off_4080C8</div><div class="line">.text:004012C9                 call    ds:GetTickCount</div><div class="line">.text:004012CF                 mov     ecx, esi</div><div class="line">.text:004012D1                 mov     [esi+200Ch], eax</div><div class="line">.text:004012D7                 mov     [esi+2008h], eax</div><div class="line">.text:004012DD                 call    f_keyobj_init_seed1_401A60</div><div class="line">.text:004012E2                 mov     eax, esi</div><div class="line">.text:004012E4                 pop     esi</div><div class="line">.text:004012E5                 retn</div><div class="line">.text:004012E5 f_keyobj_init_4012C0 endp</div></pre></td></tr></table></figure></p>
+<p>其实就在main函数中，然后看获取输入之后干了什么。<br>首先检查输入长度是不是在8到20之间，不是提示key len error<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.text:00401066                 cmp     ecx, 8</span><br><span class="line">.text:00401069                 jl      loc_40127A</span><br><span class="line">.text:0040106F                 cmp     ecx, 14h</span><br><span class="line">.text:00401072                 jg      loc_40127A</span><br><span class="line">.text:00401078                 xor     esi, esi</span><br><span class="line">.text:0040107A                 xor     edx, edx</span><br><span class="line">.text:0040107C                 test    ecx, ecx</span><br></pre></td></tr></table></figure></p>
+<p>是不是都是数值，不是就提示key format error…<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">.text:00401082                 jle     short loc_4010AC</span><br><span class="line">.text:00401084</span><br><span class="line">.text:00401084 loc_401084:                             ; CODE XREF: _main+94j</span><br><span class="line">.text:00401084                 mov     al, [esp+edx+4138h+key]</span><br><span class="line">.text:00401088                 cmp     al, 30h</span><br><span class="line">.text:0040108A                 jle     short loc_401090</span><br><span class="line">.text:0040108C                 cmp     al, 39h</span><br><span class="line">.text:0040108E                 jle     short loc_401091</span><br><span class="line">.text:00401090</span><br><span class="line">.text:00401090 loc_401090:                             ; CODE XREF: _main+8Aj</span><br><span class="line">.text:00401090                 inc     esi</span><br><span class="line">.text:00401091</span><br><span class="line">.text:00401091 loc_401091:                             ; CODE XREF: _main+8Ej</span><br><span class="line">.text:00401091                 inc     edx</span><br><span class="line">.text:00401092                 cmp     edx, ecx</span><br><span class="line">.text:00401094                 jl      short loc_401084</span><br><span class="line">.text:00401096                 test    esi, esi</span><br><span class="line">.text:00401098                 jz      short loc_4010AC</span><br><span class="line">.text:0040109A                 push    offset aKeyFormatError ; &quot;key format error...\n&quot;</span><br><span class="line">.text:0040109F                 call    f_printf_401BE0</span><br></pre></td></tr></table></figure></p>
+<p>下面接着就是算法的重要部分了，一看到下面的函数，就知道有点小类结构了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.text:004012C0 ; KEY_OBJ1 *__thiscall f_keyobj_init_4012C0(KEY_OBJ1 *this)</span><br><span class="line">.text:004012C0 f_keyobj_init_4012C0 proc near          ; CODE XREF: _main+B3 p</span><br><span class="line">.text:004012C0                                         ; f_keyobj_calc_mul_401730+29p ...</span><br><span class="line">.text:004012C0                 push    esi</span><br><span class="line">.text:004012C1                 mov     esi, ecx</span><br><span class="line">.text:004012C3                 mov     dword ptr [esi], offset off_4080C8</span><br><span class="line">.text:004012C9                 call    ds:GetTickCount</span><br><span class="line">.text:004012CF                 mov     ecx, esi</span><br><span class="line">.text:004012D1                 mov     [esi+200Ch], eax</span><br><span class="line">.text:004012D7                 mov     [esi+2008h], eax</span><br><span class="line">.text:004012DD                 call    f_keyobj_init_seed1_401A60</span><br><span class="line">.text:004012E2                 mov     eax, esi</span><br><span class="line">.text:004012E4                 pop     esi</span><br><span class="line">.text:004012E5                 retn</span><br><span class="line">.text:004012E5 f_keyobj_init_4012C0 endp</span><br></pre></td></tr></table></figure></p>
 <h1 id="1-算法类结构分析，各类函数的功能分析"><a href="#1-算法类结构分析，各类函数的功能分析" class="headerlink" title="1. 算法类结构分析，各类函数的功能分析"></a>1. 算法类结构分析，各类函数的功能分析</h1><p>先把类结构大致整理出来，方便后续分析</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">00000000 KEY_OBJ1        struc ; (sizeof=0x2010) ; XREF: _mainr</div><div class="line">00000000                                         ; f_keyobj_calc_mul_401730r</div><div class="line">00000000 vtable_4080C8   dd ?</div><div class="line">00000004 cur_calc_pos    dd ? //结果长度</div><div class="line">00000008 seed_array_1024_1 dd 1024 dup(?) //保存key的值</div><div class="line">00001008 seed_array_1024 dd 1024 dup(?) //保存序号</div><div class="line">00002008 TickCnt_key_seed dd ?</div><div class="line">0000200C TickCnt1        dd ?</div><div class="line">00002010 KEY_OBJ1        ends</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">00000000 KEY_OBJ1        struc ; (sizeof=0x2010) ; XREF: _mainr</span><br><span class="line">00000000                                         ; f_keyobj_calc_mul_401730r</span><br><span class="line">00000000 vtable_4080C8   dd ?</span><br><span class="line">00000004 cur_calc_pos    dd ? //结果长度</span><br><span class="line">00000008 seed_array_1024_1 dd 1024 dup(?) //保存key的值</span><br><span class="line">00001008 seed_array_1024 dd 1024 dup(?) //保存序号</span><br><span class="line">00002008 TickCnt_key_seed dd ?</span><br><span class="line">0000200C TickCnt1        dd ?</span><br><span class="line">00002010 KEY_OBJ1        ends</span><br></pre></td></tr></table></figure>
 <p>然后就是几个关键函数：</p>
-<p>1.1 初始化数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">.text:00401A60 ; char *__thiscall f_keyobj_init_seed1_401A60(KEY_OBJ1 *this)</div><div class="line">...</div><div class="line">.text:00401A8F                 call    f_kyeobj_getindex_4019E0 //更加GetTickCount获取随机index，用于打乱序号的顺序增加分析难度</div><div class="line">...</div><div class="line">.text:00401ABA                 mov     esi, [ecx]</div><div class="line">.text:00401ABC                 sub     ecx, 4</div><div class="line">.text:00401ABF                 mov     [eax], esi</div><div class="line">.text:00401AC1                 add     eax, 4</div><div class="line">.text:00401AC4                 dec     edx</div></pre></td></tr></table></figure></p>
-<p>这个地方首先就想到了每次GetTickCount不一样，那么算法怎么保证结果相同呢，便想到肯定跟index顺序无关，后面验证果然是，我就把401A60给patch了一下，然初始化的序号结构没有打乱顺序，保持0-0x3ff，如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">//nop了00401A8F调用的循环部分                 </div><div class="line">.text:00401A8F                 call    f_kyeobj_getindex_4019E0 </div><div class="line">//这里其实就是seed_array_1024[1023]，不让它倒过来赋值，修改为lea     ecx, [esi+1008h]</div><div class="line">.text:00401AAE                 lea     ecx, [esi+2004h]</div></pre></td></tr></table></figure></p>
-<p>这样之后，就可以很方便查看数据变换，观察这两个字段即可<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">00000004 cur_calc_pos    dd ? //结果长度</div><div class="line">00000008 seed_array_1024_1 dd 1024 dup(?) //保存key的值</div></pre></td></tr></table></figure></p>
-<p>后面所有相关函数中有关index转换的也不用关注，因为他变来变去都是0-0x3ff，就只需要关注具体数据操作了。<br>然后其他函数功能分析也就简单了。<br>下面简单列一下，不做详细说明了（很简单，就是数组操作过来过去的）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">.text:004014E0 ; int __thiscall f_keyojb_key1_4014E0(void *this, const char *key) //将输入的key保存到seed_array_1024_1 中，字符转为数值，每个值存一个dword</div><div class="line">.text:00401970 ; void __thiscall f_keyobj_key1_s2_401970(KEY_OBJ1 *this) //数值大于10，取余存当前index位置，取商和index+1位置求和保存，其实就是进位处理（后面才醒悟）</div><div class="line">.text:00401730 ; signed int __userpurge f_keyobj_calc_mul_401730@&lt;eax&gt;(int a1@&lt;eax&gt;, int keyobj0@&lt;ecx&gt;, signed int a3)//用a3取商做右位移，a3取余做加法，其实就是做乘法运算</div><div class="line">text:00401840 ; signed int __userpurge f_keyobj_mul2_401840@&lt;eax&gt;(int a1@&lt;eax&gt;, int a2@&lt;ecx&gt;, KEY_OBJ1 *a3)//两个KEY_OBJ做乘法</div></pre></td></tr></table></figure></p>
-<h1 id="2-醒悟算法究竟是个什么玩意"><a href="#2-醒悟算法究竟是个什么玩意" class="headerlink" title="2. 醒悟算法究竟是个什么玩意"></a>2. 醒悟算法究竟是个什么玩意</h1><p>输入的key关键处理部分<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">.text:004010E0                 push    9</div><div class="line">.text:004010E2                 lea     ecx, [esp+413Ch+keyobj]</div><div class="line">.text:004010E9                 call    f_keyobj_calc_mul_401730 ;</div><div class="line">...</div><div class="line">.text:0040110B                 lea     eax, [esp+4138h+keyobj1]</div><div class="line">.text:00401112                 lea     ecx, [esp+4138h+keyobj]</div><div class="line">.text:00401119                 push    eax</div><div class="line">.text:0040111A                 mov     byte ptr [esp+413Ch+var_4], 1</div><div class="line">.text:00401122                 call    f_keyobj_mul2_401840</div><div class="line">...</div><div class="line">.text:00401127                 push    9</div><div class="line">.text:00401129                 lea     ecx, [esp+413Ch+keyobj]</div><div class="line">.text:00401130                 mov     esi, eax</div><div class="line">.text:00401132                 call    f_keyobj_calc_mul_401730 ;</div></pre></td></tr></table></figure></p>
+<p>1.1 初始化数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.text:00401A60 ; char *__thiscall f_keyobj_init_seed1_401A60(KEY_OBJ1 *this)</span><br><span class="line">...</span><br><span class="line">.text:00401A8F                 call    f_kyeobj_getindex_4019E0 //更加GetTickCount获取随机index，用于打乱序号的顺序增加分析难度</span><br><span class="line">...</span><br><span class="line">.text:00401ABA                 mov     esi, [ecx]</span><br><span class="line">.text:00401ABC                 sub     ecx, 4</span><br><span class="line">.text:00401ABF                 mov     [eax], esi</span><br><span class="line">.text:00401AC1                 add     eax, 4</span><br><span class="line">.text:00401AC4                 dec     edx</span><br></pre></td></tr></table></figure></p>
+<p>这个地方首先就想到了每次GetTickCount不一样，那么算法怎么保证结果相同呢，便想到肯定跟index顺序无关，后面验证果然是，我就把401A60给patch了一下，然初始化的序号结构没有打乱顺序，保持0-0x3ff，如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//nop了00401A8F调用的循环部分                 </span><br><span class="line">.text:00401A8F                 call    f_kyeobj_getindex_4019E0 </span><br><span class="line">//这里其实就是seed_array_1024[1023]，不让它倒过来赋值，修改为lea     ecx, [esi+1008h]</span><br><span class="line">.text:00401AAE                 lea     ecx, [esi+2004h]</span><br></pre></td></tr></table></figure></p>
+<p>这样之后，就可以很方便查看数据变换，观察这两个字段即可<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">00000004 cur_calc_pos    dd ? //结果长度</span><br><span class="line">00000008 seed_array_1024_1 dd 1024 dup(?) //保存key的值</span><br></pre></td></tr></table></figure></p>
+<p>后面所有相关函数中有关index转换的也不用关注，因为他变来变去都是0-0x3ff，就只需要关注具体数据操作了。<br>然后其他函数功能分析也就简单了。<br>下面简单列一下，不做详细说明了（很简单，就是数组操作过来过去的）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:004014E0 ; int __thiscall f_keyojb_key1_4014E0(void *this, const char *key) //将输入的key保存到seed_array_1024_1 中，字符转为数值，每个值存一个dword</span><br><span class="line">.text:00401970 ; void __thiscall f_keyobj_key1_s2_401970(KEY_OBJ1 *this) //数值大于10，取余存当前index位置，取商和index+1位置求和保存，其实就是进位处理（后面才醒悟）</span><br><span class="line">.text:00401730 ; signed int __userpurge f_keyobj_calc_mul_401730@&lt;eax&gt;(int a1@&lt;eax&gt;, int keyobj0@&lt;ecx&gt;, signed int a3)//用a3取商做右位移，a3取余做加法，其实就是做乘法运算</span><br><span class="line">text:00401840 ; signed int __userpurge f_keyobj_mul2_401840@&lt;eax&gt;(int a1@&lt;eax&gt;, int a2@&lt;ecx&gt;, KEY_OBJ1 *a3)//两个KEY_OBJ做乘法</span><br></pre></td></tr></table></figure></p>
+<h1 id="2-醒悟算法究竟是个什么玩意"><a href="#2-醒悟算法究竟是个什么玩意" class="headerlink" title="2. 醒悟算法究竟是个什么玩意"></a>2. 醒悟算法究竟是个什么玩意</h1><p>输入的key关键处理部分<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.text:004010E0                 push    9</span><br><span class="line">.text:004010E2                 lea     ecx, [esp+413Ch+keyobj]</span><br><span class="line">.text:004010E9                 call    f_keyobj_calc_mul_401730 ;</span><br><span class="line">...</span><br><span class="line">.text:0040110B                 lea     eax, [esp+4138h+keyobj1]</span><br><span class="line">.text:00401112                 lea     ecx, [esp+4138h+keyobj]</span><br><span class="line">.text:00401119                 push    eax</span><br><span class="line">.text:0040111A                 mov     byte ptr [esp+413Ch+var_4], 1</span><br><span class="line">.text:00401122                 call    f_keyobj_mul2_401840</span><br><span class="line">...</span><br><span class="line">.text:00401127                 push    9</span><br><span class="line">.text:00401129                 lea     ecx, [esp+413Ch+keyobj]</span><br><span class="line">.text:00401130                 mov     esi, eax</span><br><span class="line">.text:00401132                 call    f_keyobj_calc_mul_401730 ;</span><br></pre></td></tr></table></figure></p>
 <p>先前想着输入的key用9做位移，做加法，干么呢…一直绕不清，后来重新看f_keyobj_key1_s2_401970，觉得是进位处理，一下子就灵光了，这是实现乘法运算（1024位的乘法，真实折腾，nb）。<br>这样算法也基本清楚了。<br>key<em>9</em>key<em>9</em>(…) =&gt; result</p>
 <p>怎么校验的呢？</p>
 <ol>
 <li>计算结果长度必须是奇数</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">.text:00401154                 call    f_keyobj_curpos_4013A0</div><div class="line">.text:00401159                 and     eax, 80000001h</div><div class="line">.text:0040115E                 jns     short loc_401165</div><div class="line">.text:00401160                 dec     eax</div><div class="line">.text:00401161                 or      eax, 0FFFFFFFEh</div><div class="line">.text:00401164                 inc     eax</div><div class="line">.text:00401165</div><div class="line">.text:00401165 loc_401165:                             ; CODE XREF: _main+15E</div><div class="line">.text:00401165                 cmp     eax, 1</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.text:00401154                 call    f_keyobj_curpos_4013A0</span><br><span class="line">.text:00401159                 and     eax, 80000001h</span><br><span class="line">.text:0040115E                 jns     short loc_401165</span><br><span class="line">.text:00401160                 dec     eax</span><br><span class="line">.text:00401161                 or      eax, 0FFFFFFFEh</span><br><span class="line">.text:00401164                 inc     eax</span><br><span class="line">.text:00401165</span><br><span class="line">.text:00401165 loc_401165:                             ; CODE XREF: _main+15E</span><br><span class="line">.text:00401165                 cmp     eax, 1</span><br></pre></td></tr></table></figure>
 <ol>
 <li>result[len/2] == key[0]</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">.text:00401175                 call    f_keyobj_curpos_4013A0</div><div class="line">.text:0040117A                 sar     eax, 1</div><div class="line">.text:0040117C                 push    eax</div><div class="line">.text:0040117D                 lea     ecx, [esp+413Ch+keyobj]</div><div class="line">.text:00401184                 call    f_keyobj_check1_4013B0</div><div class="line">.text:00401189                 push    0</div><div class="line">.text:0040118B                 lea     ecx, [esp+413Ch+keyobj1]</div><div class="line">.text:00401192                 mov     edi, eax</div><div class="line">.text:00401194                 call    f_keyobj_check1_4013B0</div><div class="line">.text:00401199                 cmp     edi, eax</div><div class="line">.text:0040119B                 lea     ecx, [esp+4138h+keyobj1]</div><div class="line">.text:004011A2                 jnz     short loc_40121C</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.text:00401175                 call    f_keyobj_curpos_4013A0</span><br><span class="line">.text:0040117A                 sar     eax, 1</span><br><span class="line">.text:0040117C                 push    eax</span><br><span class="line">.text:0040117D                 lea     ecx, [esp+413Ch+keyobj]</span><br><span class="line">.text:00401184                 call    f_keyobj_check1_4013B0</span><br><span class="line">.text:00401189                 push    0</span><br><span class="line">.text:0040118B                 lea     ecx, [esp+413Ch+keyobj1]</span><br><span class="line">.text:00401192                 mov     edi, eax</span><br><span class="line">.text:00401194                 call    f_keyobj_check1_4013B0</span><br><span class="line">.text:00401199                 cmp     edi, eax</span><br><span class="line">.text:0040119B                 lea     ecx, [esp+4138h+keyobj1]</span><br><span class="line">.text:004011A2                 jnz     short loc_40121C</span><br></pre></td></tr></table></figure>
 <ol>
 <li>高位部分和key相同（跳过比较那个字节）</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">.text:004011D0                 lea     ecx, [esp+4144h+keyobj1]</div><div class="line">.text:004011D7                 push    esi</div><div class="line">.text:004011D8                 push    ecx</div><div class="line">.text:004011D9                 lea     ecx, [esp+414Ch+keyobj]</div><div class="line">.text:004011E0                 call    f_keyobj_check2_4013E0</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text:004011D0                 lea     ecx, [esp+4144h+keyobj1]</span><br><span class="line">.text:004011D7                 push    esi</span><br><span class="line">.text:004011D8                 push    ecx</span><br><span class="line">.text:004011D9                 lea     ecx, [esp+414Ch+keyobj]</span><br><span class="line">.text:004011E0                 call    f_keyobj_check2_4013E0</span><br></pre></td></tr></table></figure>
 <ol>
 <li>低位部分和key逆序（跳过比较那个字节）</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">text:004011F6                 lea     edx, [esp+413Ch+keyobj1]</div><div class="line">.text:004011FD                 push    eax</div><div class="line">.text:004011FE                 push    1</div><div class="line">.text:00401200                 push    0</div><div class="line">.text:00401202                 push    edx</div><div class="line">.text:00401203                 lea     ecx, [esp+414Ch+keyobj]</div><div class="line">.text:0040120A                 call    f_keyobj_check2_4013E0</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">text:004011F6                 lea     edx, [esp+413Ch+keyobj1]</span><br><span class="line">.text:004011FD                 push    eax</span><br><span class="line">.text:004011FE                 push    1</span><br><span class="line">.text:00401200                 push    0</span><br><span class="line">.text:00401202                 push    edx</span><br><span class="line">.text:00401203                 lea     ecx, [esp+414Ch+keyobj]</span><br><span class="line">.text:0040120A                 call    f_keyobj_check2_4013E0</span><br></pre></td></tr></table></figure>
 <p>感觉结果应该是这一个样子的：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">1234567-&gt;1234567654321 //中间因为长度折腾了好久，后面查了才知道这是回文数，翻半天没有什么算法，脚本已经跑起来了</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1234567-&gt;1234567654321 //中间因为长度折腾了好久，后面查了才知道这是回文数，翻半天没有什么算法，脚本已经跑起来了</span><br></pre></td></tr></table></figure>
 <p>怎么求逆呢？算法不好，那就脚本跑吧！</p>
-<h1 id="3-脚本跑"><a href="#3-脚本跑" class="headerlink" title="3. 脚本跑"></a>3. 脚本跑</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">i = 11111111#</div><div class="line">while True:</div><div class="line">    break</div><div class="line">    is1 = str(i)</div><div class="line">    is2_len = len(is1) </div><div class="line">    </div><div class="line">    is1 = is1[:is2_len-1]</div><div class="line">    is2 = is1[::-1]</div><div class="line">    </div><div class="line">    k = i*9*9*i</div><div class="line">        </div><div class="line">    ks1 = &apos;&apos;</div><div class="line">    ks = &apos;&apos;</div><div class="line">    while True:</div><div class="line">       </div><div class="line">        #print i, k</div><div class="line">        #break</div><div class="line">        ks1 = str(k)</div><div class="line">        </div><div class="line">        lll = len(ks1)/2</div><div class="line">        </div><div class="line">        if len(ks1) &gt; 2*is2_len:</div><div class="line">            #print &apos;long out - 1&apos;, i, len(ks1), 2*is2_len</div><div class="line">            break</div><div class="line">        </div><div class="line">        if (is2_len + len(ks1))&gt;1024:</div><div class="line">            #print &apos;long out - 1&apos;, i, is2_len + len(ks1)</div><div class="line">            break</div><div class="line">        </div><div class="line">        if (len(ks1)%2!=0) and (is1[0:1] == ks1[lll:lll+1]):</div><div class="line">            print  &apos;get -success1 &gt; &apos;, i, is1, k</div><div class="line">            break</div><div class="line"></div><div class="line">        if len(ks1)&gt;1024:</div><div class="line">            #print &apos;long out&apos;, i</div><div class="line">            break </div><div class="line">        </div><div class="line">        k = k * i*9</div><div class="line"></div><div class="line">    ls2_len1 = is2_len-1</div><div class="line">    ks = ks1[:ls2_len1]</div><div class="line">    </div><div class="line">    if ((is1 == ks) and (is2 == ks1[(-1*ls2_len1):])):</div><div class="line">        print  &apos;get -success &gt; &apos;, i, is1, k</div><div class="line">        print &apos;&apos;</div><div class="line">    </div><div class="line">    i += 1</div><div class="line">    </div><div class="line">    if i % 10000000 == 0:</div><div class="line">        print &apos;...&apos;, i</div><div class="line">    </div><div class="line">    if i &gt; 99999999999999999999:</div><div class="line">        break</div></pre></td></tr></table></figure>
-<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><p>结果最后跑出来是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">get -success &gt;  12345679 1234567 12345678987654321</div></pre></td></tr></table></figure></p>
+<h1 id="3-脚本跑"><a href="#3-脚本跑" class="headerlink" title="3. 脚本跑"></a>3. 脚本跑</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">i = 11111111#</span><br><span class="line">while True:</span><br><span class="line">    break</span><br><span class="line">    is1 = str(i)</span><br><span class="line">    is2_len = len(is1) </span><br><span class="line">    </span><br><span class="line">    is1 = is1[:is2_len-1]</span><br><span class="line">    is2 = is1[::-1]</span><br><span class="line">    </span><br><span class="line">    k = i*9*9*i</span><br><span class="line">        </span><br><span class="line">    ks1 = &apos;&apos;</span><br><span class="line">    ks = &apos;&apos;</span><br><span class="line">    while True:</span><br><span class="line">       </span><br><span class="line">        #print i, k</span><br><span class="line">        #break</span><br><span class="line">        ks1 = str(k)</span><br><span class="line">        </span><br><span class="line">        lll = len(ks1)/2</span><br><span class="line">        </span><br><span class="line">        if len(ks1) &gt; 2*is2_len:</span><br><span class="line">            #print &apos;long out - 1&apos;, i, len(ks1), 2*is2_len</span><br><span class="line">            break</span><br><span class="line">        </span><br><span class="line">        if (is2_len + len(ks1))&gt;1024:</span><br><span class="line">            #print &apos;long out - 1&apos;, i, is2_len + len(ks1)</span><br><span class="line">            break</span><br><span class="line">        </span><br><span class="line">        if (len(ks1)%2!=0) and (is1[0:1] == ks1[lll:lll+1]):</span><br><span class="line">            print  &apos;get -success1 &gt; &apos;, i, is1, k</span><br><span class="line">            break</span><br><span class="line"></span><br><span class="line">        if len(ks1)&gt;1024:</span><br><span class="line">            #print &apos;long out&apos;, i</span><br><span class="line">            break </span><br><span class="line">        </span><br><span class="line">        k = k * i*9</span><br><span class="line"></span><br><span class="line">    ls2_len1 = is2_len-1</span><br><span class="line">    ks = ks1[:ls2_len1]</span><br><span class="line">    </span><br><span class="line">    if ((is1 == ks) and (is2 == ks1[(-1*ls2_len1):])):</span><br><span class="line">        print  &apos;get -success &gt; &apos;, i, is1, k</span><br><span class="line">        print &apos;&apos;</span><br><span class="line">    </span><br><span class="line">    i += 1</span><br><span class="line">    </span><br><span class="line">    if i % 10000000 == 0:</span><br><span class="line">        print &apos;...&apos;, i</span><br><span class="line">    </span><br><span class="line">    if i &gt; 99999999999999999999:</span><br><span class="line">        break</span><br></pre></td></tr></table></figure>
+<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><p>结果最后跑出来是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">get -success &gt;  12345679 1234567 12345678987654321</span><br></pre></td></tr></table></figure></p>
 <p>因为代码中处理字符存为数值是倒着的，所以key应该是97654321</p>
 <p>转载请注明出处：<a href="https://anhkgg.github.io/kxctf2017_writeup2">https://anhkgg.github.io/kxctf2017_writeup2</a></p>
 
@@ -576,22 +577,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -605,6 +590,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -624,7 +613,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -637,6 +634,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -676,23 +689,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -725,6 +726,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -768,30 +797,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -800,7 +805,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -836,6 +845,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -845,6 +866,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -861,26 +890,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -916,14 +925,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -937,6 +938,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

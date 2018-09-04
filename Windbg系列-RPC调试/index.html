@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/Windbg系列-RPC调试/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="概述最近在调试rpc，没法子，翻译了一下windbg这篇调试RPC的文档，后面可能还有其他内容，也就弄个系列吧算是自己的笔记，有看客的话，可以多多指出问题，提提建议，不吝赐教！ 微软的远程过程调用（RPC）可以轻松越过进程和机器的界限并且进行数据通信。这种网络通信标准是微软Window网络通信如此强大的原因（….太绕了，翻不来，也不重要）。然而，因为RPC对进程隐藏了网络调用，所以隐藏了计算机之间">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:updated_time" content="2016-07-06T23:46:33.472Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Windbg系列-RPC调试">
@@ -184,7 +185,7 @@
 <p>之后这些信息就可以被调试器或者DbgRpc访问了。在每种情况下，一个集合的查询都是可以用的。细节请看Displaying RPC State Information</p>
 <p>在大部分情况下，你可以通过使用Common RPC Debugging Techniques.中的技术找到问题。<br>如果你想探索一下机器是怎么保存这些细腻的，或者你想设计自己的状态信息分析的技术，可以看看RPC State Information Internals.<br>这些工具和技术在Windows2000中不能使用</p>
 <h1 id="激活RPC状态信息"><a href="#激活RPC状态信息" class="headerlink" title="激活RPC状态信息"></a>激活RPC状态信息</h1><p>可以收集两种不同的RPC运行时状态信息：服务端信息和完整信息。必须要在调试器或者DbgRpc使用之前激活状态信息的收集。<br>只有Windows XP以及以后的系统可以收集RPC状态信息。<br>收集服务端状态信息是比较轻量级。每次RPC调用大概需要100条机器指令，甚至在性能测试中都几乎不可察觉已经被加载了（…）。但是收集这些信息会耗费内存（每个RPC服务端大概4KB），所以不推荐内存有压力的机器使用。服务端信息包括数据，endpoints，线程，连接对象和服务调用对象（SCALL）。这些足够调试大部分RPC问题了。<br>收集全部状态信息更加heavyweight。它收集了所有的信息，包括服务端信息，另外还有客户端调用对象（CCALL）。全部状态信息通常是不需要的。<br>在电脑中运行Group Policy Editor(Gpedit.msc)可以激活收集RPC状态信息的功能。在本地电脑策略中，找到Computer Configuration/Administrative Templates/System/Remote Procedure Call。在这节下面可以看到RPC Troubleshooting State Information，当你编辑它的属性时，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">本地计算机策略-计算机配置-管理模板-系统-远程过程调用-维护RPC疑难解答状态信息（默认未启用，启用之后配置下面5中状态）</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">本地计算机策略-计算机配置-管理模板-系统-远程过程调用-维护RPC疑难解答状态信息（默认未启用，启用之后配置下面5中状态）</span><br></pre></td></tr></table></figure>
 <p>可以看到5中可能的状态：<br>None：不维持任何状态信息。除非你电脑内存压力很大，不推荐这种配置。<br>Server：收集服务端状态信息。推荐在个人电脑中设置这个。<br>Full：收集全部状态信息。<br>Auto1：在内存小于64MB的电脑中，相当于None配置。在大于64MB的电脑中相当于Server配置。<br>Auto2：在内存小于128MB的运行Windows Server2003的电脑，或者运行Windows XP的电脑，相当于None配置。在大于128MB的Windows Server 2003中，相当于Server。这个也是默认配置。</p>
 <p>如果你想同时配置一个局域网中的电脑的这些状态，使用Group Policy Editor卷起（roll out）机器策略到首选的机器中。策略引擎会监视你配置的策略传到首选的机器中。在这种情况下，Auto1和Auto2是特别有用的，因为不同机器的操作系统和内存大小是不一样的。<br>如果网络中包括运行了比Windows XP更老的系统，这些电脑会忽略这些配置。</p>
 <h1 id="显示RPC状态信息"><a href="#显示RPC状态信息" class="headerlink" title="显示RPC状态信息"></a>显示RPC状态信息</h1><p>各种各样的RPC调试扩展在Rpcexts.dll中导出。<br>这些用来显示RPC状态信息RPC扩展只能在用户模式中运行。他们可以在CDB(或者NTSD)或者用户模式的Windbg中使用。<br>用户模式的调试器必须有一个目标程序，但是这个目标跟RPC扩展又是没有关系的（？？）。如果调试器还没有运行，你可以简单打开它调试一个毫不相干的目标（比如windbg notepad或者cdb winmine）。接着在CDB中CTRL+C，或者Windbg中Debug|Break来停止目标进程，这样可以使用调试器的命令窗口。<br>如果你需要分析一个远程电脑的RPC状态信息，你需要在目标电脑中运行一个用户模式的调试器，然后使用Remote Debugging。<br>通过调试器访问RPC状态信息在一个stress环境中是特别有用的，或者当一个调试器已经运行了。</p>
@@ -192,59 +193,59 @@
 <h2 id="使用DbgRpc工具"><a href="#使用DbgRpc工具" class="headerlink" title="使用DbgRpc工具"></a>使用DbgRpc工具</h2><p>DbgRpc工具（DbgRpc.exe）放在windbg安装目录中，必须使用命令提示窗口打开它。<br>双击是不能启动这个工具的。<br>命令提示窗口必须运行在本地电脑的administrator权限的账户下，或者域管理员权限。<br>DbgRpc不会对系统服务产生任何调用（比如LSASS）。 这个对调试时非常有用的，只要内核还在运行，即便在系统服务已经崩溃了。</p>
 <p>在远程电脑中使用DbgRpc<br>DbgRpc也可以用来检查远程电脑的信息。为了让这个可以正常工作，远程电脑需要可以接受远程连接和远程认证用户。如果远程电脑的RPCSS服务已经崩溃，DbgRpc将不能工作。远程电脑中也需要Administrative或者域管理员权限。</p>
 <p>-s参数用来指定服务端名字，-p指定传输协议。TCP和命名管道都可以使用。推荐使用TCP协议，它几乎可以在每种情况下使用。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">G:\&gt;dbgrpc -s MyServer -p ncacn_ip_tcp -l -P 1e8 -L 0.1</div><div class="line">Getting remote cell info ...</div><div class="line">Endpoint</div><div class="line">Status: Active</div><div class="line">Protocol Sequence: LRPC</div><div class="line">Endpoint name: OLE18</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">G:\&gt;dbgrpc -s MyServer -p ncacn_ip_tcp -l -P 1e8 -L 0.1</span><br><span class="line">Getting remote cell info ...</span><br><span class="line">Endpoint</span><br><span class="line">Status: Active</span><br><span class="line">Protocol Sequence: LRPC</span><br><span class="line">Endpoint name: OLE18</span><br></pre></td></tr></table></figure>
 <p>DbgRpc命令行<br>可以查看详细的DbgRpc命令描述</p>
 <h2 id="获取RPC-Cell信息"><a href="#获取RPC-Cell信息" class="headerlink" title="获取RPC Cell信息"></a>获取RPC Cell信息</h2><p>详细的cell信息通过!rpcexts.getdbgcell显示，或者使用DbgRpc的-l开关。<br>需要指定进程id已经cell number。<br>下面的例子，进程id是0x278，cell number是0000.0002</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -l -P 278 -L 0.2</div><div class="line">Getting cell info ...</div><div class="line">Thread</div><div class="line">Status: Dispatched</div><div class="line">Thread ID: 0x1A4 (420)</div><div class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</div><div class="line">For details on the optional parameters, see DbgRpc Command-Line Options.</div><div class="line">For a similar example using the RPC debugger extensions, see !rpcexts.getdbgcell.</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">D:\wmsg&gt;dbgrpc -l -P 278 -L 0.2</span><br><span class="line">Getting cell info ...</span><br><span class="line">Thread</span><br><span class="line">Status: Dispatched</span><br><span class="line">Thread ID: 0x1A4 (420)</span><br><span class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</span><br><span class="line">For details on the optional parameters, see DbgRpc Command-Line Options.</span><br><span class="line">For a similar example using the RPC debugger extensions, see !rpcexts.getdbgcell.</span><br></pre></td></tr></table></figure>
 <h2 id="获取RPC-Endpoint信息"><a href="#获取RPC-Endpoint信息" class="headerlink" title="获取RPC Endpoint信息"></a>获取RPC Endpoint信息</h2><p>Endpoint信息通过!rpcexts.getendpointinfo显示，或者DbgRpc的-e开关。<br>如果指定了endpoint number，就会显示它的信息。如果忽略endpoint number，系统中所有进程的endpoint都会显示。<br>下面是显示所有endpoints的例子，通常包含进程id和cell number作为额外的参数是很有用的方式。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -e</div><div class="line">Searching for endpoint info ...</div><div class="line">PID  CELL ID   ST PROTSEQ        ENDPOINT</div><div class="line">-------------------------------------------------------</div><div class="line">00a8 0000.0001 01            NMP \PIPE\InitShutdown</div><div class="line">00a8 0000.0003 01            NMP \PIPE\SfcApi</div><div class="line">00a8 0000.0004 01            NMP \PIPE\ProfMapApi</div><div class="line">00a8 0000.0007 01            NMP \pipe\winlogonrpc</div><div class="line">00a8 0000.0008 01           LRPC OLE5</div><div class="line">00c4 0000.0001 01           LRPC ntsvcs</div><div class="line">00c4 0000.0003 01            NMP \PIPE\ntsvcs</div><div class="line">00c4 0000.0008 01            NMP \PIPE\scerpc</div><div class="line">00d0 0000.0001 01            NMP \PIPE\lsass</div><div class="line">00d0 0000.0004 01            NMP \pipe\WMIEP_d0</div><div class="line">00d0 0000.000b 01            NMP \PIPE\POLICYAGENT</div><div class="line">00d0 0000.000c 01           LRPC policyagent</div><div class="line">0170 0000.0001 01           LRPC epmapper</div><div class="line">0170 0000.0003 01            TCP 135</div><div class="line">0170 0000.0005 01            SPX 34280</div><div class="line">0170 0000.0006 01             NB 135</div><div class="line">0170 0000.0007 01             NB 135</div><div class="line">0170 0000.000b 01            NMP \pipe\epmapper</div><div class="line">01b8 0000.0001 01            NMP \pipe\spoolss</div><div class="line">01b8 0000.0003 01           LRPC spoolss</div><div class="line">01b8 0000.0007 01           LRPC OLE7</div><div class="line">00ec 0000.0001 01           LRPC OLE2</div><div class="line">00ec 0000.0003 01           LRPC senssvc</div><div class="line">00ec 0000.0007 01            NMP \pipe\tapsrv</div><div class="line">00ec 0000.0008 01           LRPC tapsrvlpc</div><div class="line">00ec 0000.000c 01            NMP \PIPE\ROUTER</div><div class="line">00ec 0000.0010 01            NMP \pipe\WMIEP_ec</div><div class="line">0214 0000.0001 01            NMP \PIPE\winreg</div><div class="line">022c 0000.0001 01           LRPC LRPC0000022c.00000001</div><div class="line">022c 0000.0003 01            TCP 1058</div><div class="line">022c 0000.0005 01            SPX 24576</div><div class="line">022c 0000.0006 01            NMP \PIPE\atsvc</div><div class="line">02a8 0000.0001 01           LRPC OLE3</div><div class="line">0370 0000.0001 01           LRPC OLE9</div><div class="line">0278 0000.0001 01            TCP 1120</div><div class="line">030c 0000.0001 01           LRPC OLE12</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">D:\wmsg&gt;dbgrpc -e</span><br><span class="line">Searching for endpoint info ...</span><br><span class="line">PID  CELL ID   ST PROTSEQ        ENDPOINT</span><br><span class="line">-------------------------------------------------------</span><br><span class="line">00a8 0000.0001 01            NMP \PIPE\InitShutdown</span><br><span class="line">00a8 0000.0003 01            NMP \PIPE\SfcApi</span><br><span class="line">00a8 0000.0004 01            NMP \PIPE\ProfMapApi</span><br><span class="line">00a8 0000.0007 01            NMP \pipe\winlogonrpc</span><br><span class="line">00a8 0000.0008 01           LRPC OLE5</span><br><span class="line">00c4 0000.0001 01           LRPC ntsvcs</span><br><span class="line">00c4 0000.0003 01            NMP \PIPE\ntsvcs</span><br><span class="line">00c4 0000.0008 01            NMP \PIPE\scerpc</span><br><span class="line">00d0 0000.0001 01            NMP \PIPE\lsass</span><br><span class="line">00d0 0000.0004 01            NMP \pipe\WMIEP_d0</span><br><span class="line">00d0 0000.000b 01            NMP \PIPE\POLICYAGENT</span><br><span class="line">00d0 0000.000c 01           LRPC policyagent</span><br><span class="line">0170 0000.0001 01           LRPC epmapper</span><br><span class="line">0170 0000.0003 01            TCP 135</span><br><span class="line">0170 0000.0005 01            SPX 34280</span><br><span class="line">0170 0000.0006 01             NB 135</span><br><span class="line">0170 0000.0007 01             NB 135</span><br><span class="line">0170 0000.000b 01            NMP \pipe\epmapper</span><br><span class="line">01b8 0000.0001 01            NMP \pipe\spoolss</span><br><span class="line">01b8 0000.0003 01           LRPC spoolss</span><br><span class="line">01b8 0000.0007 01           LRPC OLE7</span><br><span class="line">00ec 0000.0001 01           LRPC OLE2</span><br><span class="line">00ec 0000.0003 01           LRPC senssvc</span><br><span class="line">00ec 0000.0007 01            NMP \pipe\tapsrv</span><br><span class="line">00ec 0000.0008 01           LRPC tapsrvlpc</span><br><span class="line">00ec 0000.000c 01            NMP \PIPE\ROUTER</span><br><span class="line">00ec 0000.0010 01            NMP \pipe\WMIEP_ec</span><br><span class="line">0214 0000.0001 01            NMP \PIPE\winreg</span><br><span class="line">022c 0000.0001 01           LRPC LRPC0000022c.00000001</span><br><span class="line">022c 0000.0003 01            TCP 1058</span><br><span class="line">022c 0000.0005 01            SPX 24576</span><br><span class="line">022c 0000.0006 01            NMP \PIPE\atsvc</span><br><span class="line">02a8 0000.0001 01           LRPC OLE3</span><br><span class="line">0370 0000.0001 01           LRPC OLE9</span><br><span class="line">0278 0000.0001 01            TCP 1120</span><br><span class="line">030c 0000.0001 01           LRPC OLE12</span><br></pre></td></tr></table></figure>
 <p>For details on the optional parameters, see DbgRpc Command-Line Options.<br>For a similar example using the RPC debugger extensions, see !rpcexts.getendpointinfo.</p>
 <h2 id="获取RPC线程信息"><a href="#获取RPC线程信息" class="headerlink" title="获取RPC线程信息"></a>获取RPC线程信息</h2><p>使用显示!rpcexts.getthreadinfo线程信息，或者DbgRpc的-t开关。<br>必须指定进程pid。也可以指定线程ID，如果忽略，显示进程的所有线程。<br>例子，进程ID 0x278，忽略了线程ID</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -t -P 278</div><div class="line">Searching for thread info ...</div><div class="line">PID  CELL ID   ST TID      LASTTIME</div><div class="line">-----------------------------------</div><div class="line">0278 0000.0002 01 000001a4 00072c09</div><div class="line">0278 0000.0005 03 0000031c 00072bf5</div><div class="line">For details on the optional parameters, see DbgRpc Command-Line Options.</div><div class="line">For a similar example using the RPC debugger extensions, see !rpcexts.getthreadinfo.</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">D:\wmsg&gt;dbgrpc -t -P 278</span><br><span class="line">Searching for thread info ...</span><br><span class="line">PID  CELL ID   ST TID      LASTTIME</span><br><span class="line">-----------------------------------</span><br><span class="line">0278 0000.0002 01 000001a4 00072c09</span><br><span class="line">0278 0000.0005 03 0000031c 00072bf5</span><br><span class="line">For details on the optional parameters, see DbgRpc Command-Line Options.</span><br><span class="line">For a similar example using the RPC debugger extensions, see !rpcexts.getthreadinfo.</span><br></pre></td></tr></table></figure>
 <h2 id="获取RPC调用信息"><a href="#获取RPC调用信息" class="headerlink" title="获取RPC调用信息"></a>获取RPC调用信息</h2><p>服务端调用信息通过!rpcexts.getcallinfo显示，DbgRpc的-c开关<br>有4个可选的参数。其中三个CallID，IfStart，ProcNum是用来跟中RPC调用来标记信息的。第四个参数是ProcessID是服务端的Pid。你可以使用你知道的参数值来缩小搜索。<br>如果没有参数指定，系统中所有可知的SCALLs都会显示。例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -c</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   ST PNO IFSTART  TIDNUMBER CALLFLAG CALLID   LASTTIME CONN/CLN</div><div class="line">----------------------------------------------------------------------------</div><div class="line">00c4 0000.0002 00 00f 82273fdc 0000.0007 00000001 00000002 0003595d 0000.0010</div><div class="line">00c4 0000.0006 00 009 367abb81 0000.0015 00000001 0000004d 000185bd 0000.0005</div><div class="line">00c4 0000.000a 00 007 367abb81 0000.002d 00000001 0000009f 00014672 0000.0009</div><div class="line">00c4 0000.000c 00 007 367abb81 0000.002d 00000001 00000083 000122e3 0000.000b</div><div class="line">00c4 0000.000d 00 03b 8d9f4e40 0000.002d 00000001 000000f7 0001aba5 0000.0020</div><div class="line">00c4 0000.000e 00 03b 8d9f4e40 0000.0026 00000001 00000002 00023056 0000.0021</div><div class="line">00c4 0000.000f 00 008 82273fdc 0000.001e 00000009 baadf00d 000366b4 00ec.03bc</div><div class="line">00c4 0000.0012 00 00d 8d9f4e40 0000.0004 00000001 00000051 0000a334 0000.0011</div><div class="line">00c4 0000.0014 00 000 367abb81 0000.0015 00000001 0000004c 0002db53 0000.0013</div><div class="line">00c4 0000.0017 00 007 367abb81 0000.0015 00000001 00000006 0000d102 0000.0016</div><div class="line">00c4 0000.0019 00 007 367abb81 0000.0004 00000001 00000006 0000f09e 0000.0018</div><div class="line">00c4 0000.001b 00 009 65a93890 0000.0007 00000001 0000012e 00630f65 0000.001a</div><div class="line">00c4 0000.001e 00 026 8d9f4e40 0000.0015 00000001 0000037d 0005e579 0000.002c</div><div class="line">00c4 0000.001f 00 008 82273fdc 0000.0033 00000009 baadf00d 000145b3 00c4.02f8</div><div class="line">00c4 0000.0023 00 000 367abb81 0000.0004 00000001 0000007e 000372f3 0000.0022</div><div class="line">00c4 0000.0025 00 03b 8d9f4e40 0000.0026 00000001 0000000b 000122e3 0000.0024</div><div class="line">00c4 0000.0027 00 000 367abb81 0000.002d 00000001 0000000b 00012e27 0000.0028</div><div class="line">00c4 0000.002a 00 008 82273fdc 0000.0033 00000009 baadf00d 0001245f 022c.0290</div><div class="line">00c4 0000.002f 00 007 367abb81 0000.0026 00000001 0000000a 0002983c 0000.002e</div><div class="line">00c4 0000.0031 00 004 3ba0ffc0 0000.0026 00000001 00000007 0005c439 0000.001c</div><div class="line">00c4 0000.0032 00 00b 82273fdc 0000.0039 00000009 baadf00d 00687db6 00d0.01d4</div><div class="line">00c4 0000.0036 00 007 367abb81 0000.0030 00000001 00000065 0003a5e1 0000.0035</div><div class="line">00c4 0000.0037 00 00d 8d9f4e40 0000.0015 00000001 0000033f 000376fa 0000.002b</div><div class="line">00c4 0000.0038 00 008 8d9f4e40 0000.0015 00000001 00000803 0018485c 0000.003b</div><div class="line">00c4 0000.003c 00 00b 82273fdc 0000.0034 00000009 baadf00d 0001f956 00a8.0244</div><div class="line">00c4 0000.003d 00 008 82273fdc 0000.0034 00000009 baadf00d 0001ff02 01b8.037c</div><div class="line">0170 0000.0009 00 002 e60c73e6 0000.0013 00000009 baadf00d 0005a371 00ec.031c</div><div class="line">0170 0000.000a 00 002 0b0a6584 0000.0002 00000009 baadf00d 000126ae 00c4.0130</div><div class="line">0170 0000.000c 00 002 0b0a6584 0000.0010 00000009 baadf00d 00012bc4 022c.0290</div><div class="line">0170 0000.000d 00 003 00000136 0000.001b 00000009 baadf00d 0005ba71 00ec.0310</div><div class="line">0170 0000.000e 00 000 412f241e 0000.0002 00000009 baadf00d 00012f21 02a8.029c</div><div class="line">0170 0000.0010 00 003 00000136 0000.0013 00000009 00000003 000341da 0370.0060</div><div class="line">0170 0000.0011 00 006 e60c73e6 0000.001b 00000009 baadf00d 000f1d00 0370.0328</div><div class="line">0170 0000.0017 00 002 0b0a6584 0000.001b 00000009 baadf00d 0006c803 0278.0184</div><div class="line">0170 0000.001a 00 004 00000136 0000.0012 00000001 baadf00d 00038e9b 00ec.0348</div><div class="line">00ec 0000.0006 00 009 00000134 0000.0011 00000009 baadf00d 000b233f 0170.0244</div><div class="line">00ec 0000.000b 00 001 2f5f6520 0000.001c 00000009 baadf00d 00035510 00ec.0334</div><div class="line">00ec 0000.000e 00 001 629b9f66 0000.0014 00000009 baadf00d 00035813 00ec.01c4</div><div class="line">00ec 0000.0012 00 000 629b9f66 0000.0014 00000009 baadf00d 00026cc6 00a8.0164</div><div class="line">00ec 0000.001b 00 001 2f5f6520 0000.0004 00000001 baadf00d 000352c1 00ec.03a8</div><div class="line">02a8 0000.0004 00 009 00000134 0000.0002 00000009 baadf00d 0009a540 0170.0244</div><div class="line">0370 0000.0006 00 003 00000134 0000.0005 0000000b baadf00d 0002e7cd 00ec.0350</div><div class="line">0370 0000.0008 00 009 00000134 0000.0007 0000000b 01cee9e4 000838fa 0170.0244</div><div class="line">0278 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00072c09 0000.0003</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">D:\wmsg&gt;dbgrpc -c</span><br><span class="line">Searching for call info ...</span><br><span class="line">PID  CELL ID   ST PNO IFSTART  TIDNUMBER CALLFLAG CALLID   LASTTIME CONN/CLN</span><br><span class="line">----------------------------------------------------------------------------</span><br><span class="line">00c4 0000.0002 00 00f 82273fdc 0000.0007 00000001 00000002 0003595d 0000.0010</span><br><span class="line">00c4 0000.0006 00 009 367abb81 0000.0015 00000001 0000004d 000185bd 0000.0005</span><br><span class="line">00c4 0000.000a 00 007 367abb81 0000.002d 00000001 0000009f 00014672 0000.0009</span><br><span class="line">00c4 0000.000c 00 007 367abb81 0000.002d 00000001 00000083 000122e3 0000.000b</span><br><span class="line">00c4 0000.000d 00 03b 8d9f4e40 0000.002d 00000001 000000f7 0001aba5 0000.0020</span><br><span class="line">00c4 0000.000e 00 03b 8d9f4e40 0000.0026 00000001 00000002 00023056 0000.0021</span><br><span class="line">00c4 0000.000f 00 008 82273fdc 0000.001e 00000009 baadf00d 000366b4 00ec.03bc</span><br><span class="line">00c4 0000.0012 00 00d 8d9f4e40 0000.0004 00000001 00000051 0000a334 0000.0011</span><br><span class="line">00c4 0000.0014 00 000 367abb81 0000.0015 00000001 0000004c 0002db53 0000.0013</span><br><span class="line">00c4 0000.0017 00 007 367abb81 0000.0015 00000001 00000006 0000d102 0000.0016</span><br><span class="line">00c4 0000.0019 00 007 367abb81 0000.0004 00000001 00000006 0000f09e 0000.0018</span><br><span class="line">00c4 0000.001b 00 009 65a93890 0000.0007 00000001 0000012e 00630f65 0000.001a</span><br><span class="line">00c4 0000.001e 00 026 8d9f4e40 0000.0015 00000001 0000037d 0005e579 0000.002c</span><br><span class="line">00c4 0000.001f 00 008 82273fdc 0000.0033 00000009 baadf00d 000145b3 00c4.02f8</span><br><span class="line">00c4 0000.0023 00 000 367abb81 0000.0004 00000001 0000007e 000372f3 0000.0022</span><br><span class="line">00c4 0000.0025 00 03b 8d9f4e40 0000.0026 00000001 0000000b 000122e3 0000.0024</span><br><span class="line">00c4 0000.0027 00 000 367abb81 0000.002d 00000001 0000000b 00012e27 0000.0028</span><br><span class="line">00c4 0000.002a 00 008 82273fdc 0000.0033 00000009 baadf00d 0001245f 022c.0290</span><br><span class="line">00c4 0000.002f 00 007 367abb81 0000.0026 00000001 0000000a 0002983c 0000.002e</span><br><span class="line">00c4 0000.0031 00 004 3ba0ffc0 0000.0026 00000001 00000007 0005c439 0000.001c</span><br><span class="line">00c4 0000.0032 00 00b 82273fdc 0000.0039 00000009 baadf00d 00687db6 00d0.01d4</span><br><span class="line">00c4 0000.0036 00 007 367abb81 0000.0030 00000001 00000065 0003a5e1 0000.0035</span><br><span class="line">00c4 0000.0037 00 00d 8d9f4e40 0000.0015 00000001 0000033f 000376fa 0000.002b</span><br><span class="line">00c4 0000.0038 00 008 8d9f4e40 0000.0015 00000001 00000803 0018485c 0000.003b</span><br><span class="line">00c4 0000.003c 00 00b 82273fdc 0000.0034 00000009 baadf00d 0001f956 00a8.0244</span><br><span class="line">00c4 0000.003d 00 008 82273fdc 0000.0034 00000009 baadf00d 0001ff02 01b8.037c</span><br><span class="line">0170 0000.0009 00 002 e60c73e6 0000.0013 00000009 baadf00d 0005a371 00ec.031c</span><br><span class="line">0170 0000.000a 00 002 0b0a6584 0000.0002 00000009 baadf00d 000126ae 00c4.0130</span><br><span class="line">0170 0000.000c 00 002 0b0a6584 0000.0010 00000009 baadf00d 00012bc4 022c.0290</span><br><span class="line">0170 0000.000d 00 003 00000136 0000.001b 00000009 baadf00d 0005ba71 00ec.0310</span><br><span class="line">0170 0000.000e 00 000 412f241e 0000.0002 00000009 baadf00d 00012f21 02a8.029c</span><br><span class="line">0170 0000.0010 00 003 00000136 0000.0013 00000009 00000003 000341da 0370.0060</span><br><span class="line">0170 0000.0011 00 006 e60c73e6 0000.001b 00000009 baadf00d 000f1d00 0370.0328</span><br><span class="line">0170 0000.0017 00 002 0b0a6584 0000.001b 00000009 baadf00d 0006c803 0278.0184</span><br><span class="line">0170 0000.001a 00 004 00000136 0000.0012 00000001 baadf00d 00038e9b 00ec.0348</span><br><span class="line">00ec 0000.0006 00 009 00000134 0000.0011 00000009 baadf00d 000b233f 0170.0244</span><br><span class="line">00ec 0000.000b 00 001 2f5f6520 0000.001c 00000009 baadf00d 00035510 00ec.0334</span><br><span class="line">00ec 0000.000e 00 001 629b9f66 0000.0014 00000009 baadf00d 00035813 00ec.01c4</span><br><span class="line">00ec 0000.0012 00 000 629b9f66 0000.0014 00000009 baadf00d 00026cc6 00a8.0164</span><br><span class="line">00ec 0000.001b 00 001 2f5f6520 0000.0004 00000001 baadf00d 000352c1 00ec.03a8</span><br><span class="line">02a8 0000.0004 00 009 00000134 0000.0002 00000009 baadf00d 0009a540 0170.0244</span><br><span class="line">0370 0000.0006 00 003 00000134 0000.0005 0000000b baadf00d 0002e7cd 00ec.0350</span><br><span class="line">0370 0000.0008 00 009 00000134 0000.0007 0000000b 01cee9e4 000838fa 0170.0244</span><br><span class="line">0278 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00072c09 0000.0003</span><br></pre></td></tr></table></figure>
 <p>For details on the optional parameters, see DbgRpc Command-Line Options.<br>For a similar example using the RPC debugger extensions, see !rpcexts.getcallinfo.</p>
 <h2 id="获取RPC客户端调用信息"><a href="#获取RPC客户端调用信息" class="headerlink" title="获取RPC客户端调用信息"></a>获取RPC客户端调用信息</h2><p>使用!rpcexts.getclientcallinfo获取客户端调用信息，或者DbgRpc的-a开关。<br>也有四个参数可选。其中三个CallID，IfStart，ProcNum是用来跟中RPC调用来标记信息的。第四个参数ProcessID是属于这个调用的进程的Pid。你可以使用你知道的参数值来缩小搜索。<br>如果没有参数指定，系统中所有可知的CCALLs都会显示。例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -a</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   PNO  IFSTART  TIDNUMBER CALLID   LASTTIME PS CLTNUMBER ENDPOINT</div><div class="line">------------------------------------------------------------------------------</div><div class="line">0390 0000.0001 0000 19bb5061 0000.0000 00000001 00072bff 07 0000.0002 1120</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">D:\wmsg&gt;dbgrpc -a</span><br><span class="line">Searching for call info ...</span><br><span class="line">PID  CELL ID   PNO  IFSTART  TIDNUMBER CALLID   LASTTIME PS CLTNUMBER ENDPOINT</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line">0390 0000.0001 0000 19bb5061 0000.0000 00000001 00072bff 07 0000.0002 1120</span><br></pre></td></tr></table></figure>
 <p>For details on the optional parameters, see DbgRpc Command-Line Options.<br>For a similar example using the RPC debugger extensions, see !rpcexts.getclientcallinfo.</p>
 <p>注意：<br>只有在全部状态信息都收集的时候，才有CCALLS的信息。</p>
 <h1 id="常用的RPC调试技术"><a href="#常用的RPC调试技术" class="headerlink" title="常用的RPC调试技术"></a>常用的RPC调试技术</h1><p>下面将介绍4中常见的RPC问题。RPC状态信息可以用来检查这些问题。<br>DbgRpc和RPC调试扩展命令都可以使用。</p>
 <h2 id="分析一个Stuck（卡）调用问题"><a href="#分析一个Stuck（卡）调用问题" class="headerlink" title="分析一个Stuck（卡）调用问题"></a>分析一个Stuck（卡）调用问题</h2><p>当一个进程直接或间接的进行一次RPC调用时，等待（holding）一个critical section或者资源时通过会出现这个问题。在这种情况下，RPC调用会到另一个进程或者机器，然后派遣到管理接口（服务接口）中，这个会等待很久。这导致调用方会出现等待超时。</p>
 <p>当通过调试器检查时，RPC是这个等待线程的最高层，但是不清楚究竟在等待什么。<br>下面是一个这种堆栈的例子，有很多可能性。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">0:002&gt; ~1k</div><div class="line">ChildEBP RetAddr</div><div class="line">0068fba0 77e9e8eb ntdll!ZwWaitForSingleObject+0xb</div><div class="line">0068fbc8 4efeff73 KERNEL32!WaitForSingleObjectEx+0x5a</div><div class="line">0068fbe8 4eff0012 RPCRT4!UTIL_WaitForSyncIO+0x21</div><div class="line">0068fc0c 4efe6e2b RPCRT4!UTIL_GetOverlappedResultEx+0x44</div><div class="line">0068fc44 4ef973bf RPCRT4!WS_SyncRecv+0x12a</div><div class="line">0068fc68 4ef98d5a RPCRT4!OSF_CCONNECTION__TransSendReceive+0xcb</div><div class="line">0068fce4 4ef9b682 RPCRT4!OSF_CCONNECTION__SendFragment+0x297</div><div class="line">0068fd38 4ef9a5a8 RPCRT4!OSF_CCALL__SendNextFragment+0x272</div><div class="line">0068fd88 4ef9a9cb RPCRT4!OSF_CCALL__FastSendReceive+0x165</div><div class="line">0068fda8 4ef9a7f8 RPCRT4!OSF_CCALL__SendReceiveHelper+0xed</div><div class="line">0068fdd4 4ef946a7 RPCRT4!OSF_CCALL__SendReceive+0x37</div><div class="line">0068fdf0 4efd56b3 RPCRT4!I_RpcSendReceive+0xc4</div><div class="line">0068fe08 01002850 RPCRT4!NdrSendReceive+0x4f</div><div class="line">0068ff40 01001f32 rtclnt+0x2850</div><div class="line">0068ffb4 77e92ca8 rtclnt+0x1f32</div><div class="line">0068ffec 00000000 KERNEL32!CreateFileA+0x11b</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">0:002&gt; ~1k</span><br><span class="line">ChildEBP RetAddr</span><br><span class="line">0068fba0 77e9e8eb ntdll!ZwWaitForSingleObject+0xb</span><br><span class="line">0068fbc8 4efeff73 KERNEL32!WaitForSingleObjectEx+0x5a</span><br><span class="line">0068fbe8 4eff0012 RPCRT4!UTIL_WaitForSyncIO+0x21</span><br><span class="line">0068fc0c 4efe6e2b RPCRT4!UTIL_GetOverlappedResultEx+0x44</span><br><span class="line">0068fc44 4ef973bf RPCRT4!WS_SyncRecv+0x12a</span><br><span class="line">0068fc68 4ef98d5a RPCRT4!OSF_CCONNECTION__TransSendReceive+0xcb</span><br><span class="line">0068fce4 4ef9b682 RPCRT4!OSF_CCONNECTION__SendFragment+0x297</span><br><span class="line">0068fd38 4ef9a5a8 RPCRT4!OSF_CCALL__SendNextFragment+0x272</span><br><span class="line">0068fd88 4ef9a9cb RPCRT4!OSF_CCALL__FastSendReceive+0x165</span><br><span class="line">0068fda8 4ef9a7f8 RPCRT4!OSF_CCALL__SendReceiveHelper+0xed</span><br><span class="line">0068fdd4 4ef946a7 RPCRT4!OSF_CCALL__SendReceive+0x37</span><br><span class="line">0068fdf0 4efd56b3 RPCRT4!I_RpcSendReceive+0xc4</span><br><span class="line">0068fe08 01002850 RPCRT4!NdrSendReceive+0x4f</span><br><span class="line">0068ff40 01001f32 rtclnt+0x2850</span><br><span class="line">0068ffb4 77e92ca8 rtclnt+0x1f32</span><br><span class="line">0068ffec 00000000 KERNEL32!CreateFileA+0x11b</span><br></pre></td></tr></table></figure>
 <p>下面是怎么检查这个问题。<br><strong>Troubleshooting a stuck call problem</strong></p>
 <p>1- 保证调试器正在调试有这个stuck cell的进程。（是那个可能在等待RPC的线程所属的进程）<br>2- 或者线程的堆栈指针。堆栈就像上面例子中显示的那样，这个例子的堆栈指针是0x0068FBA0<br>3- 获取这个线程的调用信息。通过!rpcexts.rpcreadstack加上堆栈指针作为参数来获取。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.rpcreadstack 68fba0</div><div class="line">CallID: 1</div><div class="line">IfStart: 19bb5061</div><div class="line">ProcNum: 0</div><div class="line">Protocol Sequence:      &quot;ncacn_ip_tcp&quot;  (Address: 00692ED8)</div><div class="line">NetworkAddress: &quot;&quot;      (Address: 00692F38)</div><div class="line">Endpoint:       &quot;1120&quot;  (Address: 00693988)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.rpcreadstack 68fba0</span><br><span class="line">CallID: 1</span><br><span class="line">IfStart: 19bb5061</span><br><span class="line">ProcNum: 0</span><br><span class="line">Protocol Sequence:      &quot;ncacn_ip_tcp&quot;  (Address: 00692ED8)</span><br><span class="line">NetworkAddress: &quot;&quot;      (Address: 00692F38)</span><br><span class="line">Endpoint:       &quot;1120&quot;  (Address: 00693988)</span><br></pre></td></tr></table></figure>
 <p>显示的这些信息可以让你跟踪这个调用。</p>
 <p>4- 网络地址是空的，标明是本地机器。Endpoint是1120。需要确认哪个进程拥有这个endpoint。通过!rpcexts.getendpointinfo加上endpoint作为参数来获取 //应该是客户端</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getendpointinfo 1120</div><div class="line">Searching for endpoint info ...</div><div class="line">PID  CELL ID   ST PROTSEQ        ENDPOINT</div><div class="line">--------------------------------------------</div><div class="line">0278 0000.0001 01            TCP 1120</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.getendpointinfo 1120</span><br><span class="line">Searching for endpoint info ...</span><br><span class="line">PID  CELL ID   ST PROTSEQ        ENDPOINT</span><br><span class="line">--------------------------------------------</span><br><span class="line">0278 0000.0001 01            TCP 1120</span><br></pre></td></tr></table></figure>
 <p>5- 根据前面的信息，可以看到进程0x278拥有这个endpoint，可以通过!rpcexts.getcallinfo<br>获取到这个call的所有信息，需要加上四个参数CallID, IfStart, and ProcNum（3步骤已经知道）和进程pid 0x278</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getcallinfo 1 19bb5061 0 278</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   ST PNO IFSTART  TIDNUMBER CALLFLAG CALLID   LASTTIME CONN/CLN</div><div class="line">----------------------------------------------------------------------------</div><div class="line">0278 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00072c09 0000.0003</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.getcallinfo 1 19bb5061 0 278</span><br><span class="line">Searching for call info ...</span><br><span class="line">PID  CELL ID   ST PNO IFSTART  TIDNUMBER CALLFLAG CALLID   LASTTIME CONN/CLN</span><br><span class="line">----------------------------------------------------------------------------</span><br><span class="line">0278 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00072c09 0000.0003</span><br></pre></td></tr></table></figure>
 <p>6- 第5步的信息非常有用，但是有些信息太少了。第二列给出的cell id是0000.0004。如果<br>!rpcexts.getdbgcell加上这个cell id，可以显示更易读的cell信息：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getdbgcell 278 0.4</div><div class="line">Getting cell info ...</div><div class="line">Call</div><div class="line">Status: Dispatched</div><div class="line">Procedure Number: 0</div><div class="line">Interface UUID start (first DWORD only): 19BB5061</div><div class="line">Call ID: 0x1 (1)</div><div class="line">Servicing thread identifier: 0x0.2</div><div class="line">Call Flags: cached</div><div class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</div><div class="line">Owning connection identifier: 0x0.3</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.getdbgcell 278 0.4</span><br><span class="line">Getting cell info ...</span><br><span class="line">Call</span><br><span class="line">Status: Dispatched</span><br><span class="line">Procedure Number: 0</span><br><span class="line">Interface UUID start (first DWORD only): 19BB5061</span><br><span class="line">Call ID: 0x1 (1)</span><br><span class="line">Servicing thread identifier: 0x0.2</span><br><span class="line">Call Flags: cached</span><br><span class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</span><br><span class="line">Owning connection identifier: 0x0.3</span><br></pre></td></tr></table></figure>
 <p>信息显示这个调用已经”dispatched”，表示已经离开了RPC运行时。最后更新时间是470.25，通过!rpcexts.rpctime可以看到现在的时间。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.rpctime</div><div class="line">Current time is: 6003, 422</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.rpctime</span><br><span class="line">Current time is: 6003, 422</span><br></pre></td></tr></table></figure>
 <p>表示这次call的最后联系在5533秒之前了，接近92分钟，因此这个肯定是一个stuck call。</p>
 <p>7- 在挂载到服务端进程之前，你可以使用Servicing thread identifier找到当前处理这个call的线程信息。也就是另一个cell number，第6步中的0x0.2，可以像下面一样使用：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getdbgcell 278 0.2</div><div class="line">Getting cell info ...</div><div class="line">Thread</div><div class="line">Status: Dispatched</div><div class="line">Thread ID: 0x1A4 (420)</div><div class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.getdbgcell 278 0.2</span><br><span class="line">Getting cell info ...</span><br><span class="line">Thread</span><br><span class="line">Status: Dispatched</span><br><span class="line">Thread ID: 0x1A4 (420)</span><br><span class="line">Last update time (in seconds since boot):470.25 (0x1D6.19)</span><br></pre></td></tr></table></figure>
 <p>现在你知道你要找的是0x278进程的0x1A4线程。</p>
 <p>可能这个线程已经在做其他的RPC调用了，你又必要重复这个过程跟踪这个call。</p>
 <p>##跟踪服务端进程的Contention（争用）</p>
 <p>为了能够处理发来的请求，RPC报了一个工作线程集合。理论上这个线程数量很小。然后理想的情况只存在实验室环境下，这些服务管理函数非常小心和谐（。。。）。在真实情况下，线程的数量决定于服务端的工作量，不过不管怎么样都在1-50的范围内。<br>如果工作线程数量超过了50，可能服务端进程有过多的竞争。通过引起这个的是heap的胡乱使用，内存的压力，或者服务端大部分的活动都通过一个单独的临界区。<br>使用!rpcexts.getthreadinfo获取服务进程的线程数量，或者DbgRpc的-t选项。需要指定进程ID，如下面的0xC4</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -t -P c4</div><div class="line">Searching for thread info ...</div><div class="line">PID  CELL ID   ST TID      LASTTIME</div><div class="line">-----------------------------------</div><div class="line">00c4 0000.0004 03 0000011c 000f164f</div><div class="line">00c4 0000.0007 03 00000120 008a6290</div><div class="line">00c4 0000.0015 03 0000018c 008a6236</div><div class="line">00c4 0000.0026 03 00000264 0005c443</div><div class="line">00c4 0000.002d 03 00000268 000265bb</div><div class="line">00c4 0000.0030 03 0000026c 000f1d32</div><div class="line">00c4 0000.0034 03 00000388 007251e9</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">D:\wmsg&gt;dbgrpc -t -P c4</span><br><span class="line">Searching for thread info ...</span><br><span class="line">PID  CELL ID   ST TID      LASTTIME</span><br><span class="line">-----------------------------------</span><br><span class="line">00c4 0000.0004 03 0000011c 000f164f</span><br><span class="line">00c4 0000.0007 03 00000120 008a6290</span><br><span class="line">00c4 0000.0015 03 0000018c 008a6236</span><br><span class="line">00c4 0000.0026 03 00000264 0005c443</span><br><span class="line">00c4 0000.002d 03 00000268 000265bb</span><br><span class="line">00c4 0000.0030 03 0000026c 000f1d32</span><br><span class="line">00c4 0000.0034 03 00000388 007251e9</span><br></pre></td></tr></table></figure>
 <p>在这个例子中，只有7个工作线程，是合理的。<br>如果有超过100个线程，就需要加载调试器看看问题了。<br>Note  Running queries such as dbgrpc -t remotely is expensive to the server and the network. If you use this query in a script, you should make sure this command is not run too often.</p>
 <h2 id="检查Struct的线程"><a href="#检查Struct的线程" class="headerlink" title="检查Struct的线程"></a>检查Struct的线程</h2><p>RPC需要它的工作线程来完成正常的工作，通常有个问题，在同一个进程中的组件会因为等待一个公共的临界区死锁（比如，loader lock或者heap lock）。这将导致很多线程暂停，很有可能也有RPC工作线程。<br>如果出现了这种情况，RPC服务器不会再给外界响应。RPC调用将返回RPC_S_SERVER_UNAVAILABLE或者RPC_S_SERVER_TOO_BUSY</p>
 <p>一个很小的问题可能会硬气有问题的驱动阻止IRPs完成，到达RPC服务器。<br>如果你怀疑可能出现了这个问题，使用DbgRpc –t或者!rpcexts.getthreadinfo需要进程PID作为参数。下面的列子是0xC4:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">D:\wmsg&gt;dbgrpc -t -P c4</div><div class="line">Searching for thread info ...</div><div class="line">PID  CELL ID   ST TID      LASTTIME</div><div class="line">-----------------------------------</div><div class="line">00c4 0000.0004 03 0000011c 000f164f</div><div class="line">00c4 0000.0007 03 00000120 008a6290</div><div class="line">00c4 0000.0015 03 0000018c 008a6236</div><div class="line">00c4 0000.0026 03 00000264 0005c443</div><div class="line">00c4 0000.002d 03 00000268 000265bb</div><div class="line">00c4 0000.0030 03 0000026c 000f1d32</div><div class="line">00c4 0000.0034 03 00000388 007251e9</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">D:\wmsg&gt;dbgrpc -t -P c4</span><br><span class="line">Searching for thread info ...</span><br><span class="line">PID  CELL ID   ST TID      LASTTIME</span><br><span class="line">-----------------------------------</span><br><span class="line">00c4 0000.0004 03 0000011c 000f164f</span><br><span class="line">00c4 0000.0007 03 00000120 008a6290</span><br><span class="line">00c4 0000.0015 03 0000018c 008a6236</span><br><span class="line">00c4 0000.0026 03 00000264 0005c443</span><br><span class="line">00c4 0000.002d 03 00000268 000265bb</span><br><span class="line">00c4 0000.0030 03 0000026c 000f1d32</span><br><span class="line">00c4 0000.0034 03 00000388 007251e9</span><br></pre></td></tr></table></figure>
 <p>TID那一列给出了每个线程的ID。LATSTIME列包含每个线程最近状态改变的时间戳。<br>只要服务器收到一个请求，至少有一个线程会改变状态，时间戳就会更新。因此，一个RPC请求失败了，但是没有任何一个线程的时间戳改变，表示这个请求没有到达RPC运行时中。你需要在研究是什么引起的。</p>
 <h2 id="在服务端标明调用者"><a href="#在服务端标明调用者" class="headerlink" title="在服务端标明调用者"></a>在服务端标明调用者</h2><p>有些时候需要确认谁发送的RPC请求，虽然你只有这次调用的服务线程信息。<br>这个非常有用-比如，找到谁传递了不合法的参数给RPC调用。<br>根据某些特别依赖于协议序列的调用，你可以或者不同程度的细节，而有些协议根本没有这些信息（比如NetBiso）</p>
 <p>Identifying the caller from the server thread<br>1- 打开用户模式调试器，挂载到目标服务线程中<br>2- 通过|命令获取到进程id</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0:001&gt; |</div><div class="line">0     id: 3d4 name: rtsvr.exe</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; |</span><br><span class="line">0     id: 3d4 name: rtsvr.exe</span><br></pre></td></tr></table></figure>
 <p>3- !rpcexts.getcallinfo获取到进程中存在的calls。需要指定进程ID 0x3D4</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getcallinfo 0 0 FFFF 3d4</div><div class="line">Searching for call info ...</div><div class="line">PID  CELL ID   ST PNO IFSTART  THRDCELL  CALLFLAG CALLID   LASTTIME CONN/CLN</div><div class="line">----------------------------------------------------------------------------</div><div class="line">03d4 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00a1aced 0000.0003</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.getcallinfo 0 0 FFFF 3d4</span><br><span class="line">Searching for call info ...</span><br><span class="line">PID  CELL ID   ST PNO IFSTART  THRDCELL  CALLFLAG CALLID   LASTTIME CONN/CLN</span><br><span class="line">----------------------------------------------------------------------------</span><br><span class="line">03d4 0000.0004 02 000 19bb5061 0000.0002 00000001 00000001 00a1aced 0000.0003</span><br></pre></td></tr></table></figure>
 <p>查找状态时2或1（dispatched或active）的调用。在这个例子中，只有一个call，如果有更多的，你可以使用!rpcexts.getdbgcell加上cell number（THRDCELL列）来获取线程IDs，从而你可以决定哪个是你感兴趣的调用了</p>
 <p>4- 在知道你感兴趣的call之后，看看CONN/CLN所在的cell number，这个是连接对象的cell ID。这里是0000.0003。使用!rpcexts.getdbgcell加上这个id</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">0:001&gt; !rpcexts.getdbgcell 3d4 0.3</div><div class="line">Getting cell info ...</div><div class="line">Connection</div><div class="line">Connection flags: Exclusive</div><div class="line">Authentication Level: Default</div><div class="line">Authentication Service: None</div><div class="line">Last Transmit Fragment Size: 24 (0x6F56D)</div><div class="line">Endpoint for the connection: 0x0.1</div><div class="line">Last send time (in seconds since boot):10595.565 (0x2963.235)</div><div class="line">Last receive time (in seconds since boot):10595.565 (0x2963.235)</div><div class="line">Getting endpoint info ...</div><div class="line">Process object for caller is 0xFF9DF5F0</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; !rpcexts.getdbgcell 3d4 0.3</span><br><span class="line">Getting cell info ...</span><br><span class="line">Connection</span><br><span class="line">Connection flags: Exclusive</span><br><span class="line">Authentication Level: Default</span><br><span class="line">Authentication Service: None</span><br><span class="line">Last Transmit Fragment Size: 24 (0x6F56D)</span><br><span class="line">Endpoint for the connection: 0x0.1</span><br><span class="line">Last send time (in seconds since boot):10595.565 (0x2963.235)</span><br><span class="line">Last receive time (in seconds since boot):10595.565 (0x2963.235)</span><br><span class="line">Getting endpoint info ...</span><br><span class="line">Process object for caller is 0xFF9DF5F0</span><br></pre></td></tr></table></figure>
 <p>这个命令显示了这个连接的客户端的所有信息。实际的信息会有很多不同，跟使用的transport有关系。<br>在这个例子中，使用的本地命令管道通信，调用者的进程对象地址也显示了。如果你挂载了内核调试器（或者启动一个本地调试器），你可以使用!process看到看看这个地址的信息。<br>如果使用LRPC通信，会显示进程ID和线程ID。<br>如果使用TCP通信，会显示调用者的IP地址。<br>如果使用了远程命名管道，不会显示任何信息。</p>
 <hr>
 <p>转载请注明出处，谢谢！</p>
@@ -594,22 +595,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -623,6 +608,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -642,7 +631,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -655,6 +652,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -694,23 +707,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -743,6 +744,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -786,30 +815,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -818,7 +823,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -854,6 +863,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -863,6 +884,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -879,26 +908,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -934,14 +943,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -955,6 +956,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

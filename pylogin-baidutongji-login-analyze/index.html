@@ -15,8 +15,9 @@
 <meta property="og:url" content="https://anhkgg.github.io/pylogin-baidutongji-login-analyze/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="概述这次分析的百度统计登录接口，算是这几个中最简单的了。 但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/wechat_public.png">
-<meta property="og:updated_time" content="2017-08-22T05:31:17.909Z">
+<meta property="og:updated_time" content="2017-08-22T05:31:17.910Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="pylogin系列之搞定百度统计">
 <meta name="twitter:description" content="概述这次分析的百度统计登录接口，算是这几个中最简单的了。 但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。">
@@ -185,32 +186,32 @@
 <p>但是学到了一个新东西，叫做js模板，搞web的同学应该知道，我这种web半吊子第一次见，非常有意思。</p>
 <a id="more"></a>
 <p>工具：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1. chrome/firefox</div><div class="line">2. f12，network</div><div class="line">3. python：requests、re</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1. chrome/firefox</span><br><span class="line">2. f12，network</span><br><span class="line">3. python：requests、re</span><br></pre></td></tr></table></figure>
 <h1 id="登录接口"><a href="#登录接口" class="headerlink" title="登录接口"></a>登录接口</h1><p>打开百度统计首页<code>https://tongji.baidu.com/web/welcome/login</code>，点开登录框，f12。尝试输入之后，查看发送的数据。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">Request URL:https://cas.baidu.com/?action=login</div><div class="line">Request Method:POST</div><div class="line">Status Code:200 OK</div><div class="line"></div><div class="line">appscope[]:6</div><div class="line">appscope[]:7</div><div class="line">appscope[]:12</div><div class="line">appid:12</div><div class="line">entered_login:anhkgg //名字</div><div class="line">entered_password:1111111111111111 //密码</div><div class="line">entered_imagecode:9mxm //验证码</div><div class="line">charset:utf-8</div><div class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</div><div class="line">selfu:https://tongji.baidu.com/web/welcome/login</div><div class="line">senderr:1</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Request URL:https://cas.baidu.com/?action=login</span><br><span class="line">Request Method:POST</span><br><span class="line">Status Code:200 OK</span><br><span class="line"></span><br><span class="line">appscope[]:6</span><br><span class="line">appscope[]:7</span><br><span class="line">appscope[]:12</span><br><span class="line">appid:12</span><br><span class="line">entered_login:anhkgg //名字</span><br><span class="line">entered_password:1111111111111111 //密码</span><br><span class="line">entered_imagecode:9mxm //验证码</span><br><span class="line">charset:utf-8</span><br><span class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</span><br><span class="line">selfu:https://tongji.baidu.com/web/welcome/login</span><br><span class="line">senderr:1</span><br></pre></td></tr></table></figure>
 <p>除了上面注释的需要输入的三个字段，其他字段意义都不明确，偷点懒，多次尝试后发现其他字段不会变化，那么就用固定值了。</p>
 <p>点击验证码，看到网络，拿到获取验证码的请求，key使用10位时间戳。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET https://cas.baidu.com/?action=image&amp;key=1503151305</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET https://cas.baidu.com/?action=image&amp;key=1503151305</span><br></pre></td></tr></table></figure>
 <p>所以登录接口就出来了，<code>vcode</code>需要人工输入。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">url = &apos;https://cas.baidu.com/?action=image&amp;key=&apos; + time_stamp(10)</div><div class="line">r = self.s.get(url)</div><div class="line"></div><div class="line">payload = &#123;</div><div class="line">    &apos;appscope[]&apos;:6,</div><div class="line">    &apos;appscope[]&apos;:7,</div><div class="line">    &apos;appscope[]&apos;:12,</div><div class="line">    &apos;appid&apos;:12,</div><div class="line">    &apos;entered_login&apos;:name,</div><div class="line">    &apos;entered_password&apos;:pwd,</div><div class="line">    &apos;entered_imagecode&apos;:vcode,</div><div class="line">    &apos;charset&apos;:&apos;utf-8&apos;,</div><div class="line">    &apos;fromu&apos;:&apos;https://tongji.baidu.com/web/welcome/loginback&apos;,</div><div class="line">    &apos;selfu&apos;:&apos;https://tongji.baidu.com/web/welcome/login&apos;,</div><div class="line">    &apos;senderr&apos;:1,</div><div class="line">    &#125;        </div><div class="line">url = &apos;https://cas.baidu.com/?action=login&apos;</div><div class="line">r = self.s.post(url, data = payload)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">url = &apos;https://cas.baidu.com/?action=image&amp;key=&apos; + time_stamp(10)</span><br><span class="line">r = self.s.get(url)</span><br><span class="line"></span><br><span class="line">payload = &#123;</span><br><span class="line">    &apos;appscope[]&apos;:6,</span><br><span class="line">    &apos;appscope[]&apos;:7,</span><br><span class="line">    &apos;appscope[]&apos;:12,</span><br><span class="line">    &apos;appid&apos;:12,</span><br><span class="line">    &apos;entered_login&apos;:name,</span><br><span class="line">    &apos;entered_password&apos;:pwd,</span><br><span class="line">    &apos;entered_imagecode&apos;:vcode,</span><br><span class="line">    &apos;charset&apos;:&apos;utf-8&apos;,</span><br><span class="line">    &apos;fromu&apos;:&apos;https://tongji.baidu.com/web/welcome/loginback&apos;,</span><br><span class="line">    &apos;selfu&apos;:&apos;https://tongji.baidu.com/web/welcome/login&apos;,</span><br><span class="line">    &apos;senderr&apos;:1,</span><br><span class="line">    &#125;        </span><br><span class="line">url = &apos;https://cas.baidu.com/?action=login&apos;</span><br><span class="line">r = self.s.post(url, data = payload)</span><br></pre></td></tr></table></figure>
 <p>接着看看登录返回状态，如果失败了，返回数据中包含如下数据：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</div><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;</div><div class="line">&lt;meta http-equiv=&quot;ReFresh&quot; content=&quot;0; url=https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot; /&gt;</div><div class="line">&lt;title&gt;正在处理...&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">    &lt;script&gt;                </div><div class="line">    var url=&quot;https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot;;</div><div class="line">    location.href=url;</div><div class="line">    &lt;/script&gt;</div><div class="line"></div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;</span><br><span class="line">&lt;meta http-equiv=&quot;ReFresh&quot; content=&quot;0; url=https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot; /&gt;</span><br><span class="line">&lt;title&gt;正在处理...&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;script&gt;                </span><br><span class="line">    var url=&quot;https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132&quot;;</span><br><span class="line">    location.href=url;</span><br><span class="line">    &lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
 <p>然后浏览器加载该url，显示错误提示信息</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Request URL:https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132</div><div class="line">Request Method:GET</div><div class="line"></div><div class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</div><div class="line">e:用户名密码错误</div><div class="line">un:anhkgg</div><div class="line">aid:12</div><div class="line">errno:132</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Request URL:https://tongji.baidu.com/web/welcome/login?fromu=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback&amp;e=%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF&amp;un=anhkgg&amp;aid=12&amp;errno=132</span><br><span class="line">Request Method:GET</span><br><span class="line"></span><br><span class="line">fromu:https://tongji.baidu.com/web/welcome/loginback</span><br><span class="line">e:用户名密码错误</span><br><span class="line">un:anhkgg</span><br><span class="line">aid:12</span><br><span class="line">errno:132</span><br></pre></td></tr></table></figure>
 <p>其中<code>e</code>是错误提示信息，errno是错误号。</p>
 <p>登录成功返回数据如下，没有<code>e</code>错误信息。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;                </div><div class="line">var url=&quot;http://cas.baidu.com/?action=check&amp;appid=12&amp;u=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback%3Fcastk%3Dc4086gh7e82166251d451&amp;fromLogin=1&quot;;</div><div class="line">location.href=url;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;                </span><br><span class="line">var url=&quot;http://cas.baidu.com/?action=check&amp;appid=12&amp;u=https%3A%2F%2Ftongji.baidu.com%2Fweb%2Fwelcome%2Floginback%3Fcastk%3Dc4086gh7e82166251d451&amp;fromLogin=1&quot;;</span><br><span class="line">location.href=url;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
 <p>那么就可以先通过正则拿到url，通过搜索url是否有<code>e</code>判断是否登录成功，并且拿到提示信息。成功则继续访问该url跳转到成功页面，获取其他需要的信息。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">pattern = re.compile(r&apos;var url=&quot;(.*?)&quot;;&apos;)</div><div class="line">cont = re.search(pattern, r.content)</div><div class="line">url = cont.group(1)</div><div class="line">pattern = re.compile(r&apos;e=(.*?)&amp;un=&apos;)</div><div class="line">cont = re.search(pattern, url)</div><div class="line">if cont != None:</div><div class="line">    r = urllib.unquote(cont.group(1)) #失败</div><div class="line">    return utf2gbk(r)        </div><div class="line"></div><div class="line">r = self.s.get(url) # 成功</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pattern = re.compile(r&apos;var url=&quot;(.*?)&quot;;&apos;)</span><br><span class="line">cont = re.search(pattern, r.content)</span><br><span class="line">url = cont.group(1)</span><br><span class="line">pattern = re.compile(r&apos;e=(.*?)&amp;un=&apos;)</span><br><span class="line">cont = re.search(pattern, url)</span><br><span class="line">if cont != None:</span><br><span class="line">    r = urllib.unquote(cont.group(1)) #失败</span><br><span class="line">    return utf2gbk(r)        </span><br><span class="line"></span><br><span class="line">r = self.s.get(url) # 成功</span><br></pre></td></tr></table></figure>
 <h1 id="js模板"><a href="#js模板" class="headerlink" title="js模板"></a>js模板</h1><p>这里比较意思的是使用的js模板来生成登录表单。</p>
-<p>具体js模板使用看<a href="http://freshflower.iteye.com/blog/2120268" target="_blank" rel="external">这里</a>。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">&lt;script id=&quot;LoginTemplate&quot; type=&quot;text/template&quot;&gt;</div><div class="line"></div><div class="line">    &lt;div id=&quot;LoginContainer&quot; class=&quot;login-dialog&quot;&gt;</div><div class="line">        &lt;div id=&quot;TopTmp&quot;&gt;&amp;nbsp;&lt;/div&gt;</div><div class="line"></div><div class="line">        if (this.isIco == 1) &#123;</div><div class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;ico-login clearfix&quot;&gt;</div><div class="line">            &lt;div class=&quot;visitor-login-tab&quot; id=&quot;LoginTab&quot;&gt;请输入查看密码&lt;/div&gt;</div><div class="line">            &lt;div id=&quot;LoginInput&quot; class=&quot;login-input&quot;&gt;</div><div class="line">                if (this.errMsg) &#123;</div><div class="line">                &lt;div id=&quot;ErrorTip&quot; class=&quot;error&quot;&gt;#&#123;this.errMsg&#125;&lt;/div&gt;</div><div class="line">                &#125;</div><div class="line">                ...</div><div class="line">            &lt;/div&gt;</div><div class="line">        &lt;/div&gt;</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;login-main&quot;&gt;</div><div class="line">            </div><div class="line">                &lt;form method=&quot;post&quot; action=&quot;#&#123;this.loginAction&#125;&quot;&gt;</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;12&quot; id=&quot;Appid&quot; name=&quot;appid&quot;&gt;</div><div class="line">                    ...</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;#&#123;this.selfUrl&#125;&quot; name=&quot;selfu&quot; /&gt;</div><div class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;1&quot; name=&quot;senderr&quot; /&gt;</div><div class="line">                &lt;/form&gt;</div><div class="line">            &lt;/div&gt;</div><div class="line">        &lt;/div&gt;</div><div class="line">        &#125;</div><div class="line">    &lt;/div&gt;</div><div class="line">    &lt;div class=&quot;dialog-bottom-bg&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<p>具体js模板使用看<a href="http://freshflower.iteye.com/blog/2120268" target="_blank" rel="noopener">这里</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&lt;script id=&quot;LoginTemplate&quot; type=&quot;text/template&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;div id=&quot;LoginContainer&quot; class=&quot;login-dialog&quot;&gt;</span><br><span class="line">        &lt;div id=&quot;TopTmp&quot;&gt;&amp;nbsp;&lt;/div&gt;</span><br><span class="line"></span><br><span class="line">        if (this.isIco == 1) &#123;</span><br><span class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;ico-login clearfix&quot;&gt;</span><br><span class="line">            &lt;div class=&quot;visitor-login-tab&quot; id=&quot;LoginTab&quot;&gt;请输入查看密码&lt;/div&gt;</span><br><span class="line">            &lt;div id=&quot;LoginInput&quot; class=&quot;login-input&quot;&gt;</span><br><span class="line">                if (this.errMsg) &#123;</span><br><span class="line">                &lt;div id=&quot;ErrorTip&quot; class=&quot;error&quot;&gt;#&#123;this.errMsg&#125;&lt;/div&gt;</span><br><span class="line">                &#125;</span><br><span class="line">                ...</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">        &#125;</span><br><span class="line">        else &#123;</span><br><span class="line">        &lt;div id=&quot;LoginMain&quot; class=&quot;login-main&quot;&gt;</span><br><span class="line">            </span><br><span class="line">                &lt;form method=&quot;post&quot; action=&quot;#&#123;this.loginAction&#125;&quot;&gt;</span><br><span class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;12&quot; id=&quot;Appid&quot; name=&quot;appid&quot;&gt;</span><br><span class="line">                    ...</span><br><span class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;#&#123;this.selfUrl&#125;&quot; name=&quot;selfu&quot; /&gt;</span><br><span class="line">                    &lt;input type=&quot;hidden&quot; value=&quot;1&quot; name=&quot;senderr&quot; /&gt;</span><br><span class="line">                &lt;/form&gt;</span><br><span class="line">            &lt;/div&gt;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">        &#125;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">    &lt;div class=&quot;dialog-bottom-bg&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
 <p>从上面代码中可以看到，某些标签的值使用了<code>#{this.xxx}</code>这样的语法，不是直接填入的具体内容，更加灵活，扩展更容易。</p>
 <p>然后在点击登录按钮之后，通过函数格式化一个全局定义的变量来生成的登录表单。具体如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">//全局数据，用于替换表单中的this.xxx</div><div class="line">&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">VAR = &#123;</div><div class="line">    webMasterRegister: &quot;https://tongji.baidu.com/web/register&quot;,</div><div class="line">    customRegister: &quot;https://u.baidu.com/ucweb/?module=Reguser&amp;controller=reg&amp;action=index&amp;appid=3&quot;,</div><div class="line">    union_forget: &quot;http://union.baidu.com/findPassword!input.action&quot;,</div><div class="line">    shifen_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</div><div class="line">    uc_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</div><div class="line">    waiting_img_src: &quot;/web/img/loadingImage.gif&quot;,</div><div class="line">    app_id: &quot;0&quot;,</div><div class="line">    errMsg: &quot;&quot;,</div><div class="line">    loginUrl: &quot;/web/welcome/login&quot;,</div><div class="line">    loginAction: &quot;https://cas.baidu.com/?action=login&quot;,</div><div class="line">    userName: &quot;&quot;,</div><div class="line">    authCode: &quot;https://cas.baidu.com/?action=image&amp;key=1503151305&quot;,</div><div class="line">    registerUrl: &quot;/web/register&quot;,</div><div class="line">    fromUrl: &quot;https://tongji.baidu.com/web/welcome/loginback&quot;,</div><div class="line">    selfUrl: &quot;https://tongji.baidu.com/web/welcome/login&quot;,</div><div class="line">    isIco: &quot;0&quot;,</div><div class="line">    webmasterUserNum: &quot;2097176&quot;,</div><div class="line">    customerUserNum: &quot;2270927&quot;,</div><div class="line">    mtjUserNum: &quot;2262130&quot;</div><div class="line">&#125;;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">//全局数据，用于替换表单中的this.xxx</span><br><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">VAR = &#123;</span><br><span class="line">    webMasterRegister: &quot;https://tongji.baidu.com/web/register&quot;,</span><br><span class="line">    customRegister: &quot;https://u.baidu.com/ucweb/?module=Reguser&amp;controller=reg&amp;action=index&amp;appid=3&quot;,</span><br><span class="line">    union_forget: &quot;http://union.baidu.com/findPassword!input.action&quot;,</span><br><span class="line">    shifen_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</span><br><span class="line">    uc_forget: &quot;https://aq.baidu.com/new/#/findpwd&quot;,</span><br><span class="line">    waiting_img_src: &quot;/web/img/loadingImage.gif&quot;,</span><br><span class="line">    app_id: &quot;0&quot;,</span><br><span class="line">    errMsg: &quot;&quot;,</span><br><span class="line">    loginUrl: &quot;/web/welcome/login&quot;,</span><br><span class="line">    loginAction: &quot;https://cas.baidu.com/?action=login&quot;,</span><br><span class="line">    userName: &quot;&quot;,</span><br><span class="line">    authCode: &quot;https://cas.baidu.com/?action=image&amp;key=1503151305&quot;,</span><br><span class="line">    registerUrl: &quot;/web/register&quot;,</span><br><span class="line">    fromUrl: &quot;https://tongji.baidu.com/web/welcome/loginback&quot;,</span><br><span class="line">    selfUrl: &quot;https://tongji.baidu.com/web/welcome/login&quot;,</span><br><span class="line">    isIco: &quot;0&quot;,</span><br><span class="line">    webmasterUserNum: &quot;2097176&quot;,</span><br><span class="line">    customerUserNum: &quot;2270927&quot;,</span><br><span class="line">    mtjUserNum: &quot;2262130&quot;</span><br><span class="line">&#125;;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
 <p>然后在login.js中，通过下面的函数来初始化表单，并且显示。</p>
 <p>其中<code>n.format(&quot;LoginTemplate&quot;, VAR)</code>用于格式化VAR定义的数据到表单的数据中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">, h = function() &#123;</div><div class="line">    var e = t(&quot;.login-trigger&quot;).eq(0);</div><div class="line">    e.on(&quot;click&quot;, function() &#123;</div><div class="line">        s || (s = new i(&#123;</div><div class="line">            width: 345,</div><div class="line">            isModal: !0,</div><div class="line">            titleText: &quot;&quot;,</div><div class="line">            isSingle: !0,</div><div class="line">            content: n.format(&quot;LoginTemplate&quot;, VAR) //初始化登录表单数据</div><div class="line">        &#125;),</div><div class="line">        loginController.init()),</div><div class="line">        s.show()</div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">, h = function() &#123;</span><br><span class="line">    var e = t(&quot;.login-trigger&quot;).eq(0);</span><br><span class="line">    e.on(&quot;click&quot;, function() &#123;</span><br><span class="line">        s || (s = new i(&#123;</span><br><span class="line">            width: 345,</span><br><span class="line">            isModal: !0,</span><br><span class="line">            titleText: &quot;&quot;,</span><br><span class="line">            isSingle: !0,</span><br><span class="line">            content: n.format(&quot;LoginTemplate&quot;, VAR) //初始化登录表单数据</span><br><span class="line">        &#125;),</span><br><span class="line">        loginController.init()),</span><br><span class="line">        s.show()</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
 <p>而在format具体如何替换的，就随意实现了，这里就不在具体分析，有兴趣跟着分析的同学可以去看看common.js中的代码。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>百度统计接口非常简单，密码未做变换，使用https。</p>
 <p>登录之后具体做什么也不在分析。</p>
@@ -576,22 +577,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -605,6 +590,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -624,7 +613,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -637,6 +634,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -676,23 +689,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -725,6 +726,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -768,30 +797,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -800,7 +805,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -836,6 +845,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -845,6 +866,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -861,26 +890,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -916,14 +925,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -937,6 +938,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

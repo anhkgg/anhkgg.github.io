@@ -15,7 +15,8 @@
 <meta property="og:url" content="https://anhkgg.github.io/sctf-summary/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="1. Misc10xctf优良传统，百度之手持两把锟斤拷，口中疾呼烫烫烫脚踏千朵屯屯屯，笑看万物锘锘锘其实我没提交，队友提交的，应该是这个">
-<meta property="og:updated_time" content="2016-07-07T04:28:44.869Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2016-07-07T04:28:44.870Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="xctf sctf summary, little writeup">
 <meta name="twitter:description" content="1. Misc10xctf优良传统，百度之手持两把锟斤拷，口中疾呼烫烫烫脚踏千朵屯屯屯，笑看万物锘锘锘其实我没提交，队友提交的，应该是这个">
@@ -182,11 +183,11 @@
         <h1 id="1-Misc10"><a href="#1-Misc10" class="headerlink" title="1. Misc10"></a><strong>1. Misc10</strong></h1><p>xctf优良传统，百度之<br>手持两把锟斤拷，口中疾呼烫烫烫<br>脚踏千朵屯屯屯，笑看万物锘锘锘<br>其实我没提交，队友提交的，应该是这个</p>
 <a id="more"></a>
 <h1 id="2-Re50"><a href="#2-Re50" class="headerlink" title="2. Re50"></a><strong>2. Re50</strong></h1><p>听说逆向都挺难的，这里有个简单的，快来秒~~~ :D</p>
-<p>逆向题把我们逼疯了，才弄个这个出来，秀优越吗？<br>队友做的，看了一下，很简单<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">k = &quot;Jr3gFud6n&quot;</div><div class="line">flag = &quot;&quot;</div><div class="line">for i in range(0, len(k)):</div><div class="line">    a = ord(k[i])-3</div><div class="line">    flag += chr(a)</div><div class="line"></div><div class="line">print flag</div><div class="line">#应该是这个SCTF&#123;Go0dCra3k&#125;</div></pre></td></tr></table></figure></p>
+<p>逆向题把我们逼疯了，才弄个这个出来，秀优越吗？<br>队友做的，看了一下，很简单<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">k = &quot;Jr3gFud6n&quot;</span><br><span class="line">flag = &quot;&quot;</span><br><span class="line">for i in range(0, len(k)):</span><br><span class="line">    a = ord(k[i])-3</span><br><span class="line">    flag += chr(a)</span><br><span class="line"></span><br><span class="line">print flag</span><br><span class="line">#应该是这个SCTF&#123;Go0dCra3k&#125;</span><br></pre></td></tr></table></figure></p>
 <h1 id="3-Misc100"><a href="#3-Misc100" class="headerlink" title="3. Misc100"></a><strong>3. Misc100</strong></h1><p>简单的贪吃蛇，吃到30分它就告诉你flag！但是要怎么控制它呢? </p>
-<p>妹的，确定是100的，搞了老半天，还是linux的，upx加壳，首先就乱了<br>好吧，过了不知道多久，回过神来，upx脱壳，ida加载分析，大致弄清楚流程，代码用到了几个关键函数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">move移动光标</div><div class="line">printw显示字符</div></pre></td></tr></table></figure></p>
-<p>然后就是位置比较，成功了30次之后，就会显示出flag，可是代码中没有啊，习惯了可以f5就f5，所以，乱了很久<br>回到汇编窗口，通过printw找到几处打印，提取字符，通过python打印了一下，妹的乱码，有什么编码问题，不懂：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">flag = [0x7F, 0x1A, 0x64, 0x7F, 0x78, 0x44, 0x5E, 0x50, 0x67, 0x7d, 0x4E, 0x5F, 0x2A, </div><div class="line">        0x64, 0x6D, 0x52, 0x4C, 0x67, 0x72, 0x64, 0x4C, 0x70, 0x44, 0x7C, 0x5F, 0x2A,</div><div class="line">        0x48, 0x44, 0x41, 0x1C, 0x61, 0x72, 0x1A, 0x17]</div><div class="line">def printArr(arr):</div><div class="line">    for i in range(0, len(arr)):</div><div class="line">        s += chr(arr[i])</div><div class="line">    print s</div><div class="line">printArr(flag)</div></pre></td></tr></table></figure></p>
-<p>没法子，我也不可能玩30分钟，只好暴力解决了，修改了几个比较，成功进入异常处理（请原谅我，看着真是异常处理），注释中是几次暴力修改位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">//.text:08049D75 jz      loc_8049EA0</div><div class="line">  if ( v11 &amp;&amp; v6 == target_y )//!=text:08049EA6 jnz     loc_8049D7B</div><div class="line">        &#123;</div><div class="line">          ++dword_804C3C0;</div><div class="line">          if ( dword_804C3C0 == 5 * dword_804C3C0 / 5 )</div><div class="line">            ++dword_804C3D8;</div><div class="line">          if ( dword_804C3C0 == 3 * dword_804C3C0 / 3 )</div><div class="line">            ++dword_804C3D4;</div><div class="line">          if ( dword_804C3C0 == 30 )//!=.text:08049EFD   jz      loc_8049F94</div><div class="line">          &#123;</div><div class="line">            if ( dword_804C3D8 == 6 )//!=text:08049F9B  jnz     loc_8049F03</div><div class="line">            &#123;</div><div class="line">              if ( dword_804C3D4 == 10 )//!=.text:08049FA8 jnz     loc_8049F03</div><div class="line">              &#123;</div><div class="line">                v16 = __cxa_allocate_exception();</div><div class="line">		//执行异常中会调用chk(3)，显示Mission Complete，然后居然没有调用打印flag，</div><div class="line">		//看到有个.text:0804A039 cmp     ds:dword_804C3DC, 3Bh</div><div class="line">		//.text:0804A040 jg      short loc_804A051强制跳转到打印flag</div><div class="line">		//会进入f5没解析成功的代码，最后我都没弄清，是出题人故意的，还是ida能力问题，亦或是我的问题</div><div class="line">                *(_DWORD *)v16 = 0;</div><div class="line">                __cxa_throw(v16, &amp;_typeinfo_for_int, 0, v17);</div><div class="line">              &#125;</div><div class="line">            &#125;</div><div class="line">          &#125;</div></pre></td></tr></table></figure></p>
+<p>妹的，确定是100的，搞了老半天，还是linux的，upx加壳，首先就乱了<br>好吧，过了不知道多久，回过神来，upx脱壳，ida加载分析，大致弄清楚流程，代码用到了几个关键函数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">move移动光标</span><br><span class="line">printw显示字符</span><br></pre></td></tr></table></figure></p>
+<p>然后就是位置比较，成功了30次之后，就会显示出flag，可是代码中没有啊，习惯了可以f5就f5，所以，乱了很久<br>回到汇编窗口，通过printw找到几处打印，提取字符，通过python打印了一下，妹的乱码，有什么编码问题，不懂：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">flag = [0x7F, 0x1A, 0x64, 0x7F, 0x78, 0x44, 0x5E, 0x50, 0x67, 0x7d, 0x4E, 0x5F, 0x2A, </span><br><span class="line">        0x64, 0x6D, 0x52, 0x4C, 0x67, 0x72, 0x64, 0x4C, 0x70, 0x44, 0x7C, 0x5F, 0x2A,</span><br><span class="line">        0x48, 0x44, 0x41, 0x1C, 0x61, 0x72, 0x1A, 0x17]</span><br><span class="line">def printArr(arr):</span><br><span class="line">    for i in range(0, len(arr)):</span><br><span class="line">        s += chr(arr[i])</span><br><span class="line">    print s</span><br><span class="line">printArr(flag)</span><br></pre></td></tr></table></figure></p>
+<p>没法子，我也不可能玩30分钟，只好暴力解决了，修改了几个比较，成功进入异常处理（请原谅我，看着真是异常处理），注释中是几次暴力修改位置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">//.text:08049D75 jz      loc_8049EA0</span><br><span class="line">  if ( v11 &amp;&amp; v6 == target_y )//!=text:08049EA6 jnz     loc_8049D7B</span><br><span class="line">        &#123;</span><br><span class="line">          ++dword_804C3C0;</span><br><span class="line">          if ( dword_804C3C0 == 5 * dword_804C3C0 / 5 )</span><br><span class="line">            ++dword_804C3D8;</span><br><span class="line">          if ( dword_804C3C0 == 3 * dword_804C3C0 / 3 )</span><br><span class="line">            ++dword_804C3D4;</span><br><span class="line">          if ( dword_804C3C0 == 30 )//!=.text:08049EFD   jz      loc_8049F94</span><br><span class="line">          &#123;</span><br><span class="line">            if ( dword_804C3D8 == 6 )//!=text:08049F9B  jnz     loc_8049F03</span><br><span class="line">            &#123;</span><br><span class="line">              if ( dword_804C3D4 == 10 )//!=.text:08049FA8 jnz     loc_8049F03</span><br><span class="line">              &#123;</span><br><span class="line">                v16 = __cxa_allocate_exception();</span><br><span class="line">		//执行异常中会调用chk(3)，显示Mission Complete，然后居然没有调用打印flag，</span><br><span class="line">		//看到有个.text:0804A039 cmp     ds:dword_804C3DC, 3Bh</span><br><span class="line">		//.text:0804A040 jg      short loc_804A051强制跳转到打印flag</span><br><span class="line">		//会进入f5没解析成功的代码，最后我都没弄清，是出题人故意的，还是ida能力问题，亦或是我的问题</span><br><span class="line">                *(_DWORD *)v16 = 0;</span><br><span class="line">                __cxa_throw(v16, &amp;_typeinfo_for_int, 0, v17);</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br></pre></td></tr></table></figure></p>
 <p>ok,终于打印出来了U0NURntzMWduNGxfMXNfZnVubnk6KX0=，base64解码之后SCTF{s1gn4l_1s_funny:)}，做出来还是比较兴奋的</p>
 <h1 id="4-其他"><a href="#4-其他" class="headerlink" title="4. 其他"></a><strong>4. 其他</strong></h1><p>其他题目也尝试了很多。<br>re300，算法太绕，晕了，没去弄了，后面提示是三阶魔方，你妹啊，被吓住了，最后也没人做出来<br>re500，又来了个lua虚拟机，额，我再次败退，这次比赛逆向题基本完败，丢人。<br>图片题貌似是两题，用自己知道的各种方式尝试了，无果。<br>web题目，额，我scan了一题，看到了个head attck，然后不会了。<br>pwn题目，好简单，可是，路在何方？求writeup啊。<br>哦，还有两道code的题目，code200在我们努力下，队友提交成功，code400目前还在暴力运算中，明天看看有答案不（求思路，野路子只有暴力破了，也不知道对不）。<br>我想说code500，请问3 3 1是几个意思啊。按我们分析的思路弄出来了，跟我说wrong input！逗我呢啊，要writeup！</p>
 <p>最后总结：<br>太急躁，没思路，最后还是能力问题！</p>
@@ -536,22 +537,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -565,6 +550,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -584,7 +573,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -597,6 +594,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -636,23 +649,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -685,6 +686,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -728,30 +757,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -760,7 +765,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -796,6 +805,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -805,6 +826,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -821,26 +850,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -876,14 +885,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -897,6 +898,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

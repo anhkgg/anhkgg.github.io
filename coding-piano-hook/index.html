@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/coding-piano-hook/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="概述突然想玩一下键盘弹曲子，就找到了freepiano，专业的东西不懂，就找了写简谱来玩玩，感觉挺不错的，哈哈~~ 玩疯了之后，突然想到，我平时写代码，是不是可以弹出一段曲子呢，是不是心情会变得非常好，代码也写的更有节奏呢~~ 说不定还搞出来一个什么《代码之歌》的钢琴曲~~ 嘎嘎 突然被自己这个想法吸引住了，不管咋样，每敲下代码的一个字符，后面想起了背景音乐，真是不错的，程序员也可以是“钢琴师”啊">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/freepiano_1.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/freepiano_2.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/freepiano_3.png">
@@ -184,7 +185,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>突然想玩一下键盘弹曲子，就找到了<a href="http://freepiano.tiwb.com/cn/" target="_blank" rel="external">freepiano</a>，专业的东西不懂，就找了写简谱来玩玩，感觉挺不错的，哈哈~~</p>
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>突然想玩一下键盘弹曲子，就找到了<a href="http://freepiano.tiwb.com/cn/" target="_blank" rel="noopener">freepiano</a>，专业的东西不懂，就找了写简谱来玩玩，感觉挺不错的，哈哈~~</p>
 <p>玩疯了之后，突然想到，我平时写代码，是不是可以弹出一段曲子呢，是不是心情会变得非常好，代码也写的更有节奏呢~~</p>
 <p>说不定还搞出来一个什么《代码之歌》的钢琴曲~~ 嘎嘎</p>
 <p>突然被自己这个想法吸引住了，不管咋样，每敲下代码的一个字符，后面想起了背景音乐，真是不错的，程序员也可以是“钢琴师”啊~~</p>
@@ -207,13 +208,13 @@
 <p>然后就用depends看了下freepiano的导入信息，发现几个可以劫持的（dsound.dll，d3d9.dll等），简单代码确认了一下，freepiano可以劫持这两个模块，选择了d3d9.dll（函数少）。</p>
 <p><img src="/img/freepiano_2.png" alt="img"></p>
 <p>然后偷懒用了aheadlib导出了d3d9.dll的导出函数信息，简单方便，飞快得就搞定了劫持。</p>
-<p>代码很简单，就贴一点（都不需要手写）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">// 导出函数</div><div class="line">#pragma comment(linker, &quot;/EXPORT:Direct3DShaderValidatorCreate9=_AheadLib_Direct3DShaderValidatorCreate9,@1&quot;)</div><div class="line">#pragma comment(linker, &quot;/EXPORT:PSGPError=_AheadLib_PSGPError,@2&quot;)</div><div class="line">#pragma comment(linker, &quot;/EXPORT:PSGPSampleTexture=_AheadLib_PSGPSampleTexture,@3&quot;)</div><div class="line">...</div><div class="line">// 导出函数</div><div class="line">ALCDECL AheadLib_Direct3DShaderValidatorCreate9(void)</div><div class="line">&#123;</div><div class="line">	// 保存返回地址</div><div class="line">	__asm POP m_dwReturn[0 * TYPE long];</div><div class="line"></div><div class="line">	// 调用原始函数</div><div class="line">	GetAddress(&quot;Direct3DShaderValidatorCreate9&quot;)();</div><div class="line"></div><div class="line">	// 转跳到返回地址</div><div class="line">	__asm JMP m_dwReturn[0 * TYPE long];</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码很简单，就贴一点（都不需要手写）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 导出函数</span><br><span class="line">#pragma comment(linker, &quot;/EXPORT:Direct3DShaderValidatorCreate9=_AheadLib_Direct3DShaderValidatorCreate9,@1&quot;)</span><br><span class="line">#pragma comment(linker, &quot;/EXPORT:PSGPError=_AheadLib_PSGPError,@2&quot;)</span><br><span class="line">#pragma comment(linker, &quot;/EXPORT:PSGPSampleTexture=_AheadLib_PSGPSampleTexture,@3&quot;)</span><br><span class="line">...</span><br><span class="line">// 导出函数</span><br><span class="line">ALCDECL AheadLib_Direct3DShaderValidatorCreate9(void)</span><br><span class="line">&#123;</span><br><span class="line">	// 保存返回地址</span><br><span class="line">	__asm POP m_dwReturn[0 * TYPE long];</span><br><span class="line"></span><br><span class="line">	// 调用原始函数</span><br><span class="line">	GetAddress(&quot;Direct3DShaderValidatorCreate9&quot;)();</span><br><span class="line"></span><br><span class="line">	// 转跳到返回地址</span><br><span class="line">	__asm JMP m_dwReturn[0 * TYPE long];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>一试，OK，模块起来了，freepiano正常工作。</p>
 <p><img src="/img/freepiano_3.png" alt="img">)</p>
-<h2 id="2-安装钩子"><a href="#2-安装钩子" class="headerlink" title="2. 安装钩子"></a>2. 安装钩子</h2><p>选择了安装全局WH_KEYBOARD钩子，这个代码网上也太多了，就不细说了，看看就行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">//安装钩子</div><div class="line">BOOL Hook(HMODULE hMod)</div><div class="line">&#123;</div><div class="line">	g_Hook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, hMod, 0);</div><div class="line">	return g_Hook?TRUE:FALSE;</div><div class="line">&#125;</div><div class="line">//卸载钩子</div><div class="line">VOID Unhook()</div><div class="line">&#123;</div><div class="line">	if(g_Hook)</div><div class="line">	&#123;</div><div class="line">		UnhookWindowsHookEx(g_Hook);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">//钩子函数，劫持键盘消息</div><div class="line">LRESULT CALLBACK KeyboardProc(  int code,       // hook code</div><div class="line">							  WPARAM wParam,  // virtual-key code</div><div class="line">							  LPARAM lParam   // keystroke-message information</div><div class="line">							  )</div><div class="line">&#123;	</div><div class="line">	if(code == HC_ACTION)</div><div class="line">	&#123;</div><div class="line">		SendKeyMsg(wParam, lParam);</div><div class="line">	&#125;</div><div class="line">	return CallNextHookEx(g_Hook, code, wParam, lParam);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="2-安装钩子"><a href="#2-安装钩子" class="headerlink" title="2. 安装钩子"></a>2. 安装钩子</h2><p>选择了安装全局WH_KEYBOARD钩子，这个代码网上也太多了，就不细说了，看看就行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">//安装钩子</span><br><span class="line">BOOL Hook(HMODULE hMod)</span><br><span class="line">&#123;</span><br><span class="line">	g_Hook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, hMod, 0);</span><br><span class="line">	return g_Hook?TRUE:FALSE;</span><br><span class="line">&#125;</span><br><span class="line">//卸载钩子</span><br><span class="line">VOID Unhook()</span><br><span class="line">&#123;</span><br><span class="line">	if(g_Hook)</span><br><span class="line">	&#123;</span><br><span class="line">		UnhookWindowsHookEx(g_Hook);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">//钩子函数，劫持键盘消息</span><br><span class="line">LRESULT CALLBACK KeyboardProc(  int code,       // hook code</span><br><span class="line">							  WPARAM wParam,  // virtual-key code</span><br><span class="line">							  LPARAM lParam   // keystroke-message information</span><br><span class="line">							  )</span><br><span class="line">&#123;	</span><br><span class="line">	if(code == HC_ACTION)</span><br><span class="line">	&#123;</span><br><span class="line">		SendKeyMsg(wParam, lParam);</span><br><span class="line">	&#125;</span><br><span class="line">	return CallNextHookEx(g_Hook, code, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <h2 id="3-发送按键信息给freepiano"><a href="#3-发送按键信息给freepiano" class="headerlink" title="3. 发送按键信息给freepiano"></a>3. 发送按键信息给freepiano</h2><p>首先想到的就是在钩子函数里给freepiano发送WM_KEYDOWN/WM_KEYUP消息就行了。</p>
-<p>先找到freepiano的窗口，spy++上，找到窗口标题和类型信息，然后代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">HWND hwnd = FindWindow(&quot;FreePianoMainWindow&quot;, &quot;Wispow Freepiano 2&quot;);</div><div class="line">if(hwnd == NULL)</div><div class="line">&#123;</div><div class="line">	hwnd =  FindWindow(&quot;FreePianoMainWindow&quot;, NULL);</div><div class="line">	if(hwnd == NULL)</div><div class="line">	&#123;</div><div class="line">		hwnd =  FindWindow(NULL, &quot;Wispow Freepiano 2&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>然后就是发消息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">if(hwnd)</div><div class="line">&#123;</div><div class="line">	SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);</div><div class="line">	if(keydown)</div><div class="line">	&#123;</div><div class="line">		keydown = false;</div><div class="line">		PostMessage(hwnd, WM_KEYDOWN, wParam, lParam);</div><div class="line">	&#125;else</div><div class="line">	&#123;</div><div class="line">		keydown = true;</div><div class="line">		PostMessage(hwnd, WM_KEYUP, wParam, lParam);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>先找到freepiano的窗口，spy++上，找到窗口标题和类型信息，然后代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HWND hwnd = FindWindow(&quot;FreePianoMainWindow&quot;, &quot;Wispow Freepiano 2&quot;);</span><br><span class="line">if(hwnd == NULL)</span><br><span class="line">&#123;</span><br><span class="line">	hwnd =  FindWindow(&quot;FreePianoMainWindow&quot;, NULL);</span><br><span class="line">	if(hwnd == NULL)</span><br><span class="line">	&#123;</span><br><span class="line">		hwnd =  FindWindow(NULL, &quot;Wispow Freepiano 2&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后就是发消息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">if(hwnd)</span><br><span class="line">&#123;</span><br><span class="line">	SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);</span><br><span class="line">	if(keydown)</span><br><span class="line">	&#123;</span><br><span class="line">		keydown = false;</span><br><span class="line">		PostMessage(hwnd, WM_KEYDOWN, wParam, lParam);</span><br><span class="line">	&#125;else</span><br><span class="line">	&#123;</span><br><span class="line">		keydown = true;</span><br><span class="line">		PostMessage(hwnd, WM_KEYUP, wParam, lParam);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>测试，失败了，没有预想的效果。</p>
 <p>分析原因：</p>
 <ol>
@@ -222,22 +223,22 @@
 <li>freepiano使用了GetKeyState之类的函数检查按键状态，通过ida简单看了一下导入表，没有相关函数（没有深究是否显示导入了）。</li>
 <li>用ida看了下freepiano的窗口消息处理，看是否有什么过滤</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">v7.lpfnWndProc = (WNDPROC)xxx_main_wndproc_41D070; //窗口响应函数</div><div class="line">v7.cbClsExtra = 0;</div><div class="line">v7.cbWndExtra = 0;</div><div class="line">v7.hInstance = GetModuleHandleA(0);</div><div class="line">v7.hIcon = LoadIconA(v1, (LPCSTR)0xA);</div><div class="line">v7.hCursor = 0;</div><div class="line">v7.hbrBackground = 0;</div><div class="line">v7.lpszMenuName = 0;</div><div class="line">v7.lpszClassName = &quot;FreePianoMainWindow&quot;;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">v7.lpfnWndProc = (WNDPROC)xxx_main_wndproc_41D070; //窗口响应函数</span><br><span class="line">v7.cbClsExtra = 0;</span><br><span class="line">v7.cbWndExtra = 0;</span><br><span class="line">v7.hInstance = GetModuleHandleA(0);</span><br><span class="line">v7.hIcon = LoadIconA(v1, (LPCSTR)0xA);</span><br><span class="line">v7.hCursor = 0;</span><br><span class="line">v7.hbrBackground = 0;</span><br><span class="line">v7.lpszMenuName = 0;</span><br><span class="line">v7.lpszClassName = &quot;FreePianoMainWindow&quot;;</span><br></pre></td></tr></table></figure>
 <p>然后发现居然没有对WM_KEYDOWN/WM_KEYUP/WM_CHAR之类的消息进行处理，那是怎么接受的按键信息</p>
 <p>继续用ida看是否有钩子之类的处理，果然，导入表中明晃晃的SetWindowsHookEx，进入一看，一个WM_KEYBOARD_LL局部钩子</p>
 <p><img src="/img/freepiano_4.png" alt="img"></p>
 <p>进钩子函数一下，各种按键状态记录的处理，不深究了。基本确认他使用这种方式来接受按键信息。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">v6 = (unsigned __int8)byte_4F6DC8[scanCode];</div><div class="line"> if ( (unsigned int)(v6 - 1) &gt; 0x6A )</div><div class="line">   goto LABEL_23;</div><div class="line"> if ( (unsigned __int8)byte_4F6ED0[v6] != pressed_0 )</div><div class="line"> &#123;</div><div class="line">   byte_4F6ED0[v6] = pressed_0;</div><div class="line">   sub_449B20(v6, pressed_0 != 0);</div><div class="line"> &#125;</div><div class="line"> if ( (_BYTE)dword_4F6DC0</div><div class="line">   || BYTE1(dword_4F6DC0) &amp;&amp; (v6 == &apos;D&apos; || v6 == &apos;H&apos;)</div><div class="line">   || BYTE2(dword_4F6DC0) &amp;&amp; (byte_4F6F15 || byte_4F6F17) &amp;&amp; v6 == 28 )</div><div class="line">   result = 1;</div><div class="line"> else</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">v6 = (unsigned __int8)byte_4F6DC8[scanCode];</span><br><span class="line"> if ( (unsigned int)(v6 - 1) &gt; 0x6A )</span><br><span class="line">   goto LABEL_23;</span><br><span class="line"> if ( (unsigned __int8)byte_4F6ED0[v6] != pressed_0 )</span><br><span class="line"> &#123;</span><br><span class="line">   byte_4F6ED0[v6] = pressed_0;</span><br><span class="line">   sub_449B20(v6, pressed_0 != 0);</span><br><span class="line"> &#125;</span><br><span class="line"> if ( (_BYTE)dword_4F6DC0</span><br><span class="line">   || BYTE1(dword_4F6DC0) &amp;&amp; (v6 == &apos;D&apos; || v6 == &apos;H&apos;)</span><br><span class="line">   || BYTE2(dword_4F6DC0) &amp;&amp; (byte_4F6F15 || byte_4F6F17) &amp;&amp; v6 == 28 )</span><br><span class="line">   result = 1;</span><br><span class="line"> else</span><br></pre></td></tr></table></figure>
 <h2 id="4-改变策略"><a href="#4-改变策略" class="headerlink" title="4. 改变策略"></a>4. 改变策略</h2><p>那就不能直接PostMessage发送消息了。</p>
 <p>修改我的钩子为WM_KEYBOARD_LL全局键盘钩子，消息和freepiano完全一样了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">g_Hook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, hMod, 0);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g_Hook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, hMod, 0);</span><br></pre></td></tr></table></figure>
 <p>钩子函数通过WM_COPYDATA打包数据，发送给freepiano</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">LRESULT CALLBACK LowLevelKeyboardProc(  int nCode,     // hook code</div><div class="line">									  WPARAM wParam, // message identifier  </div><div class="line">									  LPARAM lParam  // message data</div><div class="line">									  )</div><div class="line">&#123;</div><div class="line">	COPYDATASTRUCT CopyData = &#123;0&#125;;</div><div class="line">	KeyboardLL_Msg Msg = &#123;0&#125;;</div><div class="line"></div><div class="line">	Msg.nCode = nCode;</div><div class="line">	Msg.wParam = wParam;</div><div class="line">	memcpy(&amp;Msg.lParam, (char*)lParam, sizeof(KBDLLHOOKSTRUCT));</div><div class="line"></div><div class="line">	CopyData.cbData = sizeof(KeyboardLL_Msg);</div><div class="line">	CopyData.dwData = 0;</div><div class="line">	CopyData.lpData = &amp;Msg;</div><div class="line"></div><div class="line">	HWND hwnd = FindFreepiano();</div><div class="line">	if(hwnd)</div><div class="line">	&#123;</div><div class="line">		BOOL ret = SendMessage(hwnd, WM_COPYDATA, (WPARAM)hwnd, (LPARAM)&amp;CopyData);</div><div class="line">	&#125;</div><div class="line">	return CallNextHookEx(g_Hook, nCode, wParam, lParam);</div><div class="line">&#125;</div><div class="line">typedef struct _KeyboardLL_Msg</div><div class="line">&#123;</div><div class="line">	int nCode;</div><div class="line">	WPARAM wParam;</div><div class="line">	KBDLLHOOKSTRUCT lParam;</div><div class="line">&#125;KeyboardLL_Msg, *PKeyboardLL_Msg;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK LowLevelKeyboardProc(  int nCode,     // hook code</span><br><span class="line">									  WPARAM wParam, // message identifier  </span><br><span class="line">									  LPARAM lParam  // message data</span><br><span class="line">									  )</span><br><span class="line">&#123;</span><br><span class="line">	COPYDATASTRUCT CopyData = &#123;0&#125;;</span><br><span class="line">	KeyboardLL_Msg Msg = &#123;0&#125;;</span><br><span class="line"></span><br><span class="line">	Msg.nCode = nCode;</span><br><span class="line">	Msg.wParam = wParam;</span><br><span class="line">	memcpy(&amp;Msg.lParam, (char*)lParam, sizeof(KBDLLHOOKSTRUCT));</span><br><span class="line"></span><br><span class="line">	CopyData.cbData = sizeof(KeyboardLL_Msg);</span><br><span class="line">	CopyData.dwData = 0;</span><br><span class="line">	CopyData.lpData = &amp;Msg;</span><br><span class="line"></span><br><span class="line">	HWND hwnd = FindFreepiano();</span><br><span class="line">	if(hwnd)</span><br><span class="line">	&#123;</span><br><span class="line">		BOOL ret = SendMessage(hwnd, WM_COPYDATA, (WPARAM)hwnd, (LPARAM)&amp;CopyData);</span><br><span class="line">	&#125;</span><br><span class="line">	return CallNextHookEx(g_Hook, nCode, wParam, lParam);</span><br><span class="line">&#125;</span><br><span class="line">typedef struct _KeyboardLL_Msg</span><br><span class="line">&#123;</span><br><span class="line">	int nCode;</span><br><span class="line">	WPARAM wParam;</span><br><span class="line">	KBDLLHOOKSTRUCT lParam;</span><br><span class="line">&#125;KeyboardLL_Msg, *PKeyboardLL_Msg;</span><br></pre></td></tr></table></figure>
 <p>通过SetWindowLong挂钩freepiano的窗口响应函数，增加处理WM_COPYDATA，来接受全局键盘信息，找到freepiano的钩子函数地址A，然后接受到WM_COPYDATA之后，直接调用A，把键盘信息给freepiano</p>
-<p>通过一个线程，循环查找freepianp窗口（可能还没起来），然后hook窗口响应函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">void HookWinProc()</div><div class="line">&#123;</div><div class="line">	while(1)</div><div class="line">	&#123;</div><div class="line">		HWND hwnd = FindFreepiano();</div><div class="line">		if(hwnd)</div><div class="line">		&#123;</div><div class="line">			g_WndProc = (pfn_WindProc)GetWindowLong(hwnd, GWL_WNDPROC);</div><div class="line">			if(g_WndProc)</div><div class="line">			&#123;</div><div class="line">				SetWindowLong(hwnd, GWL_WNDPROC, (LONG)fakeWindowProc);</div><div class="line">				break;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		Sleep(10);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>通过一个线程，循环查找freepianp窗口（可能还没起来），然后hook窗口响应函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">void HookWinProc()</span><br><span class="line">&#123;</span><br><span class="line">	while(1)</span><br><span class="line">	&#123;</span><br><span class="line">		HWND hwnd = FindFreepiano();</span><br><span class="line">		if(hwnd)</span><br><span class="line">		&#123;</span><br><span class="line">			g_WndProc = (pfn_WindProc)GetWindowLong(hwnd, GWL_WNDPROC);</span><br><span class="line">			if(g_WndProc)</span><br><span class="line">			&#123;</span><br><span class="line">				SetWindowLong(hwnd, GWL_WNDPROC, (LONG)fakeWindowProc);</span><br><span class="line">				break;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		Sleep(10);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>自己的函数中加入对WM_COPYDATA的消息处理，调用freepiano的钩子函数g_LowLevelKeyboardProc发键盘消息过去。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">LRESULT WINAPI fakeWindowProc(</div><div class="line">					   HWND hWnd,              // handle to window</div><div class="line">					   UINT Msg,               // message</div><div class="line">					   WPARAM wParam,          // first message parameter</div><div class="line">					   LPARAM lParam           // second message parameter</div><div class="line">					   )</div><div class="line">&#123;</div><div class="line">	if(Msg == WM_COPYDATA)</div><div class="line">	&#123;</div><div class="line">		COPYDATASTRUCT* CopyData = (COPYDATASTRUCT*)lParam;	</div><div class="line">		//if(CopyData-&gt;cbData == sizeof(KeyboardLL_Msg))</div><div class="line">		&#123;</div><div class="line">			KeyboardLL_Msg* Msg = (KeyboardLL_Msg*)CopyData-&gt;lpData;</div><div class="line">			g_LowLevelKeyboardProc(Msg-&gt;nCode, Msg-&gt;wParam, (LPARAM)&amp;Msg-&gt;lParam);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	return g_WndProc(hWnd, Msg, wParam, lParam);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>g_LowLevelKeyboardProc地址这里使用硬编码，图方便<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">HMODULE hExe = GetModuleHandle(NULL);</div><div class="line">g_LowLevelKeyboardProc = (pfn_LowLevelKeyboardProc)((DWORD)hExe + (DWORD)g_LowLevelKeyboardProc);</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">LRESULT WINAPI fakeWindowProc(</span><br><span class="line">					   HWND hWnd,              // handle to window</span><br><span class="line">					   UINT Msg,               // message</span><br><span class="line">					   WPARAM wParam,          // first message parameter</span><br><span class="line">					   LPARAM lParam           // second message parameter</span><br><span class="line">					   )</span><br><span class="line">&#123;</span><br><span class="line">	if(Msg == WM_COPYDATA)</span><br><span class="line">	&#123;</span><br><span class="line">		COPYDATASTRUCT* CopyData = (COPYDATASTRUCT*)lParam;	</span><br><span class="line">		//if(CopyData-&gt;cbData == sizeof(KeyboardLL_Msg))</span><br><span class="line">		&#123;</span><br><span class="line">			KeyboardLL_Msg* Msg = (KeyboardLL_Msg*)CopyData-&gt;lpData;</span><br><span class="line">			g_LowLevelKeyboardProc(Msg-&gt;nCode, Msg-&gt;wParam, (LPARAM)&amp;Msg-&gt;lParam);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	return g_WndProc(hWnd, Msg, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>g_LowLevelKeyboardProc地址这里使用硬编码，图方便<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">HMODULE hExe = GetModuleHandle(NULL);</span><br><span class="line">g_LowLevelKeyboardProc = (pfn_LowLevelKeyboardProc)((DWORD)hExe + (DWORD)g_LowLevelKeyboardProc);</span><br></pre></td></tr></table></figure></p>
 <p>功能到这里基本搞定。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>测试通过。</p>
 <p>手指立马不受控制的在编辑器里、浏览器、文件浏览器里各种按键，然后耳边响起了悠扬（忽略乱打的节奏的话）的钢琴声~~</p>
@@ -598,22 +599,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -627,6 +612,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -646,7 +635,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -659,6 +656,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -698,23 +711,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -747,6 +748,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -790,30 +819,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -822,7 +827,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -858,6 +867,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -867,6 +888,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -883,26 +912,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -938,14 +947,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -959,6 +960,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

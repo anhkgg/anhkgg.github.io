@@ -15,7 +15,8 @@
 <meta property="og:url" content="https://anhkgg.github.io/010注册算法分析/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="1. 关键函数定位进入register窗口，随便填入name，然后check license，弹框信息”Invalid name or password. Please enter your name and password exactly as given when you purchased 010 Editor (make sure no quotes are included).”，通过">
-<meta property="og:updated_time" content="2016-07-07T04:32:12.042Z">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2016-07-07T04:32:12.043Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="010注册算法分析">
 <meta name="twitter:description" content="1. 关键函数定位进入register窗口，随便填入name，然后check license，弹框信息”Invalid name or password. Please enter your name and password exactly as given when you purchased 010 Editor (make sure no quotes are included).”，通过">
@@ -181,18 +182,18 @@
       
         <h2 id="1-关键函数定位"><a href="#1-关键函数定位" class="headerlink" title="1. 关键函数定位"></a><strong>1. 关键函数定位</strong></h2><p>进入register窗口，随便填入name，然后check license，弹框信息”Invalid name or password. Please enter your name and password exactly as given when you purchased 010 Editor (make sure no quotes are included).”，通过该信息在IDA中找到对应函数地址，基本可以确认是关键函数位置，函数居然有名字，这是作者故意留下的吗。下面是整个验证函数流程：</p>
 <a id="more"></a>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">void __usercall chekc(char a1&lt;zf&gt;, int a2&lt;ecx&gt;)</div><div class="line">&#123;</div><div class="line">	//获取用户名</div><div class="line">	//是否为空</div><div class="line">	//获取注册码</div><div class="line">	//是否为空</div><div class="line">	//注册码格式检查xxxx-xxxx-xxxx-xxxx-xxxx</div><div class="line">	v42 = (void *)myCheck(mygbName, 3u, &apos;9A&apos;); //注册码验证，返回值v42对于是否注册成功，有很大关系，返回值为231，为失败</div><div class="line">	v26 = mySecondCheck(mygbName, 3u, &apos;9A&apos;);  // 第二次检查，如果返回中为219，就会进入后面的注册成功提示</div><div class="line">	//myCheck中返回不等于231，mygbName + 44提示进入网络验证，没有弄清楚，哪里会等于1</div><div class="line">	if ( v42 != (void *)231 &amp;&amp; *(_DWORD *)(mygbName + 44) )</div><div class="line">	&#123;</div><div class="line">		v27 = myWebCheck((void *)mygbName, 0);</div><div class="line">		if(v27 &lt; 0 )</div><div class="line">		&#123;</div><div class="line">			v43 = myMsg(&quot;Could not contact the webserver. Please check your internet connection. If your internet connection is currently working, the server may be down. If this problem persists, please visit &apos;http://www.sweetscape.com/support/&apos; (&quot;, 0xFFFFFFFFu);</div><div class="line">		&#125;</div><div class="line">		if ( !v27 )</div><div class="line">		&#123;</div><div class="line">			v43 = myMsg( &quot;010 Editor has detected that you have entered an invalid license. Please check to see if your license is entered correctly and try again. If this problem persists, please visit &apos;http://www.sweetscape.com/support/&apos;.&quot;, 0xFFFFFFFFu);</div><div class="line">		&#125;</div><div class="line">		v33 = mySecondCheck(mygbName, 3u, &apos;9A&apos;);//网络验证是否成功，成功，返回219</div><div class="line">	&#125;</div><div class="line">	if ( v43 == (void *)219 )                     // v43 == 219，注册成功</div><div class="line">	&#123;</div><div class="line">		v43 = myMsg(&quot;Password accepted. Thank you for purchasing 010 Editor!&quot;, 0xFFFFFFFFu);</div><div class="line">		//写入注册表</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="2-算法分析"><a href="#2-算法分析" class="headerlink" title="2. 算法分析"></a><strong>2. 算法分析</strong></h2><p>下面看看主要的验证函数myCheck和mySecondCheck，代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">signed int __thiscall mySecondCheck(int this, unsigned int a2, unsigned int a3)</div><div class="line">&#123;</div><div class="line">  int v3; // esi@1</div><div class="line">  signed int result; // eax@2</div><div class="line">  int v5; // eax@3</div><div class="line">  int v6; // eax@6</div><div class="line">  int v7; // eax@9</div><div class="line"></div><div class="line">  v3 = this;</div><div class="line">  if ( *(_DWORD *)(this + 44) )                 // 要让这个值等于0，否则进入网络验证，初始化就是0</div><div class="line">	return 275;</div><div class="line">  v5 = myCheck(this, a2, a3);	//可以看到，只有返回值是45时，才能返回219，注册成功</div><div class="line">  if ( v5 == 45 )</div><div class="line">  &#123;</div><div class="line">	result = 219;                               // 返回219， 注册成功</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>可以看到，只有返回值是45时，才能返回219，注册成功。<br>那么返回myCheck看看，怎么才能得到45的返回值，整个返回值查看一下，只有两处位置，可能返回45，如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">if ( v26 == 0x9Cu )</div><div class="line">&#123;</div><div class="line">	v20 = *(_DWORD *)(regdlg + 28) &lt; a2;</div><div class="line">	return (-v20 &amp; 0x21) + 45;                  // 成功？</div><div class="line">&#125;</div><div class="line">if ( v26 != 0xFCu )</div><div class="line">&#123;</div><div class="line">	if ( v26 == 0xACu &amp;&amp; v33 )</div><div class="line">	&#123;</div><div class="line">	  v20 = v33 &lt; a3;</div><div class="line">	  return (-v20 &amp; 0x21) + 45;                // 成功？</div><div class="line">	&#125;</div><div class="line">return 231;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>那么就需要回溯回去，看看v26，是如何得到的，只有在v26等于0x9c或者0xAc时，才有可能注册成功。下面看看完整代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div></pre></td><td class="code"><pre><div class="line">int __thiscall myCheck(int this, unsigned int a2, unsigned int a3)</div><div class="line">&#123;</div><div class="line">	//name和key长度是否为0</div><div class="line">	//myPassCheck(this, (int)&amp;v23);//将key字符串转换成数值，每两个字符转化成2为十六进制数，</div><div class="line">	//xxxx-xxxx-xxxx-xxxx-xxxx分别对应k1k2-k3k4-k5k6-k7k8-k9k10</div><div class="line">	//v23其实就是一个数组，存的就是k1-k10</div><div class="line">	//检测name是否等于&apos;999&apos;,是，则失败</div><div class="line">	if ( v26 == 0x9Cu )</div><div class="line">	&#123;</div><div class="line">		LOBYTE(v32) = v23 ^ v28;                    // k1^k7</div><div class="line">		LOWORD(v6) = (unsigned __int8)(v24 ^ v29);  // k2^k8</div><div class="line">		LOWORD(v7) = (unsigned __int8)(v25 ^ HIBYTE(v27));// k3^k6</div><div class="line">		v11 = v7 + ((_DWORD)v6 &lt;&lt; 8);               // v11 = k3^k6 + ((k2^k8)&lt;&lt;8)</div><div class="line">		*(_DWORD *)(regdlg + 28) = (unsigned __int8)myCal1(v23 ^ v28);// k1^k7 =&gt; 不能等于0</div><div class="line">		v9 = myCal2(v11);                           // 不能等于0</div><div class="line">		v10 = *(_DWORD *)(regdlg + 28);</div><div class="line">		*(_DWORD *)(regdlg + 32) = (unsigned __int16)v9;</div><div class="line">		// v10==0,v9==0或者v9&gt;0x3e8，返回231</div><div class="line">		if ( !v10 || !v9 || (unsigned __int16)v9 &gt; 0x3E8u )</div><div class="line">		  return 231;                               </div><div class="line">		v12 = v10 &lt; 2 ? v10 : 0;                    // v12 = 0或者1</div><div class="line">	&#125;else</div><div class="line">	&#123;</div><div class="line">		if(v26 == 0xFC)</div><div class="line">		&#123;//不可能成功</div><div class="line">		&#125;esle </div><div class="line">		&#123;</div><div class="line">			//v26不等于0xAC，退出，返回231，失败</div><div class="line">			//myCal2(k3^k6 + ((k2^k8)&lt;&lt;8)) &gt;  0x3E8, 失败</div><div class="line">			if ( v26 != 0xACu</div><div class="line">			|| (v15 = v24 ^ v29,//k2^k8</div><div class="line">				v16 = v25 ^ HIBYTE(v27),//k3^k6</div><div class="line">				*(_DWORD *)(regdlg + 28) = 2,</div><div class="line">				v14 = (unsigned __int16)myCal2(v16 + (v15 &lt;&lt; 8)),v11 = k3^k6 + ((k2^k8)&lt;&lt;8)</div><div class="line">				*(_DWORD *)(regdlg + 32) = (unsigned __int16)v14,</div><div class="line">				!(_WORD)v14)</div><div class="line">				|| v14 &gt; 0x3E8 )</div><div class="line">			return 231;</div><div class="line">			//sub_4FD0B9( (k1^k7 + (k9^k5 + (k6^k10)&lt;&lt;8)&lt;&lt;8), xxx);</div><div class="line">			//其实就是凑成十六进制数(k6^k10)(k9^k5)(k1^k7)</div><div class="line">			v17 = sub_4FD0B9(</div><div class="line">				  (v23 ^ v28) + (((v30 ^ (unsigned __int8)v27) + ((HIBYTE(v27) ^ v31) &lt;&lt; 8)) &lt;&lt; 8),</div><div class="line">				  (char *)loc_5B8C25 + 2);</div><div class="line">			v33 = v17;</div><div class="line">			*(_DWORD *)(regdlg + 52) = v17;</div><div class="line">			v12 = v17;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	//编码name，返回给v18，</div><div class="line">	v18 = myEncStr(*(const char **)(*(_DWORD *)qstrname + 12), v26 != -4, v12, *(_DWORD *)(regdlg + 32));</div><div class="line">	//如果v18，如0xABCDEF10分解成0xAB，0xCD， 0xEF10,不等于v29, v28,v27就失败，其实就是</div><div class="line">	//(k6k5) = 0xEF10, k7 = 0xCD, k8 = 0xAB</div><div class="line">	if ( v27 != (_WORD)v18</div><div class="line">		|| v28 != (unsigned __int8)((unsigned int)v18 &gt;&gt; 0x10u)</div><div class="line">		|| v29 != (unsigned __int8)((unsigned int)v18 &gt;&gt; 0x18u) )</div><div class="line">		return 231;                                 // 这三个条件很重要啊</div><div class="line">	//下面就接近成功了，就是上面提到的返回45的结果，成功</div><div class="line">	if ( v26 == 0x9Cu )</div><div class="line">	&#123;</div><div class="line">		//这里就需要regdlg + 28 = myCal1(k1^k7) &gt;= a2,也就是3，传入的a2是3</div><div class="line">		//然后v20就是0，那么(-v20 &amp; 0x21)=0，最后返回45</div><div class="line">		v20 = *(_DWORD *)(regdlg + 28) &lt; a2;</div><div class="line">		return (-v20 &amp; 0x21) + 45;                  // 成功？</div><div class="line">	&#125;</div><div class="line">	if ( v26 != 0xFCu )</div><div class="line">	&#123;</div><div class="line">		if ( v26 == 0xACu &amp;&amp; v33 )</div><div class="line">		&#123;</div><div class="line">		  v20 = v33 &lt; a3;</div><div class="line">		  return (-v20 &amp; 0x21) + 45;                // 成功？</div><div class="line">		&#125;</div><div class="line">	return 231;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>最后总结一下算法，基本可以列出一个方程类似的东西：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">k4 = 0x9C或者0xAC</div><div class="line">myCal1(k1^k7) &gt;= 3;//可以任取大于等于3的值，算出k1^k7=？</div><div class="line">myCal2(k3^k6 + ((k2^k8)&lt;&lt;8)) &gt; 0;//可以任去大于0</div><div class="line">myCal2(k3^k6 + ((k2^k8)&lt;&lt;8)) &lt; 0x3E8;//小于0x3E8的某一个值，算出k3^k6 + ((k2^k8)&lt;&lt;8) = ？</div><div class="line">k8k7k6k5 = v18;//0xABCDEF10，可以得到k5=?,k6=?,k7=?,k8=?，由此可以算出上面的k1,k2</div><div class="line">sub_4FD0B9((k6^k10)(k9^k5)(k1^k7), xx) = ?//可以算出k9，k10</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">void __usercall chekc(char a1&lt;zf&gt;, int a2&lt;ecx&gt;)</span><br><span class="line">&#123;</span><br><span class="line">	//获取用户名</span><br><span class="line">	//是否为空</span><br><span class="line">	//获取注册码</span><br><span class="line">	//是否为空</span><br><span class="line">	//注册码格式检查xxxx-xxxx-xxxx-xxxx-xxxx</span><br><span class="line">	v42 = (void *)myCheck(mygbName, 3u, &apos;9A&apos;); //注册码验证，返回值v42对于是否注册成功，有很大关系，返回值为231，为失败</span><br><span class="line">	v26 = mySecondCheck(mygbName, 3u, &apos;9A&apos;);  // 第二次检查，如果返回中为219，就会进入后面的注册成功提示</span><br><span class="line">	//myCheck中返回不等于231，mygbName + 44提示进入网络验证，没有弄清楚，哪里会等于1</span><br><span class="line">	if ( v42 != (void *)231 &amp;&amp; *(_DWORD *)(mygbName + 44) )</span><br><span class="line">	&#123;</span><br><span class="line">		v27 = myWebCheck((void *)mygbName, 0);</span><br><span class="line">		if(v27 &lt; 0 )</span><br><span class="line">		&#123;</span><br><span class="line">			v43 = myMsg(&quot;Could not contact the webserver. Please check your internet connection. If your internet connection is currently working, the server may be down. If this problem persists, please visit &apos;http://www.sweetscape.com/support/&apos; (&quot;, 0xFFFFFFFFu);</span><br><span class="line">		&#125;</span><br><span class="line">		if ( !v27 )</span><br><span class="line">		&#123;</span><br><span class="line">			v43 = myMsg( &quot;010 Editor has detected that you have entered an invalid license. Please check to see if your license is entered correctly and try again. If this problem persists, please visit &apos;http://www.sweetscape.com/support/&apos;.&quot;, 0xFFFFFFFFu);</span><br><span class="line">		&#125;</span><br><span class="line">		v33 = mySecondCheck(mygbName, 3u, &apos;9A&apos;);//网络验证是否成功，成功，返回219</span><br><span class="line">	&#125;</span><br><span class="line">	if ( v43 == (void *)219 )                     // v43 == 219，注册成功</span><br><span class="line">	&#123;</span><br><span class="line">		v43 = myMsg(&quot;Password accepted. Thank you for purchasing 010 Editor!&quot;, 0xFFFFFFFFu);</span><br><span class="line">		//写入注册表</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-算法分析"><a href="#2-算法分析" class="headerlink" title="2. 算法分析"></a><strong>2. 算法分析</strong></h2><p>下面看看主要的验证函数myCheck和mySecondCheck，代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">signed int __thiscall mySecondCheck(int this, unsigned int a2, unsigned int a3)</span><br><span class="line">&#123;</span><br><span class="line">  int v3; // esi@1</span><br><span class="line">  signed int result; // eax@2</span><br><span class="line">  int v5; // eax@3</span><br><span class="line">  int v6; // eax@6</span><br><span class="line">  int v7; // eax@9</span><br><span class="line"></span><br><span class="line">  v3 = this;</span><br><span class="line">  if ( *(_DWORD *)(this + 44) )                 // 要让这个值等于0，否则进入网络验证，初始化就是0</span><br><span class="line">	return 275;</span><br><span class="line">  v5 = myCheck(this, a2, a3);	//可以看到，只有返回值是45时，才能返回219，注册成功</span><br><span class="line">  if ( v5 == 45 )</span><br><span class="line">  &#123;</span><br><span class="line">	result = 219;                               // 返回219， 注册成功</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，只有返回值是45时，才能返回219，注册成功。<br>那么返回myCheck看看，怎么才能得到45的返回值，整个返回值查看一下，只有两处位置，可能返回45，如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">if ( v26 == 0x9Cu )</span><br><span class="line">&#123;</span><br><span class="line">	v20 = *(_DWORD *)(regdlg + 28) &lt; a2;</span><br><span class="line">	return (-v20 &amp; 0x21) + 45;                  // 成功？</span><br><span class="line">&#125;</span><br><span class="line">if ( v26 != 0xFCu )</span><br><span class="line">&#123;</span><br><span class="line">	if ( v26 == 0xACu &amp;&amp; v33 )</span><br><span class="line">	&#123;</span><br><span class="line">	  v20 = v33 &lt; a3;</span><br><span class="line">	  return (-v20 &amp; 0x21) + 45;                // 成功？</span><br><span class="line">	&#125;</span><br><span class="line">return 231;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>那么就需要回溯回去，看看v26，是如何得到的，只有在v26等于0x9c或者0xAc时，才有可能注册成功。下面看看完整代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">int __thiscall myCheck(int this, unsigned int a2, unsigned int a3)</span><br><span class="line">&#123;</span><br><span class="line">	//name和key长度是否为0</span><br><span class="line">	//myPassCheck(this, (int)&amp;v23);//将key字符串转换成数值，每两个字符转化成2为十六进制数，</span><br><span class="line">	//xxxx-xxxx-xxxx-xxxx-xxxx分别对应k1k2-k3k4-k5k6-k7k8-k9k10</span><br><span class="line">	//v23其实就是一个数组，存的就是k1-k10</span><br><span class="line">	//检测name是否等于&apos;999&apos;,是，则失败</span><br><span class="line">	if ( v26 == 0x9Cu )</span><br><span class="line">	&#123;</span><br><span class="line">		LOBYTE(v32) = v23 ^ v28;                    // k1^k7</span><br><span class="line">		LOWORD(v6) = (unsigned __int8)(v24 ^ v29);  // k2^k8</span><br><span class="line">		LOWORD(v7) = (unsigned __int8)(v25 ^ HIBYTE(v27));// k3^k6</span><br><span class="line">		v11 = v7 + ((_DWORD)v6 &lt;&lt; 8);               // v11 = k3^k6 + ((k2^k8)&lt;&lt;8)</span><br><span class="line">		*(_DWORD *)(regdlg + 28) = (unsigned __int8)myCal1(v23 ^ v28);// k1^k7 =&gt; 不能等于0</span><br><span class="line">		v9 = myCal2(v11);                           // 不能等于0</span><br><span class="line">		v10 = *(_DWORD *)(regdlg + 28);</span><br><span class="line">		*(_DWORD *)(regdlg + 32) = (unsigned __int16)v9;</span><br><span class="line">		// v10==0,v9==0或者v9&gt;0x3e8，返回231</span><br><span class="line">		if ( !v10 || !v9 || (unsigned __int16)v9 &gt; 0x3E8u )</span><br><span class="line">		  return 231;                               </span><br><span class="line">		v12 = v10 &lt; 2 ? v10 : 0;                    // v12 = 0或者1</span><br><span class="line">	&#125;else</span><br><span class="line">	&#123;</span><br><span class="line">		if(v26 == 0xFC)</span><br><span class="line">		&#123;//不可能成功</span><br><span class="line">		&#125;esle </span><br><span class="line">		&#123;</span><br><span class="line">			//v26不等于0xAC，退出，返回231，失败</span><br><span class="line">			//myCal2(k3^k6 + ((k2^k8)&lt;&lt;8)) &gt;  0x3E8, 失败</span><br><span class="line">			if ( v26 != 0xACu</span><br><span class="line">			|| (v15 = v24 ^ v29,//k2^k8</span><br><span class="line">				v16 = v25 ^ HIBYTE(v27),//k3^k6</span><br><span class="line">				*(_DWORD *)(regdlg + 28) = 2,</span><br><span class="line">				v14 = (unsigned __int16)myCal2(v16 + (v15 &lt;&lt; 8)),v11 = k3^k6 + ((k2^k8)&lt;&lt;8)</span><br><span class="line">				*(_DWORD *)(regdlg + 32) = (unsigned __int16)v14,</span><br><span class="line">				!(_WORD)v14)</span><br><span class="line">				|| v14 &gt; 0x3E8 )</span><br><span class="line">			return 231;</span><br><span class="line">			//sub_4FD0B9( (k1^k7 + (k9^k5 + (k6^k10)&lt;&lt;8)&lt;&lt;8), xxx);</span><br><span class="line">			//其实就是凑成十六进制数(k6^k10)(k9^k5)(k1^k7)</span><br><span class="line">			v17 = sub_4FD0B9(</span><br><span class="line">				  (v23 ^ v28) + (((v30 ^ (unsigned __int8)v27) + ((HIBYTE(v27) ^ v31) &lt;&lt; 8)) &lt;&lt; 8),</span><br><span class="line">				  (char *)loc_5B8C25 + 2);</span><br><span class="line">			v33 = v17;</span><br><span class="line">			*(_DWORD *)(regdlg + 52) = v17;</span><br><span class="line">			v12 = v17;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	//编码name，返回给v18，</span><br><span class="line">	v18 = myEncStr(*(const char **)(*(_DWORD *)qstrname + 12), v26 != -4, v12, *(_DWORD *)(regdlg + 32));</span><br><span class="line">	//如果v18，如0xABCDEF10分解成0xAB，0xCD， 0xEF10,不等于v29, v28,v27就失败，其实就是</span><br><span class="line">	//(k6k5) = 0xEF10, k7 = 0xCD, k8 = 0xAB</span><br><span class="line">	if ( v27 != (_WORD)v18</span><br><span class="line">		|| v28 != (unsigned __int8)((unsigned int)v18 &gt;&gt; 0x10u)</span><br><span class="line">		|| v29 != (unsigned __int8)((unsigned int)v18 &gt;&gt; 0x18u) )</span><br><span class="line">		return 231;                                 // 这三个条件很重要啊</span><br><span class="line">	//下面就接近成功了，就是上面提到的返回45的结果，成功</span><br><span class="line">	if ( v26 == 0x9Cu )</span><br><span class="line">	&#123;</span><br><span class="line">		//这里就需要regdlg + 28 = myCal1(k1^k7) &gt;= a2,也就是3，传入的a2是3</span><br><span class="line">		//然后v20就是0，那么(-v20 &amp; 0x21)=0，最后返回45</span><br><span class="line">		v20 = *(_DWORD *)(regdlg + 28) &lt; a2;</span><br><span class="line">		return (-v20 &amp; 0x21) + 45;                  // 成功？</span><br><span class="line">	&#125;</span><br><span class="line">	if ( v26 != 0xFCu )</span><br><span class="line">	&#123;</span><br><span class="line">		if ( v26 == 0xACu &amp;&amp; v33 )</span><br><span class="line">		&#123;</span><br><span class="line">		  v20 = v33 &lt; a3;</span><br><span class="line">		  return (-v20 &amp; 0x21) + 45;                // 成功？</span><br><span class="line">		&#125;</span><br><span class="line">	return 231;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后总结一下算法，基本可以列出一个方程类似的东西：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">k4 = 0x9C或者0xAC</span><br><span class="line">myCal1(k1^k7) &gt;= 3;//可以任取大于等于3的值，算出k1^k7=？</span><br><span class="line">myCal2(k3^k6 + ((k2^k8)&lt;&lt;8)) &gt; 0;//可以任去大于0</span><br><span class="line">myCal2(k3^k6 + ((k2^k8)&lt;&lt;8)) &lt; 0x3E8;//小于0x3E8的某一个值，算出k3^k6 + ((k2^k8)&lt;&lt;8) = ？</span><br><span class="line">k8k7k6k5 = v18;//0xABCDEF10，可以得到k5=?,k6=?,k7=?,k8=?，由此可以算出上面的k1,k2</span><br><span class="line">sub_4FD0B9((k6^k10)(k9^k5)(k1^k7), xx) = ?//可以算出k9，k10</span><br></pre></td></tr></table></figure></p>
 <p>下面就0x9C的情况写了个注册机</p>
-<h2 id="3-注册机"><a href="#3-注册机" class="headerlink" title="3. 注册机"></a><strong>3. 注册机</strong></h2><p>根据上面的注册算法，写了个针对0x9c的注册机：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div></pre></td><td class="code"><pre><div class="line">DWORD ckname(char* name, int isnotFC,  int islowk1k7, DWORD k3k6k2k8 )</div><div class="line">&#123;</div><div class="line">	int slen = strlen(name);</div><div class="line">	if(slen &gt; 0 )</div><div class="line">	&#123;</div><div class="line">		DWORD v15 = 0, v17 = 0, v16 = 0, chk = 0, v9 = 0, v8=0, v14 = 0, v5 = 0, v6 = 0;</div><div class="line">		while(v14 &lt; slen)</div><div class="line">		&#123;</div><div class="line">			DWORD v7 = toupper(name[v14]);</div><div class="line">			if(isnotFC)</div><div class="line">			&#123;</div><div class="line">				v9 = dword_B21DC4[(v17 + 15 * k3k6k2k8) &amp; 0xFF]</div><div class="line">				+ dword_B21DC4[(v6 + 17 * islowk1k7) &amp; 0xFF]</div><div class="line">				+ dword_B21DC4[(v7 + 47) &amp; 0xFF] * ((v5 + dword_B21DC4[v7]) ^ dword_B21DC4[(v7 + 13) &amp; 0xFF]);</div><div class="line">				v8 = v16;</div><div class="line">			&#125;</div><div class="line">			else&#123;</div><div class="line">				v9 = dword_B21DC4[(v17 + 15 * k3k6k2k8) &amp; 0xFF]</div><div class="line">				+ dword_B21DC4[(v6 + 17 * islowk1k7) &amp; 0xFF]</div><div class="line">				+ dword_B21DC4[(v7 + 23) &amp; 0xFF] * ((v5 + dword_B21DC4[v7]) ^ dword_B21DC4[(v7 + 63) &amp; 0xFF]);</div><div class="line">				v8 = v15;</div><div class="line">			&#125;</div><div class="line">			v16 += 19;</div><div class="line">			v17 += 13;</div><div class="line">			v15 += 7;</div><div class="line">			v6 += 9;</div><div class="line">			v5 = dword_B21DC4[v8] + v9;</div><div class="line">			v14 = v14 + 1;</div><div class="line">		&#125;</div><div class="line">		return v5;</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int main()</div><div class="line">&#123;</div><div class="line">	char name[] = &quot;&quot;;</div><div class="line">	char key[0x20] = &#123;0&#125;;</div><div class="line">	int k4 = 0x9c;//0xac	</div><div class="line">	int islowk1k7 = 3;//&gt;=3</div><div class="line">	int k1_xor_k7 = ((islowk1k7^0xA7)-61)^0x18;</div><div class="line"></div><div class="line">	int k3k6k2k8 = 1;//k3k6k2k8&gt;=1 &amp;&amp; k3k6k2k8&lt;0x3E8，其中任意一个值</div><div class="line">	int k3_xor_k6_k2_xor_k8 = 0xFFFF &amp; (((k3k6k2k8*11)^0x3421)-19760);</div><div class="line">	k3_xor_k6_k2_xor_k8 = k3_xor_k6_k2_xor_k8^0x7892;</div><div class="line">	int k3_xor_k6 = k3_xor_k6_k2_xor_k8 &amp; 0xff;//低位</div><div class="line">	int k2_xor_k8 = k3_xor_k6_k2_xor_k8 &gt;&gt; 8;//高位</div><div class="line"></div><div class="line">	int k1=0, k2=0, k3=0, k5=0, k6=0, k7=0, k8=0, k9=0, k10=0;//</div><div class="line"></div><div class="line">	printf(&quot;****************************************************\n&quot;);</div><div class="line">	printf(&quot;************* 010 Editor v3.1.2 keygen *************\n&quot;);</div><div class="line">	printf(&quot;*************   by anhkgg 2014-11-18   *************\n&quot;);</div><div class="line">	printf(&quot;****************************************************\n\n&quot;);</div><div class="line">	printf(&quot;name&gt;&quot;);</div><div class="line">	</div><div class="line">	scanf(&quot;%s&quot;, name);</div><div class="line">	</div><div class="line">	if(!stricmp(name, &quot;999&quot;))</div><div class="line">	&#123;</div><div class="line">		printf(&quot;name is not valid!\n&quot;);</div><div class="line">		system(&quot;pause&quot;);</div><div class="line">		return 0;</div><div class="line">	&#125;</div><div class="line">	DWORD name_chk = ckname(name, k4==0x9C?1:0, islowk1k7&lt;2?islowk1k7:0, k3k6k2k8) ;</div><div class="line">	k5 = name_chk &amp; 0xFF;</div><div class="line">	k6 = (name_chk &amp; 0xFFFF)&gt;&gt;8;//</div><div class="line">	k7 = (name_chk &gt;&gt; 16) &amp; 0xFF;//</div><div class="line">	k8 = (name_chk &gt;&gt; 24) &amp; 0xFF;//</div><div class="line">	k1 = k1_xor_k7 ^ k7;//</div><div class="line">	k2 = k2_xor_k8 ^ k8;</div><div class="line">	k3 = k3_xor_k6 ^ k6;//</div><div class="line"></div><div class="line">	printf(&quot;key&gt;%02x%02x-%02x%02x-%02x%02x-%02x%02x\n\n&quot;, k1, k2, k3, k4, k5, k6, k7, k8);</div><div class="line"></div><div class="line">	system(&quot;pause&quot;);</div><div class="line"></div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="3-注册机"><a href="#3-注册机" class="headerlink" title="3. 注册机"></a><strong>3. 注册机</strong></h2><p>根据上面的注册算法，写了个针对0x9c的注册机：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">DWORD ckname(char* name, int isnotFC,  int islowk1k7, DWORD k3k6k2k8 )</span><br><span class="line">&#123;</span><br><span class="line">	int slen = strlen(name);</span><br><span class="line">	if(slen &gt; 0 )</span><br><span class="line">	&#123;</span><br><span class="line">		DWORD v15 = 0, v17 = 0, v16 = 0, chk = 0, v9 = 0, v8=0, v14 = 0, v5 = 0, v6 = 0;</span><br><span class="line">		while(v14 &lt; slen)</span><br><span class="line">		&#123;</span><br><span class="line">			DWORD v7 = toupper(name[v14]);</span><br><span class="line">			if(isnotFC)</span><br><span class="line">			&#123;</span><br><span class="line">				v9 = dword_B21DC4[(v17 + 15 * k3k6k2k8) &amp; 0xFF]</span><br><span class="line">				+ dword_B21DC4[(v6 + 17 * islowk1k7) &amp; 0xFF]</span><br><span class="line">				+ dword_B21DC4[(v7 + 47) &amp; 0xFF] * ((v5 + dword_B21DC4[v7]) ^ dword_B21DC4[(v7 + 13) &amp; 0xFF]);</span><br><span class="line">				v8 = v16;</span><br><span class="line">			&#125;</span><br><span class="line">			else&#123;</span><br><span class="line">				v9 = dword_B21DC4[(v17 + 15 * k3k6k2k8) &amp; 0xFF]</span><br><span class="line">				+ dword_B21DC4[(v6 + 17 * islowk1k7) &amp; 0xFF]</span><br><span class="line">				+ dword_B21DC4[(v7 + 23) &amp; 0xFF] * ((v5 + dword_B21DC4[v7]) ^ dword_B21DC4[(v7 + 63) &amp; 0xFF]);</span><br><span class="line">				v8 = v15;</span><br><span class="line">			&#125;</span><br><span class="line">			v16 += 19;</span><br><span class="line">			v17 += 13;</span><br><span class="line">			v15 += 7;</span><br><span class="line">			v6 += 9;</span><br><span class="line">			v5 = dword_B21DC4[v8] + v9;</span><br><span class="line">			v14 = v14 + 1;</span><br><span class="line">		&#125;</span><br><span class="line">		return v5;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	char name[] = &quot;&quot;;</span><br><span class="line">	char key[0x20] = &#123;0&#125;;</span><br><span class="line">	int k4 = 0x9c;//0xac	</span><br><span class="line">	int islowk1k7 = 3;//&gt;=3</span><br><span class="line">	int k1_xor_k7 = ((islowk1k7^0xA7)-61)^0x18;</span><br><span class="line"></span><br><span class="line">	int k3k6k2k8 = 1;//k3k6k2k8&gt;=1 &amp;&amp; k3k6k2k8&lt;0x3E8，其中任意一个值</span><br><span class="line">	int k3_xor_k6_k2_xor_k8 = 0xFFFF &amp; (((k3k6k2k8*11)^0x3421)-19760);</span><br><span class="line">	k3_xor_k6_k2_xor_k8 = k3_xor_k6_k2_xor_k8^0x7892;</span><br><span class="line">	int k3_xor_k6 = k3_xor_k6_k2_xor_k8 &amp; 0xff;//低位</span><br><span class="line">	int k2_xor_k8 = k3_xor_k6_k2_xor_k8 &gt;&gt; 8;//高位</span><br><span class="line"></span><br><span class="line">	int k1=0, k2=0, k3=0, k5=0, k6=0, k7=0, k8=0, k9=0, k10=0;//</span><br><span class="line"></span><br><span class="line">	printf(&quot;****************************************************\n&quot;);</span><br><span class="line">	printf(&quot;************* 010 Editor v3.1.2 keygen *************\n&quot;);</span><br><span class="line">	printf(&quot;*************   by anhkgg 2014-11-18   *************\n&quot;);</span><br><span class="line">	printf(&quot;****************************************************\n\n&quot;);</span><br><span class="line">	printf(&quot;name&gt;&quot;);</span><br><span class="line">	</span><br><span class="line">	scanf(&quot;%s&quot;, name);</span><br><span class="line">	</span><br><span class="line">	if(!stricmp(name, &quot;999&quot;))</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;name is not valid!\n&quot;);</span><br><span class="line">		system(&quot;pause&quot;);</span><br><span class="line">		return 0;</span><br><span class="line">	&#125;</span><br><span class="line">	DWORD name_chk = ckname(name, k4==0x9C?1:0, islowk1k7&lt;2?islowk1k7:0, k3k6k2k8) ;</span><br><span class="line">	k5 = name_chk &amp; 0xFF;</span><br><span class="line">	k6 = (name_chk &amp; 0xFFFF)&gt;&gt;8;//</span><br><span class="line">	k7 = (name_chk &gt;&gt; 16) &amp; 0xFF;//</span><br><span class="line">	k8 = (name_chk &gt;&gt; 24) &amp; 0xFF;//</span><br><span class="line">	k1 = k1_xor_k7 ^ k7;//</span><br><span class="line">	k2 = k2_xor_k8 ^ k8;</span><br><span class="line">	k3 = k3_xor_k6 ^ k6;//</span><br><span class="line"></span><br><span class="line">	printf(&quot;key&gt;%02x%02x-%02x%02x-%02x%02x-%02x%02x\n\n&quot;, k1, k2, k3, k4, k5, k6, k7, k8);</span><br><span class="line"></span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line"></span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <h2 id="4-其他"><a href="#4-其他" class="headerlink" title="4. 其他"></a><strong>4. 其他</strong></h2><ul>
 <li>本次分析针对的是010 v3.1.2</li>
 <li>希望各位大牛不要见笑，欢迎交流</li>
-<li>网站：<a href="http://anhkgg.gitcafe.com" target="_blank" rel="external">anhkgg.gitcafe.com</a>， <a href="http://www.devilstep.com" target="_blank" rel="external">www.devilstep.com</a></li>
-<li>转载请注明出处：<a href="http://anhkgg.gitcafe.com/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">anhkgg.gitcafe.com/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/</a></li>
+<li>网站：<a href="http://anhkgg.gitcafe.com" target="_blank" rel="noopener">anhkgg.gitcafe.com</a>， <a href="http://www.devilstep.com" target="_blank" rel="noopener">www.devilstep.com</a></li>
+<li>转载请注明出处：<a href="http://anhkgg.gitcafe.com/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">anhkgg.gitcafe.com/010%E6%B3%A8%E5%86%8C%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/</a></li>
 <li>更新：最新版v5.0.2，分析之后，算法流程基本没有变化，只需要myCal1(k1^k7)条件更新一下就行！</li>
 </ul>
 
@@ -533,22 +534,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -562,6 +547,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -581,7 +570,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -594,6 +591,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -633,23 +646,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -682,6 +683,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -725,30 +754,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -757,7 +762,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -793,6 +802,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -802,6 +823,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -818,26 +847,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -873,14 +882,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -894,6 +895,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

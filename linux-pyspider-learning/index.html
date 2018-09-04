@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/linux-pyspider-learning/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="1. 创建工程运行pyspider，然后浏览器中输入localhost:5000，即可进入project管理，Create创建新的project">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/css_select.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/pyspider_d1.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/pyspider_d2.png">
@@ -188,9 +189,9 @@
       
         <h1 id="1-创建工程"><a href="#1-创建工程" class="headerlink" title="1. 创建工程"></a><strong>1. 创建工程</strong></h1><p>运行pyspider，然后浏览器中输入localhost:5000，即可进入project管理，Create创建新的project</p>
 <a id="more"></a>
-<h1 id="2-编码"><a href="#2-编码" class="headerlink" title="2. 编码"></a><strong>2. 编码</strong></h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">from pyspider.libs.base_handler import * </div><div class="line">import re </div><div class="line"></div><div class="line">class Handler(BaseHandler): </div><div class="line">crawl_config = &#123; </div><div class="line">&#125; </div><div class="line">@every(minutes=24 * 60) </div><div class="line">def on_start(self): </div><div class="line">for i in range(1, 287): </div><div class="line">self.crawl(&apos;http://xxx?ajax=1&amp;major=73&amp;showMore=0&amp;refer=cindex&amp;page=&apos;+str(i)+&apos;&amp;_CSRFToken=&apos;, callback=self.index_page) </div><div class="line"></div><div class="line">@config(age=10 * 24 * 60 * 60) </div><div class="line">def index_page(self, response): </div><div class="line">#print response.json[&apos;data&apos;] </div><div class="line">total = response.json[&apos;data&apos;][&apos;total&apos;] </div><div class="line">lists = response.json[&apos;data&apos;][&apos;lists&apos;] </div><div class="line">#print total, len(lists) </div><div class="line">for i in range(0, len(lists)): </div><div class="line">url = lists[i][&apos;url&apos;]; </div><div class="line">#if re.match(&quot;http://xxx?/corp/\d+/project/\d+&quot;, url): </div><div class="line">self.crawl(url, callback=self.detail_page) </div><div class="line"></div><div class="line">def detail_page(self, response): </div><div class="line">#信息过滤提取</div><div class="line">content = response.doc(&apos;div.position-content&apos;).text() </div><div class="line">if content == &quot;&quot; or content == None: </div><div class="line">content = response.doc(&apos;div.project-info &gt; div.pro-detail&apos;).text() </div><div class="line">return &#123; </div><div class="line">&quot;url&quot;: response.url, </div><div class="line">&quot;title&quot;: response.doc(&apos;title&apos;).text(), </div><div class="line">&quot;content&quot;: content </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>self.crawl(url, callback)抓取网页，callback为响应函数<br>def callback(self, response),response表示内容，可以通过response.doc(‘各类选择器’).text()获取到需要的内容<br>更多response的操作可以查看<a href="http://docs.pyspider.org/en/latest/apis/Response/" target="_blank" rel="external">pyspider response</a></p>
-<p><em>注意：</em><br>由于 response.doc是一个<a href="https://pythonhosted.org/pyquery/#quickstart" target="_blank" rel="external">pyquery</a>对象，信息过滤中可以使用css选择器<br>pyspider自带css选择器生成，但是貌似不能使用<br>在浏览器中f12，也可以自动生成选择器<br><img src="/img/css_select.png" alt="img"><br>在生成的选择其中，如&lt;#pagecontent &gt; table:nth-child(3) &gt; tbody &gt; tr:nth-child(2) &gt; td:nth-child(2) &gt; table &gt; tbody &gt; tr &gt; td &gt; div:nth-child(2)&gt;<br>需要去掉其中的tbody标签，否则无法使用，是否还有其他标签，没有过多测试<br>其实css选择器不用从上到下完整的生成，只要能够唯一获取指定的元素即可</p>
+<h1 id="2-编码"><a href="#2-编码" class="headerlink" title="2. 编码"></a><strong>2. 编码</strong></h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">from pyspider.libs.base_handler import * </span><br><span class="line">import re </span><br><span class="line"></span><br><span class="line">class Handler(BaseHandler): </span><br><span class="line">crawl_config = &#123; </span><br><span class="line">&#125; </span><br><span class="line">@every(minutes=24 * 60) </span><br><span class="line">def on_start(self): </span><br><span class="line">for i in range(1, 287): </span><br><span class="line">self.crawl(&apos;http://xxx?ajax=1&amp;major=73&amp;showMore=0&amp;refer=cindex&amp;page=&apos;+str(i)+&apos;&amp;_CSRFToken=&apos;, callback=self.index_page) </span><br><span class="line"></span><br><span class="line">@config(age=10 * 24 * 60 * 60) </span><br><span class="line">def index_page(self, response): </span><br><span class="line">#print response.json[&apos;data&apos;] </span><br><span class="line">total = response.json[&apos;data&apos;][&apos;total&apos;] </span><br><span class="line">lists = response.json[&apos;data&apos;][&apos;lists&apos;] </span><br><span class="line">#print total, len(lists) </span><br><span class="line">for i in range(0, len(lists)): </span><br><span class="line">url = lists[i][&apos;url&apos;]; </span><br><span class="line">#if re.match(&quot;http://xxx?/corp/\d+/project/\d+&quot;, url): </span><br><span class="line">self.crawl(url, callback=self.detail_page) </span><br><span class="line"></span><br><span class="line">def detail_page(self, response): </span><br><span class="line">#信息过滤提取</span><br><span class="line">content = response.doc(&apos;div.position-content&apos;).text() </span><br><span class="line">if content == &quot;&quot; or content == None: </span><br><span class="line">content = response.doc(&apos;div.project-info &gt; div.pro-detail&apos;).text() </span><br><span class="line">return &#123; </span><br><span class="line">&quot;url&quot;: response.url, </span><br><span class="line">&quot;title&quot;: response.doc(&apos;title&apos;).text(), </span><br><span class="line">&quot;content&quot;: content </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>self.crawl(url, callback)抓取网页，callback为响应函数<br>def callback(self, response),response表示内容，可以通过response.doc(‘各类选择器’).text()获取到需要的内容<br>更多response的操作可以查看<a href="http://docs.pyspider.org/en/latest/apis/Response/" target="_blank" rel="noopener">pyspider response</a></p>
+<p><em>注意：</em><br>由于 response.doc是一个<a href="https://pythonhosted.org/pyquery/#quickstart" target="_blank" rel="noopener">pyquery</a>对象，信息过滤中可以使用css选择器<br>pyspider自带css选择器生成，但是貌似不能使用<br>在浏览器中f12，也可以自动生成选择器<br><img src="/img/css_select.png" alt="img"><br>在生成的选择其中，如&lt;#pagecontent &gt; table:nth-child(3) &gt; tbody &gt; tr:nth-child(2) &gt; td:nth-child(2) &gt; table &gt; tbody &gt; tr &gt; td &gt; div:nth-child(2)&gt;<br>需要去掉其中的tbody标签，否则无法使用，是否还有其他标签，没有过多测试<br>其实css选择器不用从上到下完整的生成，只要能够唯一获取指定的元素即可</p>
 <h1 id="3-调试"><a href="#3-调试" class="headerlink" title="3. 调试"></a><strong>3. 调试</strong></h1><p>第一次run，调用on_start，crawl指定的url，然后调用callback函数，界面显示如图<br><img src="/img/pyspider_d1.png" alt="img"></p>
 <p>切换到follow窗口，可以看到符合callback函数的url列表<br><img src="/img/pyspider_d2.png" alt="img"></p>
 <p>点击列表中右侧播放按钮，crawl该页面，获取符合规则的url，调用下一个callback<br><img src="/img/pyspider_d3.png" alt="img"></p>
@@ -534,22 +535,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -563,6 +548,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -582,7 +571,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -595,6 +592,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -634,23 +647,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -683,6 +684,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -726,30 +755,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -758,7 +763,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -794,6 +803,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -803,6 +824,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -819,26 +848,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -874,14 +883,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -895,6 +896,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

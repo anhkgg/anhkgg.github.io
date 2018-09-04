@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/hctf-writeup/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="1. 丘比龙的最爱传说，丘比龙是丘比特的弟弟，丘比龙是一只小爱神，虽然有两只翅膀，但因为吃多了，导致身体太胖，所以飞不起来~那么问题来了?!丘比龙吃什么食物吃多了变胖了百度之：甜甜圈">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://www.taihainet.com/news/UploadFiles_6334/201306/20130618160811617.jpg">
 <meta property="og:updated_time" content="2014-11-10T02:15:50.000Z">
 <meta name="twitter:card" content="summary">
@@ -183,14 +184,14 @@
       
         <p><strong>1. 丘比龙的最爱</strong><br>传说，丘比龙是丘比特的弟弟，丘比龙是一只小爱神，虽然有两只翅膀，但因为吃多了，导致身体太胖，所以飞不起来~那么问题来了?!丘比龙吃什么食物吃多了变胖了<br>百度之：甜甜圈</p>
 <a id="more"></a>
-<p><strong>1. nvshen</strong><br>猫流大大发现一个女神，你能告诉我女神的名字么（名字即是flag） <a href="http://107.189.158.112/0aab9b20410fdd880c53922048023266/nvshen.zip" target="_blank" rel="external">http://107.189.158.112/0aab9b20410fdd880c53922048023266/nvshen.zip</a><br>打开大量数据，感觉是base64，解密了前一部分数据看到PNG, IHDR字符，应该就是png图片了，然后python写了段脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">import base64</div><div class="line">f1 = open(&quot;nvshen.txt&quot;, &quot;r&quot;)</div><div class="line">f2 = open(&quot;nvshen.png&quot;, &quot;wb&quot;)</div><div class="line"></div><div class="line">while 1:</div><div class="line">	buf = f1.read(12)</div><div class="line">	if not buf:</div><div class="line">		break;</div><div class="line">	#print buf, base64.decodestring(buf)</div><div class="line">	f2.write(base64.decodestring(buf))	</div><div class="line"></div><div class="line">f1.close()</div><div class="line">f2.close()</div></pre></td></tr></table></figure></p>
+<p><strong>1. nvshen</strong><br>猫流大大发现一个女神，你能告诉我女神的名字么（名字即是flag） <a href="http://107.189.158.112/0aab9b20410fdd880c53922048023266/nvshen.zip" target="_blank" rel="noopener">http://107.189.158.112/0aab9b20410fdd880c53922048023266/nvshen.zip</a><br>打开大量数据，感觉是base64，解密了前一部分数据看到PNG, IHDR字符，应该就是png图片了，然后python写了段脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">import base64</span><br><span class="line">f1 = open(&quot;nvshen.txt&quot;, &quot;r&quot;)</span><br><span class="line">f2 = open(&quot;nvshen.png&quot;, &quot;wb&quot;)</span><br><span class="line"></span><br><span class="line">while 1:</span><br><span class="line">	buf = f1.read(12)</span><br><span class="line">	if not buf:</span><br><span class="line">		break;</span><br><span class="line">	#print buf, base64.decodestring(buf)</span><br><span class="line">	f2.write(base64.decodestring(buf))	</span><br><span class="line"></span><br><span class="line">f1.close()</span><br><span class="line">f2.close()</span><br></pre></td></tr></table></figure></p>
 <p>得到一张女神照片，纠结了会，google图片之，找到女神名字“爱新觉罗·启星”，被中间的点坑了几次，然后flag是“爱新觉罗启星”， 出题人原来喜欢她啊<br><img src="http://www.taihainet.com/news/UploadFiles_6334/201306/20130618160811617.jpg" alt="img"></p>
-<p><strong>3. babyCrack</strong><br>107.189.158.112/d55757a7ccf958399789e18e1d8199de/babyCrack.zip<br>PEID查了下，是.net，马上祭出神奇.net reflector， 结果工具过期，重新下了个注册机，搞定，几个函数，翻了下，看到flag：hctf{bABy<em>CtsvlmE</em>!}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">private void button1_Click(object sender, EventArgs e)</div><div class="line">&#123;</div><div class="line">	bool flag = false;</div><div class="line">	Config.user = this.textBox1.Text;</div><div class="line">	string user = Config.user;</div><div class="line">	string str2 = &quot;hctf&#123;bABy_CtsvlmE_!&#125;&quot;;</div><div class="line">	if (str2.CompareTo(user) == 0)</div><div class="line">	&#123;</div><div class="line">		flag = true;</div><div class="line">	&#125;</div><div class="line">	if (flag)</div><div class="line">	&#123;</div><div class="line">		MessageBox.Show(&quot;good !!!&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>3. babyCrack</strong><br>107.189.158.112/d55757a7ccf958399789e18e1d8199de/babyCrack.zip<br>PEID查了下，是.net，马上祭出神奇.net reflector， 结果工具过期，重新下了个注册机，搞定，几个函数，翻了下，看到flag：hctf{bABy<em>CtsvlmE</em>!}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">private void button1_Click(object sender, EventArgs e)</span><br><span class="line">&#123;</span><br><span class="line">	bool flag = false;</span><br><span class="line">	Config.user = this.textBox1.Text;</span><br><span class="line">	string user = Config.user;</span><br><span class="line">	string str2 = &quot;hctf&#123;bABy_CtsvlmE_!&#125;&quot;;</span><br><span class="line">	if (str2.CompareTo(user) == 0)</span><br><span class="line">	&#123;</span><br><span class="line">		flag = true;</span><br><span class="line">	&#125;</span><br><span class="line">	if (flag)</span><br><span class="line">	&#123;</span><br><span class="line">		MessageBox.Show(&quot;good !!!&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p><strong>4. stego_final</strong><br>图片隐写题，Stegsolve各种通道翻了一下，看到张二维码，用手机一扫，识别不了，背影有些黑点，又不会图片处理，ps一番，终于找到flag：flag{hctf_3xF$235#^3}</p>
-<p><strong>5. wzwzDingDing</strong><br>被坑的最惨的一道题，是个64位驱动，代码真不多，只有30多个函数，翻了一个遍，流程分析清楚，最后有个字符串提示 “OK!YOU ARE REALLY GOOD!Also, there is a } left!”<br>就是说代码执行到这，应该会得到flag，然后这个是在IRP_MJ_DEVICE_CONTROL函数中，函数对应多个ctl code，分别是：<br>0x88102004，0x88102008, 0x8810200C, 0x88102014, 0x88102010，以及都不是前面的一个ctl code，每个ctl code对应分支都会对偏移0x48E0的一个标志进行操作，最后得到0xFFFFFF，执行提示字符串的分支。<br>下面是触发的ring3代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">HANDLE hDev = CreateFileA(DRV_SYM, GENERIC_ALL, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);</div><div class="line">if(hDev == INVALID_HANDLE_VALUE)</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] open dev error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line">printf(&quot;[+] open dev success!\n&quot;);</div><div class="line">char buf[20] = &quot;^lejAJ]O&quot;;</div><div class="line">DWORD dwReturn = 0;</div><div class="line">if(! DeviceIoControl(hDev, 0x88102004, buf, strlen(buf), buf, strlen(buf),  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line">char buf1[20] = &quot;MNIII&quot;;</div><div class="line">if(! DeviceIoControl(hDev, 0x88102004, buf1, strlen(buf1), buf1, strlen(buf1),  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">if(! DeviceIoControl(hDev, 0x88102008, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div><div class="line">//8810200C</div><div class="line">if(! DeviceIoControl(hDev, 0x8810200C, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;	</div><div class="line"></div><div class="line">if(! DeviceIoControl(hDev, 0x88102014, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;	</div><div class="line">//88102010</div><div class="line">if(! DeviceIoControl(hDev,  0x88102010, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</div><div class="line">&#123;</div><div class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>5. wzwzDingDing</strong><br>被坑的最惨的一道题，是个64位驱动，代码真不多，只有30多个函数，翻了一个遍，流程分析清楚，最后有个字符串提示 “OK!YOU ARE REALLY GOOD!Also, there is a } left!”<br>就是说代码执行到这，应该会得到flag，然后这个是在IRP_MJ_DEVICE_CONTROL函数中，函数对应多个ctl code，分别是：<br>0x88102004，0x88102008, 0x8810200C, 0x88102014, 0x88102010，以及都不是前面的一个ctl code，每个ctl code对应分支都会对偏移0x48E0的一个标志进行操作，最后得到0xFFFFFF，执行提示字符串的分支。<br>下面是触发的ring3代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">HANDLE hDev = CreateFileA(DRV_SYM, GENERIC_ALL, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);</span><br><span class="line">if(hDev == INVALID_HANDLE_VALUE)</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;[-] open dev error %d\n&quot;, GetLastError());</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">printf(&quot;[+] open dev success!\n&quot;);</span><br><span class="line">char buf[20] = &quot;^lejAJ]O&quot;;</span><br><span class="line">DWORD dwReturn = 0;</span><br><span class="line">if(! DeviceIoControl(hDev, 0x88102004, buf, strlen(buf), buf, strlen(buf),  &amp;dwReturn, NULL))</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">char buf1[20] = &quot;MNIII&quot;;</span><br><span class="line">if(! DeviceIoControl(hDev, 0x88102004, buf1, strlen(buf1), buf1, strlen(buf1),  &amp;dwReturn, NULL))</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if(! DeviceIoControl(hDev, 0x88102008, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">//8810200C</span><br><span class="line">if(! DeviceIoControl(hDev, 0x8810200C, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</span><br><span class="line">	return 0;</span><br><span class="line">&#125;	</span><br><span class="line"></span><br><span class="line">if(! DeviceIoControl(hDev, 0x88102014, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</span><br><span class="line">	return 0;</span><br><span class="line">&#125;	</span><br><span class="line">//88102010</span><br><span class="line">if(! DeviceIoControl(hDev,  0x88102010, NULL, 0, NULL, 0,  &amp;dwReturn, NULL))</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;[-] dev control error %d\n&quot;, GetLastError());</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>最后就进入了提示字符分支，结果在这里 <code>text:0000000000012361 call    [rsp+0C8h+ShellCode]</code>，就崩了，被坑了好久，这里需要结合题目提示flag: HCTF{‘intput’.encode(‘hex’)}<br>就是需要修复那段shellcode，让其正确执行，然后顺利执行到提示字符串位置，分支中还有代码提示需要修复的代码字节位置，然后就是根据一个堆栈平衡就能修复（开始明显看不懂题意啊，坑）<br>修复前代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">fffff880`02f85d90 l5b</div><div class="line">wzwzDingDing+0x2d90:</div><div class="line">fffff880`02f85d90 （10） 5152          adc     byte ptr [rcx+52h],dl =&gt;(50 //push rax push rcx</div><div class="line">fffff880`02f85d93 53              push    rbx</div><div class="line">fffff880`02f85d94 55              push    rbp</div><div class="line">fffff880`02f85d95 56              push    rsi</div><div class="line">fffff880`02f85d96 57              push    rdi</div><div class="line">fffff880`02f85d97 （90）              nop</div><div class="line">fffff880`02f85d98 （90）              nop//push r8  (41 50</div><div class="line">fffff880`02f85d99 4151            push    r9</div><div class="line">fffff880`02f85d9b 4152            push    r10</div><div class="line">fffff880`02f85d9d 4153            push    r11</div><div class="line">fffff880`02f85d9f 4154            push    r12</div><div class="line">fffff880`02f85da1 4155            push    r13</div><div class="line">fffff880`02f85da3 4156            push    r14</div><div class="line">fffff880`02f85da5 4157            push    r15</div><div class="line">fffff880`02f85da7 90              nop</div><div class="line">fffff880`02f85da8 （90）              nop//(48 83 EC 28 sub rsp,28h</div><div class="line">fffff880`02f85da9 (90              nop</div><div class="line">fffff880`02f85daa (90              nop</div><div class="line">fffff880`02f85dab (90              nop</div><div class="line">fffff880`02f85dac 90              nop</div><div class="line">fffff880`02f85dad 48c7c600000000  mov     rsi,0</div><div class="line">fffff880`02f85db4 488b040e        mov     rax,qword ptr [rsi+rcx]</div><div class="line">fffff880`02f85db8 4883f007        xor     rax,7</div><div class="line">fffff880`02f85dbc 4889040e        mov     qword ptr [rsi+rcx],rax</div><div class="line">fffff880`02f85dc0 90              nop</div><div class="line">fffff880`02f85dc1 90              nop</div><div class="line">fffff880`02f85dc2 90              nop</div><div class="line">fffff880`02f85dc3 90              nop</div><div class="line">fffff880`02f85dc4 48ffc6          inc     rsi</div><div class="line">fffff880`02f85dc7 4883fe0b        cmp     rsi,0Bh</div><div class="line">fffff880`02f85dcb 74e0            je      wzwzDingDing+0x2dad (fffff880`02f85dad)</div><div class="line">fffff880`02f85dcd 90              nop</div><div class="line">fffff880`02f85dce 4883c428        add     rsp,28h</div><div class="line">fffff880`02f85dd2 415f            pop     r15</div><div class="line">fffff880`02f85dd4 415e            pop     r14</div><div class="line">fffff880`02f85dd6 415d            pop     r13</div><div class="line">fffff880`02f85dd8 415c            pop     r12</div><div class="line">fffff880`02f85dda 415b            pop     r11</div><div class="line">fffff880`02f85ddc 415a            pop     r10</div><div class="line">fffff880`02f85dde 4159            pop     r9</div><div class="line">fffff880`02f85de0 4158            pop     r8</div><div class="line">fffff880`02f85de2 5f              pop     rdi</div><div class="line">fffff880`02f85de3 5e              pop     rsi</div><div class="line">fffff880`02f85de4 5d              pop     rbp</div><div class="line">fffff880`02f85de5 5b              pop     rbx</div><div class="line">fffff880`02f85de6 5a              pop     rdx</div><div class="line">fffff880`02f85de7 (90)              nop //59 pop rcx </div><div class="line">fffff880`02f85de8 58              pop     rax</div><div class="line">fffff880`02f85de9 (90)              nop//ret C3</div><div class="line">fffff880`02f85dea 00cc            add     ah,cl</div></pre></td></tr></table></figure>
-<p>修复后代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">kd&gt; u fffff880`02f85d90 l5b</div><div class="line">wzwzDingDing+0x2d90:</div><div class="line">fffff880`02f85d90 50              push    rax</div><div class="line">fffff880`02f85d91 51              push    rcx</div><div class="line">fffff880`02f85d92 52              push    rdx</div><div class="line">fffff880`02f85d93 53              push    rbx</div><div class="line">fffff880`02f85d94 55              push    rbp</div><div class="line">fffff880`02f85d95 56              push    rsi</div><div class="line">fffff880`02f85d96 57              push    rdi</div><div class="line">fffff880`02f85d97 4150            push    r8</div><div class="line">fffff880`02f85d99 4151            push    r9</div><div class="line">fffff880`02f85d9b 4152            push    r10</div><div class="line">fffff880`02f85d9d 4153            push    r11</div><div class="line">fffff880`02f85d9f 4154            push    r12</div><div class="line">fffff880`02f85da1 4155            push    r13</div><div class="line">fffff880`02f85da3 4156            push    r14</div><div class="line">fffff880`02f85da5 4157            push    r15</div><div class="line">fffff880`02f85da7 90              nop</div><div class="line">fffff880`02f85da8 4883ec28        sub     rsp,28h</div><div class="line">fffff880`02f85dac 90              nop</div><div class="line">fffff880`02f85dad 48c7c600000000  mov     rsi,0</div><div class="line">fffff880`02f85db4 488b040e        mov     rax,qword ptr [rsi+rcx]</div><div class="line">fffff880`02f85db8 4883f007        xor     rax,7</div><div class="line">fffff880`02f85dbc 4889040e        mov     qword ptr [rsi+rcx],rax</div><div class="line">fffff880`02f85dc0 90              nop</div><div class="line">fffff880`02f85dc1 90              nop</div><div class="line">fffff880`02f85dc2 90              nop</div><div class="line">fffff880`02f85dc3 90              nop</div><div class="line">fffff880`02f85dc4 48ffc6          inc     rsi</div><div class="line">fffff880`02f85dc7 4883fe0b        cmp     rsi,0Bh</div><div class="line">fffff880`02f85dcb 74e0            je      wzwzDingDing+0x2dad (fffff880`02f85dad)</div><div class="line">fffff880`02f85dcd 90              nop</div><div class="line">fffff880`02f85dce 4883c428        add     rsp,28h</div><div class="line">fffff880`02f85dd2 415f            pop     r15</div><div class="line">fffff880`02f85dd4 415e            pop     r14</div><div class="line">fffff880`02f85dd6 415d            pop     r13</div><div class="line">fffff880`02f85dd8 415c            pop     r12</div><div class="line">fffff880`02f85dda 415b            pop     r11</div><div class="line">fffff880`02f85ddc 415a            pop     r10</div><div class="line">fffff880`02f85dde 4159            pop     r9</div><div class="line">fffff880`02f85de0 4158            pop     r8</div><div class="line">fffff880`02f85de2 5f              pop     rdi</div><div class="line">fffff880`02f85de3 5e              pop     rsi</div><div class="line">fffff880`02f85de4 5d              pop     rbp</div><div class="line">fffff880`02f85de5 5b              pop     rbx</div><div class="line">fffff880`02f85de6 5a              pop     rdx</div><div class="line">fffff880`02f85de7 59              pop     rcx</div><div class="line">fffff880`02f85de8 58              pop     rax</div><div class="line">fffff880`02f85de9 c3              ret</div><div class="line">fffff880`02f85dea 00cc            add     ah,cl</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">fffff880`02f85d90 l5b</span><br><span class="line">wzwzDingDing+0x2d90:</span><br><span class="line">fffff880`02f85d90 （10） 5152          adc     byte ptr [rcx+52h],dl =&gt;(50 //push rax push rcx</span><br><span class="line">fffff880`02f85d93 53              push    rbx</span><br><span class="line">fffff880`02f85d94 55              push    rbp</span><br><span class="line">fffff880`02f85d95 56              push    rsi</span><br><span class="line">fffff880`02f85d96 57              push    rdi</span><br><span class="line">fffff880`02f85d97 （90）              nop</span><br><span class="line">fffff880`02f85d98 （90）              nop//push r8  (41 50</span><br><span class="line">fffff880`02f85d99 4151            push    r9</span><br><span class="line">fffff880`02f85d9b 4152            push    r10</span><br><span class="line">fffff880`02f85d9d 4153            push    r11</span><br><span class="line">fffff880`02f85d9f 4154            push    r12</span><br><span class="line">fffff880`02f85da1 4155            push    r13</span><br><span class="line">fffff880`02f85da3 4156            push    r14</span><br><span class="line">fffff880`02f85da5 4157            push    r15</span><br><span class="line">fffff880`02f85da7 90              nop</span><br><span class="line">fffff880`02f85da8 （90）              nop//(48 83 EC 28 sub rsp,28h</span><br><span class="line">fffff880`02f85da9 (90              nop</span><br><span class="line">fffff880`02f85daa (90              nop</span><br><span class="line">fffff880`02f85dab (90              nop</span><br><span class="line">fffff880`02f85dac 90              nop</span><br><span class="line">fffff880`02f85dad 48c7c600000000  mov     rsi,0</span><br><span class="line">fffff880`02f85db4 488b040e        mov     rax,qword ptr [rsi+rcx]</span><br><span class="line">fffff880`02f85db8 4883f007        xor     rax,7</span><br><span class="line">fffff880`02f85dbc 4889040e        mov     qword ptr [rsi+rcx],rax</span><br><span class="line">fffff880`02f85dc0 90              nop</span><br><span class="line">fffff880`02f85dc1 90              nop</span><br><span class="line">fffff880`02f85dc2 90              nop</span><br><span class="line">fffff880`02f85dc3 90              nop</span><br><span class="line">fffff880`02f85dc4 48ffc6          inc     rsi</span><br><span class="line">fffff880`02f85dc7 4883fe0b        cmp     rsi,0Bh</span><br><span class="line">fffff880`02f85dcb 74e0            je      wzwzDingDing+0x2dad (fffff880`02f85dad)</span><br><span class="line">fffff880`02f85dcd 90              nop</span><br><span class="line">fffff880`02f85dce 4883c428        add     rsp,28h</span><br><span class="line">fffff880`02f85dd2 415f            pop     r15</span><br><span class="line">fffff880`02f85dd4 415e            pop     r14</span><br><span class="line">fffff880`02f85dd6 415d            pop     r13</span><br><span class="line">fffff880`02f85dd8 415c            pop     r12</span><br><span class="line">fffff880`02f85dda 415b            pop     r11</span><br><span class="line">fffff880`02f85ddc 415a            pop     r10</span><br><span class="line">fffff880`02f85dde 4159            pop     r9</span><br><span class="line">fffff880`02f85de0 4158            pop     r8</span><br><span class="line">fffff880`02f85de2 5f              pop     rdi</span><br><span class="line">fffff880`02f85de3 5e              pop     rsi</span><br><span class="line">fffff880`02f85de4 5d              pop     rbp</span><br><span class="line">fffff880`02f85de5 5b              pop     rbx</span><br><span class="line">fffff880`02f85de6 5a              pop     rdx</span><br><span class="line">fffff880`02f85de7 (90)              nop //59 pop rcx </span><br><span class="line">fffff880`02f85de8 58              pop     rax</span><br><span class="line">fffff880`02f85de9 (90)              nop//ret C3</span><br><span class="line">fffff880`02f85dea 00cc            add     ah,cl</span><br></pre></td></tr></table></figure>
+<p>修复后代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">kd&gt; u fffff880`02f85d90 l5b</span><br><span class="line">wzwzDingDing+0x2d90:</span><br><span class="line">fffff880`02f85d90 50              push    rax</span><br><span class="line">fffff880`02f85d91 51              push    rcx</span><br><span class="line">fffff880`02f85d92 52              push    rdx</span><br><span class="line">fffff880`02f85d93 53              push    rbx</span><br><span class="line">fffff880`02f85d94 55              push    rbp</span><br><span class="line">fffff880`02f85d95 56              push    rsi</span><br><span class="line">fffff880`02f85d96 57              push    rdi</span><br><span class="line">fffff880`02f85d97 4150            push    r8</span><br><span class="line">fffff880`02f85d99 4151            push    r9</span><br><span class="line">fffff880`02f85d9b 4152            push    r10</span><br><span class="line">fffff880`02f85d9d 4153            push    r11</span><br><span class="line">fffff880`02f85d9f 4154            push    r12</span><br><span class="line">fffff880`02f85da1 4155            push    r13</span><br><span class="line">fffff880`02f85da3 4156            push    r14</span><br><span class="line">fffff880`02f85da5 4157            push    r15</span><br><span class="line">fffff880`02f85da7 90              nop</span><br><span class="line">fffff880`02f85da8 4883ec28        sub     rsp,28h</span><br><span class="line">fffff880`02f85dac 90              nop</span><br><span class="line">fffff880`02f85dad 48c7c600000000  mov     rsi,0</span><br><span class="line">fffff880`02f85db4 488b040e        mov     rax,qword ptr [rsi+rcx]</span><br><span class="line">fffff880`02f85db8 4883f007        xor     rax,7</span><br><span class="line">fffff880`02f85dbc 4889040e        mov     qword ptr [rsi+rcx],rax</span><br><span class="line">fffff880`02f85dc0 90              nop</span><br><span class="line">fffff880`02f85dc1 90              nop</span><br><span class="line">fffff880`02f85dc2 90              nop</span><br><span class="line">fffff880`02f85dc3 90              nop</span><br><span class="line">fffff880`02f85dc4 48ffc6          inc     rsi</span><br><span class="line">fffff880`02f85dc7 4883fe0b        cmp     rsi,0Bh</span><br><span class="line">fffff880`02f85dcb 74e0            je      wzwzDingDing+0x2dad (fffff880`02f85dad)</span><br><span class="line">fffff880`02f85dcd 90              nop</span><br><span class="line">fffff880`02f85dce 4883c428        add     rsp,28h</span><br><span class="line">fffff880`02f85dd2 415f            pop     r15</span><br><span class="line">fffff880`02f85dd4 415e            pop     r14</span><br><span class="line">fffff880`02f85dd6 415d            pop     r13</span><br><span class="line">fffff880`02f85dd8 415c            pop     r12</span><br><span class="line">fffff880`02f85dda 415b            pop     r11</span><br><span class="line">fffff880`02f85ddc 415a            pop     r10</span><br><span class="line">fffff880`02f85dde 4159            pop     r9</span><br><span class="line">fffff880`02f85de0 4158            pop     r8</span><br><span class="line">fffff880`02f85de2 5f              pop     rdi</span><br><span class="line">fffff880`02f85de3 5e              pop     rsi</span><br><span class="line">fffff880`02f85de4 5d              pop     rbp</span><br><span class="line">fffff880`02f85de5 5b              pop     rbx</span><br><span class="line">fffff880`02f85de6 5a              pop     rdx</span><br><span class="line">fffff880`02f85de7 59              pop     rcx</span><br><span class="line">fffff880`02f85de8 58              pop     rax</span><br><span class="line">fffff880`02f85de9 c3              ret</span><br><span class="line">fffff880`02f85dea 00cc            add     ah,cl</span><br></pre></td></tr></table></figure></p>
 <p>然后flag：HCTF{5041504883ec2859c3}，注意大小写啊</p>
 <p><strong>6. 其他</strong></p>
 <p>就这么多了，经验太少，就各路大牛路过指导</p>
@@ -532,22 +533,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -561,6 +546,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -580,7 +569,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -593,6 +590,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -632,23 +645,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -681,6 +682,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -724,30 +753,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -756,7 +761,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -792,6 +801,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -801,6 +822,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -817,26 +846,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -872,14 +881,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -893,6 +894,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

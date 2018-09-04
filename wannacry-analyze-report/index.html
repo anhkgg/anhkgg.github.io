@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/wannacry-analyze-report/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="0x00. 前言最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。 趁着这个热度，我也来跟风一把。 前前后后把WannaCry详细分析了一遍。 从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/00.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_0.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/1_1.png">
@@ -45,7 +46,7 @@
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_8.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_9.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wannacry/4_10.png">
-<meta property="og:updated_time" content="2017-05-26T05:27:07.176Z">
+<meta property="og:updated_time" content="2017-05-26T05:27:07.177Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="WannaCry深度详细分析报告">
 <meta name="twitter:description" content="0x00. 前言最近，WannaCry是火了一把，到处都是分析文章，报告，解决方案等等。 趁着这个热度，我也来跟风一把。 前前后后把WannaCry详细分析了一遍。 从文件释放、启动加密器、文件加密策略、加密算法、到解密过程中所有细节进行了详尽深入的分析。">
@@ -241,7 +242,7 @@
 <p>解压还要密码，看代码密码是WNcry@2ol7，解压成功。</p>
 <p><img src="/img/wannacry/1_3.png" alt="img"></p>
 <p>读取资源数据后，解压释放文件到当前目录。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">//部分释放文件说明：</div><div class="line">b.wnry      //桌面背景图片</div><div class="line">c.wnry      //加密相关</div><div class="line">msg/*.wnry  //语言相关文件</div><div class="line">r.wnry      //@Please_Read_Me@.txt</div><div class="line">s.wnry      //是压缩文件，打包的是Tor相关组件</div><div class="line"></div><div class="line">taskdl.exe  //删除回收站文件</div><div class="line">taskse.exe  //用于启动其他session的@WanaDecryptor@.exe</div><div class="line"></div><div class="line">u.wnry      //@WanaDecryptor@.exe 解密器 </div><div class="line">t.wnry      //解密后是加密器</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//部分释放文件说明：</span><br><span class="line">b.wnry      //桌面背景图片</span><br><span class="line">c.wnry      //加密相关</span><br><span class="line">msg/*.wnry  //语言相关文件</span><br><span class="line">r.wnry      //@Please_Read_Me@.txt</span><br><span class="line">s.wnry      //是压缩文件，打包的是Tor相关组件</span><br><span class="line"></span><br><span class="line">taskdl.exe  //删除回收站文件</span><br><span class="line">taskse.exe  //用于启动其他session的@WanaDecryptor@.exe</span><br><span class="line"></span><br><span class="line">u.wnry      //@WanaDecryptor@.exe 解密器 </span><br><span class="line">t.wnry      //解密后是加密器</span><br></pre></td></tr></table></figure>
 <p>在三个比特币交易地址中随机选择一个，写入c.wnry</p>
 <p><img src="/img\wannacry\1_6.png" alt="img"></p>
 <p>然后设置当前目录为隐藏属性，且设置为everyone可访问</p>
@@ -308,22 +309,22 @@
 <li>子目录枚举完成，所有文件记录到链表，进行后续操作。</li>
 </ol>
 <p>目录和文件采用相同的链表结果，总结如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">struct FILE_LIST_CONTEXT</div><div class="line">&#123;</div><div class="line">    DWORD vtable;</div><div class="line">    FILE_LIST *list;//</div><div class="line">    DWORD file_count;//8</div><div class="line">&#125;</div><div class="line"></div><div class="line">struct FILE_LIST</div><div class="line">&#123;</div><div class="line">    FILE_LIST* prev;</div><div class="line">    FILE_LIST* next;</div><div class="line">    FILE_INFO file;//8</div><div class="line">&#125;</div><div class="line"></div><div class="line">struct FILE_INFO</div><div class="line">&#123;</div><div class="line">    WCHAR path[0x168];//</div><div class="line">    WCHAR name[0x104];//2d0</div><div class="line">    DWORD nFileSizeLow;//4d8</div><div class="line">    DWORD nFileSizeHigh;//4dc</div><div class="line">    DWORD type;//4e0  FILE_TYPE</div><div class="line">&#125;//0x4e4</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">struct FILE_LIST_CONTEXT</span><br><span class="line">&#123;</span><br><span class="line">    DWORD vtable;</span><br><span class="line">    FILE_LIST *list;//</span><br><span class="line">    DWORD file_count;//8</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">struct FILE_LIST</span><br><span class="line">&#123;</span><br><span class="line">    FILE_LIST* prev;</span><br><span class="line">    FILE_LIST* next;</span><br><span class="line">    FILE_INFO file;//8</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">struct FILE_INFO</span><br><span class="line">&#123;</span><br><span class="line">    WCHAR path[0x168];//</span><br><span class="line">    WCHAR name[0x104];//2d0</span><br><span class="line">    DWORD nFileSizeLow;//4d8</span><br><span class="line">    DWORD nFileSizeHigh;//4dc</span><br><span class="line">    DWORD type;//4e0  FILE_TYPE</span><br><span class="line">&#125;//0x4e4</span><br></pre></td></tr></table></figure>
 <h2 id="排除目录"><a href="#排除目录" class="headerlink" title="排除目录"></a>排除目录</h2><p>枚举子目录时，会跳过如下目录（保证系统正常工作）：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">\Intel </div><div class="line">\ProgramData</div><div class="line">\WINDOWS</div><div class="line">\Program Files</div><div class="line">\Program Files (x86)</div><div class="line">\AppData\Local\Temp</div><div class="line">\Local Settings\Temp</div><div class="line">This folder protects against ransomware. Modifying it will reduce protection</div><div class="line">Temporary Internet Files</div><div class="line">Content.IE5</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">\Intel </span><br><span class="line">\ProgramData</span><br><span class="line">\WINDOWS</span><br><span class="line">\Program Files</span><br><span class="line">\Program Files (x86)</span><br><span class="line">\AppData\Local\Temp</span><br><span class="line">\Local Settings\Temp</span><br><span class="line">This folder protects against ransomware. Modifying it will reduce protection</span><br><span class="line">Temporary Internet Files</span><br><span class="line">Content.IE5</span><br></pre></td></tr></table></figure>
 <h2 id="文件分类"><a href="#文件分类" class="headerlink" title="文件分类"></a>文件分类</h2><p>枚举文件时，首先跳过 @Please_Read_Me@.txt，@WanaDecryptor@.exe.lnk， @WanaDecryptor@.bmp</p>
 <p>然后检查文件类型，跳过0,1,6类型文件，其他文件加入链表。</p>
 <p>具体类型如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">0 没有后缀以及其他类型后缀</div><div class="line">1 .exe, .dll</div><div class="line">4 .WNCRYT </div><div class="line">5 .WNCYR</div><div class="line">6 .WNCRY</div><div class="line"></div><div class="line">2.</div><div class="line">&quot;.doc&quot;&quot;.docx&quot;&quot;.xls&quot;&quot;.xlsx&quot;&quot;.ppt&quot;&quot;.pptx&quot;&quot;.pst&quot;&quot;.ost&quot;&quot;.msg&quot;&quot;.eml&quot;&quot;.vsd&quot;&quot;.vsdx&quot;</div><div class="line">&quot;.txt&quot;&quot;.csv&quot;&quot;.rtf&quot;&quot;.123&quot;&quot;.wks&quot;&quot;.wk1&quot;&quot;.pdf&quot;&quot;.dwg&quot;&quot;.onetoc2&quot;&quot;.snt&quot;&quot;.jpeg&quot;&quot;.jpg&quot;</div><div class="line"></div><div class="line">3. </div><div class="line">&quot;.docb&quot;&quot;.docm&quot;&quot;.dot&quot;&quot;.dotm&quot;&quot;.dotx&quot;&quot;.xlsm&quot;&quot;.xlsb&quot;&quot;.xlw&quot;&quot;.xlt&quot;&quot;.xlm&quot;&quot;.xlc&quot;&quot;.xltx&quot;&quot;.xltm&quot;&quot;.pptm&quot;&quot;.pot&quot;&quot;.pps&quot;&quot;.ppsm&quot;&quot;.ppsx&quot;&quot;.ppam&quot;&quot;.potx&quot;&quot;.potm&quot;</div><div class="line">&quot;.edb&quot;&quot;.hwp&quot;&quot;.602&quot;&quot;.sxi&quot;&quot;.sti&quot;&quot;.sldx&quot;&quot;.sldm&quot;&quot;.sldm&quot;&quot;.vdi&quot;&quot;.vmdk&quot;&quot;.vmx&quot;&quot;.gpg&quot;&quot;.aes&quot;&quot;.ARC&quot;&quot;.PAQ&quot;&quot;.bz2&quot;&quot;.tbk&quot;&quot;.bak&quot;&quot;.tar&quot;&quot;.tgz&quot;&quot;.gz&quot;&quot;.7z&quot;&quot;.rar&quot;</div><div class="line">&quot;.zip&quot;&quot;.backup&quot;&quot;.iso&quot;&quot;.vcd&quot;&quot;.bmp&quot;&quot;.png&quot;&quot;.gif&quot;&quot;.raw&quot;&quot;.cgm&quot;&quot;.tif&quot;&quot;.tiff&quot;&quot;.nef&quot;&quot;.psd&quot;&quot;.ai&quot;&quot;.svg&quot;&quot;.djvu&quot;&quot;.m4u&quot;&quot;.m3u&quot;&quot;.mid&quot;&quot;.wma&quot;&quot;.flv&quot;&quot;.3g2&quot;&quot;.mkv&quot;</div><div class="line">&quot;.3gp&quot;&quot;.mp4&quot;&quot;.mov&quot;&quot;.avi&quot;&quot;.asf&quot;&quot;.mpeg&quot;&quot;.vob&quot;&quot;.mpg&quot;&quot;.wmv&quot;&quot;.fla&quot;&quot;.swf&quot;&quot;.wav&quot;&quot;.mp3&quot;&quot;.sh&quot;&quot;.class&quot;&quot;.jar&quot;&quot;.java&quot;&quot;.rb&quot;&quot;.asp&quot;&quot;.php&quot;&quot;.jsp&quot;&quot;.brd&quot;&quot;.sch&quot;</div><div class="line">&quot;.dch&quot;&quot;.dip&quot;&quot;.pl&quot;&quot;.vb&quot;&quot;.vbs&quot;&quot;.ps1&quot;&quot;.bat&quot;&quot;.cmd&quot;&quot;.js&quot;&quot;.asm&quot;&quot;.h&quot;&quot;.pas&quot;&quot;.cpp&quot;&quot;.c&quot;&quot;.cs&quot;&quot;.suo&quot;&quot;.sln&quot;&quot;.ldf&quot;&quot;.mdf&quot;&quot;.ibd&quot;&quot;.myi&quot;&quot;.myd&quot;&quot;.frm&quot;&quot;.odb&quot;&quot;.dbf&quot;</div><div class="line">&quot;.db&quot;&quot;.mdb&quot;&quot;.accdb&quot;&quot;.sql&quot;&quot;.sqlitedb&quot;&quot;.sqlite3&quot;&quot;.asc&quot;&quot;.lay6&quot;&quot;.lay&quot;&quot;.mml&quot;&quot;.sxm&quot;&quot;.otg&quot;&quot;.odg&quot;&quot;.uop&quot;&quot;.std&quot;&quot;.sxd&quot;&quot;.otp&quot;&quot;.odp&quot;&quot;.wb2&quot;&quot;.slk&quot;&quot;.dif&quot;&quot;.stc&quot;</div><div class="line">&quot;.sxc&quot;&quot;.ots&quot;&quot;.ods&quot;&quot;.3dm&quot;&quot;.max&quot;&quot;.3ds&quot;&quot;.uot&quot;&quot;.stw&quot;&quot;.sxw&quot;&quot;.ott&quot;&quot;.odt&quot;&quot;.pem&quot;&quot;.p12&quot;&quot;.csr&quot;&quot;.crt&quot;&quot;.key&quot;&quot;.pfx&quot;&quot;.der&quot;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">0 没有后缀以及其他类型后缀</span><br><span class="line">1 .exe, .dll</span><br><span class="line">4 .WNCRYT </span><br><span class="line">5 .WNCYR</span><br><span class="line">6 .WNCRY</span><br><span class="line"></span><br><span class="line">2.</span><br><span class="line">&quot;.doc&quot;&quot;.docx&quot;&quot;.xls&quot;&quot;.xlsx&quot;&quot;.ppt&quot;&quot;.pptx&quot;&quot;.pst&quot;&quot;.ost&quot;&quot;.msg&quot;&quot;.eml&quot;&quot;.vsd&quot;&quot;.vsdx&quot;</span><br><span class="line">&quot;.txt&quot;&quot;.csv&quot;&quot;.rtf&quot;&quot;.123&quot;&quot;.wks&quot;&quot;.wk1&quot;&quot;.pdf&quot;&quot;.dwg&quot;&quot;.onetoc2&quot;&quot;.snt&quot;&quot;.jpeg&quot;&quot;.jpg&quot;</span><br><span class="line"></span><br><span class="line">3. </span><br><span class="line">&quot;.docb&quot;&quot;.docm&quot;&quot;.dot&quot;&quot;.dotm&quot;&quot;.dotx&quot;&quot;.xlsm&quot;&quot;.xlsb&quot;&quot;.xlw&quot;&quot;.xlt&quot;&quot;.xlm&quot;&quot;.xlc&quot;&quot;.xltx&quot;&quot;.xltm&quot;&quot;.pptm&quot;&quot;.pot&quot;&quot;.pps&quot;&quot;.ppsm&quot;&quot;.ppsx&quot;&quot;.ppam&quot;&quot;.potx&quot;&quot;.potm&quot;</span><br><span class="line">&quot;.edb&quot;&quot;.hwp&quot;&quot;.602&quot;&quot;.sxi&quot;&quot;.sti&quot;&quot;.sldx&quot;&quot;.sldm&quot;&quot;.sldm&quot;&quot;.vdi&quot;&quot;.vmdk&quot;&quot;.vmx&quot;&quot;.gpg&quot;&quot;.aes&quot;&quot;.ARC&quot;&quot;.PAQ&quot;&quot;.bz2&quot;&quot;.tbk&quot;&quot;.bak&quot;&quot;.tar&quot;&quot;.tgz&quot;&quot;.gz&quot;&quot;.7z&quot;&quot;.rar&quot;</span><br><span class="line">&quot;.zip&quot;&quot;.backup&quot;&quot;.iso&quot;&quot;.vcd&quot;&quot;.bmp&quot;&quot;.png&quot;&quot;.gif&quot;&quot;.raw&quot;&quot;.cgm&quot;&quot;.tif&quot;&quot;.tiff&quot;&quot;.nef&quot;&quot;.psd&quot;&quot;.ai&quot;&quot;.svg&quot;&quot;.djvu&quot;&quot;.m4u&quot;&quot;.m3u&quot;&quot;.mid&quot;&quot;.wma&quot;&quot;.flv&quot;&quot;.3g2&quot;&quot;.mkv&quot;</span><br><span class="line">&quot;.3gp&quot;&quot;.mp4&quot;&quot;.mov&quot;&quot;.avi&quot;&quot;.asf&quot;&quot;.mpeg&quot;&quot;.vob&quot;&quot;.mpg&quot;&quot;.wmv&quot;&quot;.fla&quot;&quot;.swf&quot;&quot;.wav&quot;&quot;.mp3&quot;&quot;.sh&quot;&quot;.class&quot;&quot;.jar&quot;&quot;.java&quot;&quot;.rb&quot;&quot;.asp&quot;&quot;.php&quot;&quot;.jsp&quot;&quot;.brd&quot;&quot;.sch&quot;</span><br><span class="line">&quot;.dch&quot;&quot;.dip&quot;&quot;.pl&quot;&quot;.vb&quot;&quot;.vbs&quot;&quot;.ps1&quot;&quot;.bat&quot;&quot;.cmd&quot;&quot;.js&quot;&quot;.asm&quot;&quot;.h&quot;&quot;.pas&quot;&quot;.cpp&quot;&quot;.c&quot;&quot;.cs&quot;&quot;.suo&quot;&quot;.sln&quot;&quot;.ldf&quot;&quot;.mdf&quot;&quot;.ibd&quot;&quot;.myi&quot;&quot;.myd&quot;&quot;.frm&quot;&quot;.odb&quot;&quot;.dbf&quot;</span><br><span class="line">&quot;.db&quot;&quot;.mdb&quot;&quot;.accdb&quot;&quot;.sql&quot;&quot;.sqlitedb&quot;&quot;.sqlite3&quot;&quot;.asc&quot;&quot;.lay6&quot;&quot;.lay&quot;&quot;.mml&quot;&quot;.sxm&quot;&quot;.otg&quot;&quot;.odg&quot;&quot;.uop&quot;&quot;.std&quot;&quot;.sxd&quot;&quot;.otp&quot;&quot;.odp&quot;&quot;.wb2&quot;&quot;.slk&quot;&quot;.dif&quot;&quot;.stc&quot;</span><br><span class="line">&quot;.sxc&quot;&quot;.ots&quot;&quot;.ods&quot;&quot;.3dm&quot;&quot;.max&quot;&quot;.3ds&quot;&quot;.uot&quot;&quot;.stw&quot;&quot;.sxw&quot;&quot;.ott&quot;&quot;.odt&quot;&quot;.pem&quot;&quot;.p12&quot;&quot;.csr&quot;&quot;.crt&quot;&quot;.key&quot;&quot;.pfx&quot;&quot;.der&quot;</span><br></pre></td></tr></table></figure>
 <p>总结为下面的enum</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">enum FILE_TYPE</div><div class="line">&#123;</div><div class="line">    FILE_TYPE_NULL = 0,</div><div class="line">    FILE_TYPE_EXEDLL,</div><div class="line">    FILE_TYPE_DOC,</div><div class="line">    FILE_TYPE_DOCEX,</div><div class="line">    FILE_TYPE_WNCRYT, //.wncryt</div><div class="line">    FILE_TYPE_WNCYR, //.wncyr</div><div class="line">    FILE_TYPE_WNCRY //.wncry</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">enum FILE_TYPE</span><br><span class="line">&#123;</span><br><span class="line">    FILE_TYPE_NULL = 0,</span><br><span class="line">    FILE_TYPE_EXEDLL,</span><br><span class="line">    FILE_TYPE_DOC,</span><br><span class="line">    FILE_TYPE_DOCEX,</span><br><span class="line">    FILE_TYPE_WNCRYT, //.wncryt</span><br><span class="line">    FILE_TYPE_WNCYR, //.wncyr</span><br><span class="line">    FILE_TYPE_WNCRY //.wncry</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="文件加密策略"><a href="#文件加密策略" class="headerlink" title="文件加密策略"></a>文件加密策略</h2><p>加密文件函数中有个参数，我取做cmd（取值是1-4）。因为不同的值会有不同的操作方式。</p>
 <p>根据cmd和文件类型和大小等等，函数<code>sub_10002E70</code>返回不同的操作方式。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">1. cmd&gt;=4, FOT_ENCRYPT_NORMAL_4</div><div class="line">2. cmd&lt;=3，FILE_TYPE_NULL，FOT_NULL_1 </div><div class="line">3. cmd==3, 非FILE_TYPE_NULL，FOT_ENCRYPT_NORMAL_4</div><div class="line">4. cmd&lt;=2, .wncyr, FOT_NULL_1</div><div class="line">5. cmd&lt;=2, .wncryt, FOT_DELETE_FILE_2</div><div class="line"></div><div class="line">//用于枚举中的操作，直接操作普通文件（不加入链表）和大文件.doc（加入链表），小文件.doc,.docex加入链表，其他文件不加入链表</div><div class="line">//枚举中完成加密操作的文件不加入链表了</div><div class="line">6. cmd==1, .doc, 大文件, FOT_ENCRYPT_WRITESRC_3 //也要加入链表</div><div class="line">7. cmd==1, .doc, 普通文件, FOT_ENCRYPT_NORMAL_4</div><div class="line">8. cmd==1, .doc, 小文件，FOT_NULL_1</div><div class="line">9. cmd==1, .docex, FOT_NULL_1</div><div class="line"></div><div class="line">10. cmd==2, .doc, FOT_NULL_1</div><div class="line">11. cmd==2, .docex, 大文件， FOT_ENCRYPT_WRITESRC_3</div><div class="line">12. cmd==2, .docex, 小文件，FOT_NULL_1</div><div class="line">13. cmd==2, .docex, 普通文件，FOT_ENCRYPT_NORMAL_4</div><div class="line"></div><div class="line">其他返回FOT_NULL_0</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">1. cmd&gt;=4, FOT_ENCRYPT_NORMAL_4</span><br><span class="line">2. cmd&lt;=3，FILE_TYPE_NULL，FOT_NULL_1 </span><br><span class="line">3. cmd==3, 非FILE_TYPE_NULL，FOT_ENCRYPT_NORMAL_4</span><br><span class="line">4. cmd&lt;=2, .wncyr, FOT_NULL_1</span><br><span class="line">5. cmd&lt;=2, .wncryt, FOT_DELETE_FILE_2</span><br><span class="line"></span><br><span class="line">//用于枚举中的操作，直接操作普通文件（不加入链表）和大文件.doc（加入链表），小文件.doc,.docex加入链表，其他文件不加入链表</span><br><span class="line">//枚举中完成加密操作的文件不加入链表了</span><br><span class="line">6. cmd==1, .doc, 大文件, FOT_ENCRYPT_WRITESRC_3 //也要加入链表</span><br><span class="line">7. cmd==1, .doc, 普通文件, FOT_ENCRYPT_NORMAL_4</span><br><span class="line">8. cmd==1, .doc, 小文件，FOT_NULL_1</span><br><span class="line">9. cmd==1, .docex, FOT_NULL_1</span><br><span class="line"></span><br><span class="line">10. cmd==2, .doc, FOT_NULL_1</span><br><span class="line">11. cmd==2, .docex, 大文件， FOT_ENCRYPT_WRITESRC_3</span><br><span class="line">12. cmd==2, .docex, 小文件，FOT_NULL_1</span><br><span class="line">13. cmd==2, .docex, 普通文件，FOT_ENCRYPT_NORMAL_4</span><br><span class="line"></span><br><span class="line">其他返回FOT_NULL_0</span><br></pre></td></tr></table></figure>
 <p>上面提到的大文件，普通文件，小文件定义如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">小于0x400的是小文件，大于0xC800000的是大文件，中间的是普通文件</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">小于0x400的是小文件，大于0xC800000的是大文件，中间的是普通文件</span><br></pre></td></tr></table></figure>
 <p><img src="/img\wannacry\4_0.png" alt="img"></p>
-<p>上面提到的作方式具体定义如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">//返回0表示未作处理，或者处理未完成，需要插入链表或者不从链表中删除</div><div class="line">enum FILE_OP_TYPE&#123;</div><div class="line">    FOT_NULL_0 = 0,     //0 未操作，返回1</div><div class="line">    FOT_NULL_1,         //1,default 未操作，返回0</div><div class="line">    FOT_DELETE_FILE_2,    //2 //删除文件，返回1</div><div class="line">    FOT_ENCRYPT_WRITESRC_3, //3 改源文件，返回0</div><div class="line">    FOT_ENCRYPT_NORMAL_4, //4 只加密，返回1</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>上面提到的作方式具体定义如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//返回0表示未作处理，或者处理未完成，需要插入链表或者不从链表中删除</span><br><span class="line">enum FILE_OP_TYPE&#123;</span><br><span class="line">    FOT_NULL_0 = 0,     //0 未操作，返回1</span><br><span class="line">    FOT_NULL_1,         //1,default 未操作，返回0</span><br><span class="line">    FOT_DELETE_FILE_2,    //2 //删除文件，返回1</span><br><span class="line">    FOT_ENCRYPT_WRITESRC_3, //3 改源文件，返回0</span><br><span class="line">    FOT_ENCRYPT_NORMAL_4, //4 只加密，返回1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>代码如下：</p>
 <p><img src="/img\wannacry\4_1.png" alt="img"></p>
 <p>对加密策略做一下总结：<br>a). 在枚举文件中，cmd=1，会对普通文件直接加密为.WNCRY，不再加入链表，大文件处理为.WNCYR，以及其他未作处理文件继续加入链表等待处理。</p>
@@ -344,7 +345,7 @@
 <p><img src="/img\wannacry\4_6.png" alt="img"><br><img src="/img\wannacry\4_7.png" alt="img"></p>
 <p>加密前，将文件后缀加上T变成.WNCRYT，然后创建文件。</p>
 <p>写入加密文件头部数据</p>
-<p><img src="/img\wannacry\4_8.png" alt="img"><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">//加密文件头部数据结构</div><div class="line">struct </div><div class="line">&#123;</div><div class="line">    char magic[8];//WANACRY!&apos;</div><div class="line">    int size;//0x100</div><div class="line">    char key[size];//</div><div class="line">    int type;//加密文件类型3,4</div><div class="line">    __int64 datasize;// &lt;=0x6400000 源文件大小</div><div class="line">    char data[1];//</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="/img\wannacry\4_8.png" alt="img"><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//加密文件头部数据结构</span><br><span class="line">struct </span><br><span class="line">&#123;</span><br><span class="line">    char magic[8];//WANACRY!&apos;</span><br><span class="line">    int size;//0x100</span><br><span class="line">    char key[size];//</span><br><span class="line">    int type;//加密文件类型3,4</span><br><span class="line">    __int64 datasize;// &lt;=0x6400000 源文件大小</span><br><span class="line">    char data[1];//</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>对于.WNCYR文件（FOT_ENCRYPT_WRITESRC_3处理过一次），读取尾部0x10000的数据加密写入文件。</p>
 <p><img src="/img\wannacry\4_9.png" alt="img"></p>
 <p>然后每0x1000读取加密，写入.WNCRYT文件，循环直到所有数据加密。移动.WNCRYT为.WNCRT。</p>
@@ -707,22 +708,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -736,6 +721,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -755,7 +744,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -768,6 +765,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -807,23 +820,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -856,6 +857,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -899,30 +928,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -931,7 +936,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -967,6 +976,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -976,6 +997,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -992,26 +1021,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1047,14 +1056,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -1068,6 +1069,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

@@ -15,12 +15,13 @@
 <meta property="og:url" content="https://anhkgg.github.io/rust-note-1-config-environment/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="安装rustRust中文站下载rusthttps://www.rust-lang.org/zh-CN/install.htmlhttps://www.rust-lang.org/zh-CN/downloads.html 安装：  Windows平台下载https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi，然">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/rust_note_one_1.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/rust_note_one_2.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/rust_note_one_3.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/rust_note_one_1.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/rust_note_one_4.png">
-<meta property="og:updated_time" content="2017-05-01T07:24:48.342Z">
+<meta property="og:updated_time" content="2017-05-01T07:24:48.343Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rust笔记（一）-- 环境配置">
 <meta name="twitter:description" content="安装rustRust中文站下载rusthttps://www.rust-lang.org/zh-CN/install.htmlhttps://www.rust-lang.org/zh-CN/downloads.html 安装：  Windows平台下载https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi，然">
@@ -185,39 +186,39 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="安装rust"><a href="#安装rust" class="headerlink" title="安装rust"></a>安装rust</h1><p>Rust中文站下载rust<br><a href="https://www.rust-lang.org/zh-CN/install.html" target="_blank" rel="external">https://www.rust-lang.org/zh-CN/install.html</a><br><a href="https://www.rust-lang.org/zh-CN/downloads.html" target="_blank" rel="external">https://www.rust-lang.org/zh-CN/downloads.html</a></p>
+        <h1 id="安装rust"><a href="#安装rust" class="headerlink" title="安装rust"></a>安装rust</h1><p>Rust中文站下载rust<br><a href="https://www.rust-lang.org/zh-CN/install.html" target="_blank" rel="noopener">https://www.rust-lang.org/zh-CN/install.html</a><br><a href="https://www.rust-lang.org/zh-CN/downloads.html" target="_blank" rel="noopener">https://www.rust-lang.org/zh-CN/downloads.html</a></p>
 <p>安装：</p>
 <ol>
-<li>Windows平台<br>下载<a href="https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi" target="_blank" rel="external">https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi</a>，然后双击运行即可，需要选上PATH环境变量配置</li>
+<li>Windows平台<br>下载<a href="https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi" target="_blank" rel="noopener">https://static.rust-lang.org/dist/rust-1.13.0-x86_64-pc-windows-msvc.msi</a>，然后双击运行即可，需要选上PATH环境变量配置</li>
 </ol>
 <a id="more"></a>
-<p>其实应该下载这个版本<a href="https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi" target="_blank" rel="external">https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi</a>，后面会说为什么</p>
+<p>其实应该下载这个版本<a href="https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi" target="_blank" rel="noopener">https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi</a>，后面会说为什么</p>
 <ol>
-<li>Linux平台<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">//安装</div><div class="line">   $ curl -sf -L https://static.rust-lang.org/rustup.sh | sh</div><div class="line">//卸载</div><div class="line">  $ sudo /usr/local/lib/rustlib/uninstall.sh</div></pre></td></tr></table></figure>
+<li>Linux平台<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//安装</span><br><span class="line">   $ curl -sf -L https://static.rust-lang.org/rustup.sh | sh</span><br><span class="line">//卸载</span><br><span class="line">  $ sudo /usr/local/lib/rustlib/uninstall.sh</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <p>下面命令成功表示安装成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">c:\&gt; rustc --version</div><div class="line">rustc 1.13.0 (2c6933acc 2016-11-07)</div><div class="line">C:\&gt; cargo --version</div><div class="line">cargo 0.13.0-nightly (eca9e15 2016-11-01)</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">c:\&gt; rustc --version</span><br><span class="line">rustc 1.13.0 (2c6933acc 2016-11-07)</span><br><span class="line">C:\&gt; cargo --version</span><br><span class="line">cargo 0.13.0-nightly (eca9e15 2016-11-01)</span><br></pre></td></tr></table></figure>
 <h1 id="配置IDE"><a href="#配置IDE" class="headerlink" title="配置IDE"></a>配置IDE</h1><p>这里介绍的是微软的Visual Studio Code编辑器配置Rust的环境。</p>
 <p>Visual Studio Code支持windows、linux、mac等，所以在不同平台配置rust都是一样的步骤。</p>
-<p>下载地址： <a href="https://code.visualstudio.com/" target="_blank" rel="external">https://code.visualstudio.com/</a></p>
+<p>下载地址： <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">https://code.visualstudio.com/</a></p>
 <p>启动visual studio code，ctrl+shift+x切换到插件安装页面，输入rust。</p>
 <p><img src="/img/rust_note_one_1.png" alt="image"></p>
 <p>选择安装Rusty Code插件，支持自动完成、跳转到定义、符号等等功能。<br>安装完成后，重新加载即可启用。</p>
 <p>新建一个rs文件，visual studio code自动识别为rust语言。右下角有个Rust tool missing，点击后会提示插件缺少的库，选择安装即可（需要保证rust环境安装成功）</p>
 <p><img src="/img/rust_note_one_2.png" alt="image"></p>
-<p>会出现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">Executing &quot;cargo install racer&quot;</div><div class="line"> Updating registry `https://github.com/rust-lang/crates.io-index`</div><div class="line"> ···</div><div class="line">    Finished release [optimized + debuginfo] target(s) in 335.15 secs</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\racer.exe</div><div class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</div><div class="line">Executing &quot;cargo install rustfmt&quot;</div><div class="line">    Updating registry `https://github.com/rust-lang/crates.io-index`</div><div class="line"> ···</div><div class="line">    Finished release [optimized] target(s) in 270.41 secs</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\cargo-fmt.exe</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\rustfmt.exe</div><div class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</div><div class="line">Executing &quot;cargo install rustsym&quot;</div><div class="line">    Updating registry `https://github.com/rust-lang/crates.io-index`</div><div class="line"> ···</div><div class="line">    Finished release [optimized] target(s) in 203.64 secs</div><div class="line">  Installing C:\Users\xxx\.cargo\bin\rustsym.exe</div><div class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</div></pre></td></tr></table></figure></p>
+<p>会出现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Executing &quot;cargo install racer&quot;</span><br><span class="line"> Updating registry `https://github.com/rust-lang/crates.io-index`</span><br><span class="line"> ···</span><br><span class="line">    Finished release [optimized + debuginfo] target(s) in 335.15 secs</span><br><span class="line">  Installing C:\Users\xxx\.cargo\bin\racer.exe</span><br><span class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</span><br><span class="line">Executing &quot;cargo install rustfmt&quot;</span><br><span class="line">    Updating registry `https://github.com/rust-lang/crates.io-index`</span><br><span class="line"> ···</span><br><span class="line">    Finished release [optimized] target(s) in 270.41 secs</span><br><span class="line">  Installing C:\Users\xxx\.cargo\bin\cargo-fmt.exe</span><br><span class="line">  Installing C:\Users\xxx\.cargo\bin\rustfmt.exe</span><br><span class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</span><br><span class="line">Executing &quot;cargo install rustsym&quot;</span><br><span class="line">    Updating registry `https://github.com/rust-lang/crates.io-index`</span><br><span class="line"> ···</span><br><span class="line">    Finished release [optimized] target(s) in 203.64 secs</span><br><span class="line">  Installing C:\Users\xxx\.cargo\bin\rustsym.exe</span><br><span class="line">warning: be sure to add `C:\Users\xxx\.cargo\bin` to your PATH to be able to run the installed binaries</span><br></pre></td></tr></table></figure></p>
 <p>安装完成后即可。测试一下，ok。</p>
 <p><img src="/img/rust_note_one_3.png" alt="image"></p>
-<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>直接rustc xxx.rs编译程序，会出现缺少linker.exe（选择gnu版是不会出现这个错误，应该是不依赖msvc编译环境）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">error: could not exec the linker `link.exe`: 系统找不到指定的文件。 (os error 2)</div><div class="line">  |</div><div class="line">  = note: &quot;link.exe&quot;</div></pre></td></tr></table></figure></p>
-<p>因为在Windows平台，rust编译程序需要vs c++编译工具，可以安装vs2013或者更高版本工具，更简单的方式就是下载<br><a href="http://landinghub.visualstudio.com/visual-cpp-build-tools" target="_blank" rel="external">Microsoft Visual C++ Build Tools 2015</a></p>
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><p>直接rustc xxx.rs编译程序，会出现缺少linker.exe（选择gnu版是不会出现这个错误，应该是不依赖msvc编译环境）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">error: could not exec the linker `link.exe`: 系统找不到指定的文件。 (os error 2)</span><br><span class="line">  |</span><br><span class="line">  = note: &quot;link.exe&quot;</span><br></pre></td></tr></table></figure></p>
+<p>因为在Windows平台，rust编译程序需要vs c++编译工具，可以安装vs2013或者更高版本工具，更简单的方式就是下载<br><a href="http://landinghub.visualstudio.com/visual-cpp-build-tools" target="_blank" rel="noopener">Microsoft Visual C++ Build Tools 2015</a></p>
 <blockquote>
 <p>Windows considerations</p>
 <p>On Windows, Rust additionally requires the C++ build tools for Visual Studio 2013 or later. The easiest way to acquire the build tools is by installing Microsoft Visual C++ Build Tools 2015 which provides just the Visual C++ build tools. Alternately, you can install Visual Studio 2015 or Visual Studio 2013 and during install select the “C++ tools”.</p>
 <p>For further information about configuring Rust on Windows see the Windows-specific rustup documentation.</p>
 </blockquote>
-<p>安装完之后，重新编译成功。（编译不需要重启，但是后面调试中需要重启，否则调试器异常）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Compiling hello_world v0.1.0 (file:///xxx/rust/hello_world)</div><div class="line">  Finished debug [unoptimized + debuginfo] target(s) in 0.28 secs</div></pre></td></tr></table></figure></p>
-<p>生成目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">D:\xxx\hello_world&gt;dir</div><div class="line"> 驱动器 D 中的卷没有标签。</div><div class="line"> 卷的序列号是 309A-078B</div><div class="line"></div><div class="line"> D:\xxx\hello_world 的目录</div><div class="line"></div><div class="line">2016/12/19  11:21    &lt;DIR&gt;          .</div><div class="line">2016/12/19  11:21    &lt;DIR&gt;          ..</div><div class="line">2016/12/19  10:59                 7 .gitignore</div><div class="line">2016/12/19  11:00                47 Cargo.lock</div><div class="line">2016/12/19  10:59                89 Cargo.toml</div><div class="line">2016/12/19  11:21           103,424 main.exe</div><div class="line">2016/12/19  11:21           487,424 main.pdb</div><div class="line">2016/12/19  10:59    &lt;DIR&gt;          src</div><div class="line">2016/12/19  11:00    &lt;DIR&gt;          target</div><div class="line">               5 个文件        590,991 字节</div><div class="line">               4 个目录 58,963,050,496 可用字节</div></pre></td></tr></table></figure></p>
+<p>安装完之后，重新编译成功。（编译不需要重启，但是后面调试中需要重启，否则调试器异常）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Compiling hello_world v0.1.0 (file:///xxx/rust/hello_world)</span><br><span class="line">  Finished debug [unoptimized + debuginfo] target(s) in 0.28 secs</span><br></pre></td></tr></table></figure></p>
+<p>生成目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">D:\xxx\hello_world&gt;dir</span><br><span class="line"> 驱动器 D 中的卷没有标签。</span><br><span class="line"> 卷的序列号是 309A-078B</span><br><span class="line"></span><br><span class="line"> D:\xxx\hello_world 的目录</span><br><span class="line"></span><br><span class="line">2016/12/19  11:21    &lt;DIR&gt;          .</span><br><span class="line">2016/12/19  11:21    &lt;DIR&gt;          ..</span><br><span class="line">2016/12/19  10:59                 7 .gitignore</span><br><span class="line">2016/12/19  11:00                47 Cargo.lock</span><br><span class="line">2016/12/19  10:59                89 Cargo.toml</span><br><span class="line">2016/12/19  11:21           103,424 main.exe</span><br><span class="line">2016/12/19  11:21           487,424 main.pdb</span><br><span class="line">2016/12/19  10:59    &lt;DIR&gt;          src</span><br><span class="line">2016/12/19  11:00    &lt;DIR&gt;          target</span><br><span class="line">               5 个文件        590,991 字节</span><br><span class="line">               4 个目录 58,963,050,496 可用字节</span><br></pre></td></tr></table></figure></p>
 <p>在Visual Studio Code直接输入命令编译</p>
 <ol>
 <li>ctrl+`，打开集成终端窗口</li>
@@ -228,44 +229,44 @@
 <p>依然ctrl+shift+x，然后输入rust，在列表中选择LLDB Debugger安装即可</p>
 <p><img src="/img/rust_note_one_1.png" alt="image"></p>
 <p>安装之后，重新加载窗口，调试插件生效。<br>打开之前的rs文件（vs code需要打开其目录作为工程目录），切换到调试窗口，点击调试开始按钮，会打开launch.json配置文件</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</div><div class="line">    &quot;configurations&quot;: [</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;Debug&quot;,</div><div class="line">            &quot;type&quot;: &quot;lldb&quot;,</div><div class="line">            &quot;request&quot;: &quot;launch&quot;,</div><div class="line">            &quot;program&quot;: &quot;$&#123;workspaceRoot&#125;/xxx&quot;, //main</div><div class="line">            &quot;args&quot;: []</div><div class="line">        &#125;</div><div class="line">    ]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</span><br><span class="line">    &quot;configurations&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot;: &quot;Debug&quot;,</span><br><span class="line">            &quot;type&quot;: &quot;lldb&quot;,</span><br><span class="line">            &quot;request&quot;: &quot;launch&quot;,</span><br><span class="line">            &quot;program&quot;: &quot;$&#123;workspaceRoot&#125;/xxx&quot;, //main</span><br><span class="line">            &quot;args&quot;: []</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>将program中xxx配置为编译后的文件名就可以进行调试了。</p>
 <p>在windows平台，需要使用gdb进行调试<br>使用TDM-GCC的GDB（需要支持Python扩展，MinGW64的GDB貌似不支持） </p>
 <ol>
-<li><p>下载<a href="https://sourceforge.net/projects/tdm-gcc/files/GDB/" target="_blank" rel="external">TDM-GCC-gdb</a>, 不需要安装，解压后，拷贝bin、gdb64、share目录到rust安装目录，修改gdb64\bin目录中gdbinit内容，文件末尾加上</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">python</div><div class="line"></div><div class="line">print &quot;---- Loading Rust pretty-printers ----&quot; </div><div class="line"></div><div class="line">sys.path.insert(0, &quot;你的rust安装目录/lib/rustlib/etc&quot;) </div><div class="line">import gdb_rust_pretty_printing </div><div class="line">gdb_rust_pretty_printing.register_printers(gdb) </div><div class="line"></div><div class="line">end</div></pre></td></tr></table></figure>
+<li><p>下载<a href="https://sourceforge.net/projects/tdm-gcc/files/GDB/" target="_blank" rel="noopener">TDM-GCC-gdb</a>, 不需要安装，解压后，拷贝bin、gdb64、share目录到rust安装目录，修改gdb64\bin目录中gdbinit内容，文件末尾加上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">python</span><br><span class="line"></span><br><span class="line">print &quot;---- Loading Rust pretty-printers ----&quot; </span><br><span class="line"></span><br><span class="line">sys.path.insert(0, &quot;你的rust安装目录/lib/rustlib/etc&quot;) </span><br><span class="line">import gdb_rust_pretty_printing </span><br><span class="line">gdb_rust_pretty_printing.register_printers(gdb) </span><br><span class="line"></span><br><span class="line">end</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>下载rust源码, <a href="https://github.com/rust-lang/rust" target="_blank" rel="external">https://github.com/rust-lang/rust</a>，拷贝etc目录到x\rust\lib\rustlib目录</p>
+<li><p>下载rust源码, <a href="https://github.com/rust-lang/rust" target="_blank" rel="noopener">https://github.com/rust-lang/rust</a>，拷贝etc目录到x\rust\lib\rustlib目录</p>
 </li>
 <li><p>测试gdb是否安装成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">C:\&gt;gdb</div><div class="line">GNU gdb (GDB) 7.9.1</div><div class="line">Copyright (C) 2015 Free Software Foundation, Inc.</div><div class="line">...</div><div class="line">---- Loading Rust pretty-printers ----</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">C:\&gt;gdb</span><br><span class="line">GNU gdb (GDB) 7.9.1</span><br><span class="line">Copyright (C) 2015 Free Software Foundation, Inc.</span><br><span class="line">...</span><br><span class="line">---- Loading Rust pretty-printers ----</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>在Visual Studio Code中搜搜安装native debug插件（不止支持gdb），重新加载后，打开rs文件目录，切换到调试页面，点击调试按钮，弹出调试器列表，选择gdb，然后配置好launch.json文件（同lldb），保存即可开始调试</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</div><div class="line">    &quot;configurations&quot;: [</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;Debug&quot;,</div><div class="line">            &quot;type&quot;: &quot;gdb&quot;,</div><div class="line">            &quot;request&quot;: &quot;launch&quot;,</div><div class="line">            &quot;target&quot;: &quot;./target/debug/hello_world.exe&quot;,</div><div class="line">            &quot;cwd&quot;: &quot;$&#123;workspaceRoot&#125;&quot;</div><div class="line">        &#125;</div><div class="line">    ]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;version&quot;: &quot;0.2.0&quot;,</span><br><span class="line">    &quot;configurations&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot;: &quot;Debug&quot;,</span><br><span class="line">            &quot;type&quot;: &quot;gdb&quot;,</span><br><span class="line">            &quot;request&quot;: &quot;launch&quot;,</span><br><span class="line">            &quot;target&quot;: &quot;./target/debug/hello_world.exe&quot;,</span><br><span class="line">            &quot;cwd&quot;: &quot;$&#123;workspaceRoot&#125;&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><ol>
-<li>在调试中遇到问题<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">---- Loading Rust pretty-printers ----</div><div class="line">No symbol table is loaded.  Use the &quot;file&quot; command.</div></pre></td></tr></table></figure>
+<li>在调试中遇到问题<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">---- Loading Rust pretty-printers ----</span><br><span class="line">No symbol table is loaded.  Use the &quot;file&quot; command.</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <p>经过一番周折发现是racer\rustfmt\rustsym没有安装成功，符号相关的是rustsym，<br>安装完成之后，依然无法识别符号，各种翻找资料，无果。</p>
-<p>最后在一篇<a href="https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/" target="_blank" rel="external">英文博客</a>中看到别人下载的rust版本是rust-nightly-x86_64-pc-windows-gnu.msi，突然想是不是跟版本有关，因为我下载的是msvc版，编译结果符号应该也是ms的，而调试其是gdb，是不是这样就识别不了了呢，而gnu版rust正好和gdb配套（猜测），所以应该会ok。</p>
-<p>果不其然，重新下载了<a href="https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi" target="_blank" rel="external">https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi</a>，配置之后，可以正常识别符号了。</p>
+<p>最后在一篇<a href="https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/" target="_blank" rel="noopener">英文博客</a>中看到别人下载的rust版本是rust-nightly-x86_64-pc-windows-gnu.msi，突然想是不是跟版本有关，因为我下载的是msvc版，编译结果符号应该也是ms的，而调试其是gdb，是不是这样就识别不了了呢，而gnu版rust正好和gdb配套（猜测），所以应该会ok。</p>
+<p>果不其然，重新下载了<a href="https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi" target="_blank" rel="noopener">https://static.rust-lang.org/dist/rust-nightly-x86_64-pc-windows-gnu.msi</a>，配置之后，可以正常识别符号了。</p>
 <p>效果图：</p>
 <p><img src="/img/rust_note_one_4.png" alt="image"></p>
 <p>gnu版的rust在配置gdb时，不用下载rust源码添加etc目录的文件</p>
 <ol>
-<li>Visual Studio Code左下角出现racer crashed，点击之后看到<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Racer Output: </div><div class="line">RUST_SRC_PATH environment variable must be set to point to the src directory of a rust checkout. E.g. &quot;/home/foouser/src/rust/src&quot;</div><div class="line">Racer Error:</div></pre></td></tr></table></figure>
+<li>Visual Studio Code左下角出现racer crashed，点击之后看到<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Racer Output: </span><br><span class="line">RUST_SRC_PATH environment variable must be set to point to the src directory of a rust checkout. E.g. &quot;/home/foouser/src/rust/src&quot;</span><br><span class="line">Racer Error:</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-<p>是因为安装racer步骤不完整，<br>需要将rust源码中src拷贝到rust安装目录中，然后设置环境变量<br>RUST_SRC_PATH = rust安装目录\src<br>验证racer是否成功：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">c:\&gt;racer complete std::io::B</div><div class="line">MATCH BufReader,50,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\buffered.rs,Struct,pub struct BufReader&lt;R&gt;</div><div class="line">MATCH BufWriter,309,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\buffered.rs,Struct,pub struct BufWriter&lt;W: Write&gt;</div><div class="line">MATCH BufRead,1208,10,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\mod.rs,Trait,pub trait BufRead: Read</div><div class="line">MATCH Bytes,1605,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\mod.rs,Struct,pub struct Bytes&lt;R&gt;</div><div class="line">MATCH BufReader,50,11,.\libstd\io\buffered.rs,Struct,pub struct BufReader&lt;R&gt;</div><div class="line">MATCH BufWriter,309,11,.\libstd\io\buffered.rs,Struct,pub struct BufWriter&lt;W: Write&gt;</div><div class="line">MATCH BufRead,1208,10,.\libstd\io\mod.rs,Trait,pub trait BufRead: Read</div><div class="line">MATCH Bytes,1605,11,.\libstd\io\mod.rs,Struct,pub struct Bytes&lt;R&gt;</div></pre></td></tr></table></figure></p>
+<p>是因为安装racer步骤不完整，<br>需要将rust源码中src拷贝到rust安装目录中，然后设置环境变量<br>RUST_SRC_PATH = rust安装目录\src<br>验证racer是否成功：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">c:\&gt;racer complete std::io::B</span><br><span class="line">MATCH BufReader,50,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\buffered.rs,Struct,pub struct BufReader&lt;R&gt;</span><br><span class="line">MATCH BufWriter,309,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\buffered.rs,Struct,pub struct BufWriter&lt;W: Write&gt;</span><br><span class="line">MATCH BufRead,1208,10,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\mod.rs,Trait,pub trait BufRead: Read</span><br><span class="line">MATCH Bytes,1605,11,C:\Program Files\Rust stable MSVC 1.13\src\libstd\io\mod.rs,Struct,pub struct Bytes&lt;R&gt;</span><br><span class="line">MATCH BufReader,50,11,.\libstd\io\buffered.rs,Struct,pub struct BufReader&lt;R&gt;</span><br><span class="line">MATCH BufWriter,309,11,.\libstd\io\buffered.rs,Struct,pub struct BufWriter&lt;W: Write&gt;</span><br><span class="line">MATCH BufRead,1208,10,.\libstd\io\mod.rs,Trait,pub trait BufRead: Read</span><br><span class="line">MATCH Bytes,1605,11,.\libstd\io\mod.rs,Struct,pub struct Bytes&lt;R&gt;</span><br></pre></td></tr></table></figure></p>
 <blockquote>
 <p>在用户设置中配置如下参数：<br>（如果已经将rust\bin和.cargo\bin加入PATH，并且设置好了RUST_SRC_PATH的话，这一步可以省略）<br>{<br>“rust.racerPath”: null, // Specifies path to Racer binary if it’s not in PATH<br>“rust.rustLangSrcPath”: null, // Specifies path to /src directory of local copy of Rust sources<br>“rust.rustfmtPath”: null, // Specifies path to Rustfmt binary if it’s not in PATH<br>“rust.cargoPath”: null, // Specifies path to Cargo binary if it’s not in PATH<br>“rust.cargoHomePath”: null, // Path to Cargo home directory, mostly needed for racer. Needed only if using custom rust installation.<br>“rust.formatOnSave”: false, // Turn on/off autoformatting file on save (EXPERIMENTAL)<br>“rust.checkOnSave”: false, // Turn on/off <code>cargo check</code> project on save (EXPERIMENTAL)<br>“rust.checkWith”: “build” // Specifies the linter to use. (EXPERIMENTAL)<br>} </p>
 </blockquote>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
-<li><a href="https://m.douban.com/group/topic/89086749/" target="_blank" rel="external">https://m.douban.com/group/topic/89086749/</a></li>
-<li><a href="https://www.douban.com/group/topic/63968269/" target="_blank" rel="external">https://www.douban.com/group/topic/63968269/</a></li>
-<li><a href="https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/" target="_blank" rel="external">https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/</a></li>
+<li><a href="https://m.douban.com/group/topic/89086749/" target="_blank" rel="noopener">https://m.douban.com/group/topic/89086749/</a></li>
+<li><a href="https://www.douban.com/group/topic/63968269/" target="_blank" rel="noopener">https://www.douban.com/group/topic/63968269/</a></li>
+<li><a href="https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/" target="_blank" rel="noopener">https://sherryummen.in/2016/09/02/debugging-rust-on-windows-using-visual-studio-code/</a></li>
 </ol>
 <p>转载请注明出处，博客原文：<a href="http://anhkgg.github.io/rust-note-1-config-environment/">http://anhkgg.github.io/rust-note-1-config-environment/</a></p>
 
@@ -610,22 +611,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -639,6 +624,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -658,7 +647,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -671,6 +668,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -710,23 +723,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -759,6 +760,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -802,30 +831,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -834,7 +839,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -870,6 +879,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -879,6 +900,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -895,26 +924,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -950,14 +959,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -971,6 +972,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>

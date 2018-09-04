@@ -15,6 +15,7 @@
 <meta property="og:url" content="https://anhkgg.github.io/upx3-05手脱笔记/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://anhkgg.github.io/img/fix.png">
 <meta property="og:updated_time" content="2015-01-07T07:14:13.000Z">
 <meta name="twitter:card" content="summary">
@@ -184,15 +185,15 @@
         <p>本来一直对upx3.0以后加密壳挺畏惧的，其逻辑看起来挺简单的，有想逆一把的想法，但是都没实施，今天又遇到了，没法，太急，去google了一下，找到几篇资料<br>但是年代都挺久远的，看到[1]中直接esp定律就脱了，有点不信，就试了试，靠，居然可以，只能表示，实践是检验真理的唯一标准。</p>
 <a id="more"></a>
 <p>#<strong>1. 查壳</strong><br><strong>[!] UPX 3.05 compressed !</strong><br>查出来是3.05，也不知道是不是误报，比[1]中版本高了点，所以也就是尝试尝试esp定律拖一下</p>
-<p>#<strong>2. 脱壳</strong><br>OD加载（是个dll，通过load.exe加载），在DllMain断下，看到熟悉的pushad，感觉方法可能靠谱了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">103432E0 &gt;  807C24 08 01    cmp byte ptr ss:[esp+0x8],0x1</div><div class="line">103432E5    0F85 9D0B0000   jnz xxx.10343E88</div><div class="line">103432EB    60              pushad</div><div class="line">103432EC    BE 00C02C10     mov esi,xxx.102CC000</div></pre></td></tr></table></figure></p>
-<p>f8到103432EC ，在数据窗口显示esp值，然后右键下了个硬件访问断点（其实以前尝试过，但是下的是内存访问断点，失败了，也不知道是不是这个原因，待会儿试试）。接着F9，断在了下面的代码中，看不出啥，就有个 jmp xxx.100C3C71，地址离当前地址还算较远，可能是另一个节<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">10343E7B    8D4424 80       lea eax,dword ptr ss:[esp-0x80] //这个就是先前pushad压入的吗？？</div><div class="line">10343E7F    6A 00           push 0x0</div><div class="line">10343E81    39C4            cmp esp,eax</div><div class="line">10343E83  ^ 75 FA           jnz short xxx.10343E7F //循环了多次，F4直接到10343E85  ，应该是在清理堆栈吧？？  </div><div class="line">10343E85    83EC 80         sub esp,-0x80</div><div class="line">10343E88  - E9 E4FDD7FF     jmp xxx.100C3C71</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">100C3C71   /E9 CA371100     jmp xxx.101D7440</div><div class="line">100C3C76   |E9 15311700     jmp xxx.10236D90                           ; jmp 到 kernel32.UnlockFile</div></pre></td></tr></table></figure>
-<p>单步到jmp，F8跟到其代码中，看到了熟悉的一段入口代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">101D7440    8BFF            mov edi,edi</div><div class="line">101D7442    55              push ebp</div><div class="line">101D7443    8BEC            mov ebp,esp</div><div class="line">101D7445    837D 0C 01      cmp dword ptr ss:[ebp+0xC],0x1</div><div class="line">101D7449    75 05           jnz short xxx.101D7450</div><div class="line">101D744B    E8 32DFEEFF     call xxx.100C5382</div><div class="line">101D7450    8B45 10         mov eax,dword ptr ss:[ebp+0x10]</div><div class="line">101D7453    50              push eax</div><div class="line">101D7454    8B4D 0C         mov ecx,dword ptr ss:[ebp+0xC]</div><div class="line">101D7457    51              push ecx</div><div class="line">101D7458    8B55 08         mov edx,dword ptr ss:[ebp+0x8]</div><div class="line">101D745B    52              push edx</div><div class="line">101D745C    E8 1F000000     call xxx.101D7480</div><div class="line">101D7461    83C4 0C         add esp,0xC</div><div class="line">101D7464    5D              pop ebp</div><div class="line">101D7465    C2 0C00         retn 0xC</div></pre></td></tr></table></figure></p>
-<p>通过堆栈参数，进一步确认了下，这是DllMain函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">0006F880   7C92118A  返回到 ntdll.7C92118A</div><div class="line">0006F884   10000000  xxx.10000000</div><div class="line">0006F888   00000001</div><div class="line">0006F88C   00000000</div></pre></td></tr></table></figure></p>
+<p>#<strong>2. 脱壳</strong><br>OD加载（是个dll，通过load.exe加载），在DllMain断下，看到熟悉的pushad，感觉方法可能靠谱了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">103432E0 &gt;  807C24 08 01    cmp byte ptr ss:[esp+0x8],0x1</span><br><span class="line">103432E5    0F85 9D0B0000   jnz xxx.10343E88</span><br><span class="line">103432EB    60              pushad</span><br><span class="line">103432EC    BE 00C02C10     mov esi,xxx.102CC000</span><br></pre></td></tr></table></figure></p>
+<p>f8到103432EC ，在数据窗口显示esp值，然后右键下了个硬件访问断点（其实以前尝试过，但是下的是内存访问断点，失败了，也不知道是不是这个原因，待会儿试试）。接着F9，断在了下面的代码中，看不出啥，就有个 jmp xxx.100C3C71，地址离当前地址还算较远，可能是另一个节<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">10343E7B    8D4424 80       lea eax,dword ptr ss:[esp-0x80] //这个就是先前pushad压入的吗？？</span><br><span class="line">10343E7F    6A 00           push 0x0</span><br><span class="line">10343E81    39C4            cmp esp,eax</span><br><span class="line">10343E83  ^ 75 FA           jnz short xxx.10343E7F //循环了多次，F4直接到10343E85  ，应该是在清理堆栈吧？？  </span><br><span class="line">10343E85    83EC 80         sub esp,-0x80</span><br><span class="line">10343E88  - E9 E4FDD7FF     jmp xxx.100C3C71</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">100C3C71   /E9 CA371100     jmp xxx.101D7440</span><br><span class="line">100C3C76   |E9 15311700     jmp xxx.10236D90                           ; jmp 到 kernel32.UnlockFile</span><br></pre></td></tr></table></figure>
+<p>单步到jmp，F8跟到其代码中，看到了熟悉的一段入口代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">101D7440    8BFF            mov edi,edi</span><br><span class="line">101D7442    55              push ebp</span><br><span class="line">101D7443    8BEC            mov ebp,esp</span><br><span class="line">101D7445    837D 0C 01      cmp dword ptr ss:[ebp+0xC],0x1</span><br><span class="line">101D7449    75 05           jnz short xxx.101D7450</span><br><span class="line">101D744B    E8 32DFEEFF     call xxx.100C5382</span><br><span class="line">101D7450    8B45 10         mov eax,dword ptr ss:[ebp+0x10]</span><br><span class="line">101D7453    50              push eax</span><br><span class="line">101D7454    8B4D 0C         mov ecx,dword ptr ss:[ebp+0xC]</span><br><span class="line">101D7457    51              push ecx</span><br><span class="line">101D7458    8B55 08         mov edx,dword ptr ss:[ebp+0x8]</span><br><span class="line">101D745B    52              push edx</span><br><span class="line">101D745C    E8 1F000000     call xxx.101D7480</span><br><span class="line">101D7461    83C4 0C         add esp,0xC</span><br><span class="line">101D7464    5D              pop ebp</span><br><span class="line">101D7465    C2 0C00         retn 0xC</span><br></pre></td></tr></table></figure></p>
+<p>通过堆栈参数，进一步确认了下，这是DllMain函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0006F880   7C92118A  返回到 ntdll.7C92118A</span><br><span class="line">0006F884   10000000  xxx.10000000</span><br><span class="line">0006F888   00000001</span><br><span class="line">0006F88C   00000000</span><br></pre></td></tr></table></figure></p>
 <p>然后在101D7440地址，尝试dump，成功之后在检测壳信息<br><strong>[CompilerDetect] -&gt; Visual C++ 9.0 (Visual Studio 2008)</strong><br>应该是脱壳成功了，但是iat没有修复，先ida看看是否需要修复</p>
 <p>#<strong>3. 修复</strong><br>如果需要修复，使用importRec工具<br><img src="/img/fix.png" alt="img"><br>找到进程，选择目标dll，然后填入OEP，修复即可</p>
 <p>#<strong>4. 参考</strong></p>
-<p>[1]: <a href="http://bbs.pediy.com/showthread.php?t=44125" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=44125</a> 【原创】手脱 UPX3.0<br>[2]: <a href="http://bbs.pediy.com/showthread.php?t=140312" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=140312</a> 【原创】UPX3.03脱壳机-学习版[代码更新]</p>
+<p>[1]: <a href="http://bbs.pediy.com/showthread.php?t=44125" target="_blank" rel="noopener">http://bbs.pediy.com/showthread.php?t=44125</a> 【原创】手脱 UPX3.0<br>[2]: <a href="http://bbs.pediy.com/showthread.php?t=140312" target="_blank" rel="noopener">http://bbs.pediy.com/showthread.php?t=140312</a> 【原创】UPX3.03脱壳机-学习版[代码更新]</p>
 
       
 
@@ -535,22 +536,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -564,6 +549,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -583,7 +572,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+                <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">RPC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">远程过程调用</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -596,6 +593,22 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -635,23 +648,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">ctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -684,6 +685,34 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">http</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -727,30 +756,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">http</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">minihttp</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -759,7 +764,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">畅言</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -795,6 +804,18 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">vul</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">FireEye</a>
               </li>
              
@@ -804,6 +825,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">FINSPY</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -820,26 +849,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">vul</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">fuzz</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -875,14 +884,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">windbg</a>
               </li>
              
@@ -896,6 +897,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
             
             <div class="clearfix"></div>
