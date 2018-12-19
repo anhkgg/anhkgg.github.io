@@ -6,22 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://anhkgg.github.io">
-  <title>微信(WeChat)电脑端多开研究+源码 | Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
+  <title>Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="不好意思！欢迎关注技术公众号：汉客儿，回复文章密码，获取密码。 encrypt: trueenc_pwd: superwechat2019 0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有">
-<meta name="keywords" content="wechat,handle,patch">
+  <meta name="description" content="title: 微信(WeChat)电脑端多开研究+源码tags:   wechat handle patchdate: 2017-05-14 15:07:51categories: security   不好意思！欢迎关注技术公众号：汉客儿，回复文章密码，获取密码。 0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互">
 <meta property="og:type" content="article">
-<meta property="og:title" content="微信(WeChat)电脑端多开研究+源码">
+<meta property="og:title" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:url" content="https://anhkgg.github.io/wechat-multi-pc/index.html">
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
-<meta property="og:description" content="不好意思！欢迎关注技术公众号：汉客儿，回复文章密码，获取密码。 encrypt: trueenc_pwd: superwechat2019 0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有">
+<meta property="og:description" content="title: 微信(WeChat)电脑端多开研究+源码tags:   wechat handle patchdate: 2017-05-14 15:07:51categories: security   不好意思！欢迎关注技术公众号：汉客儿，回复文章密码，获取密码。 0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://anhkgg.github.io/img/webchat.png">
-<meta property="og:updated_time" content="2018-12-19T02:32:23.054Z">
+<meta property="og:updated_time" content="2018-12-19T02:34:31.744Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="微信(WeChat)电脑端多开研究+源码">
-<meta name="twitter:description" content="不好意思！欢迎关注技术公众号：汉客儿，回复文章密码，获取密码。 encrypt: trueenc_pwd: superwechat2019 0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。 哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个… 不管这些有">
-<meta name="twitter:image" content="https://anhkgg.github.io/img/webchat.png">
+<meta name="twitter:title" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
+<meta name="twitter:description" content="title: 微信(WeChat)电脑端多开研究+源码tags:   wechat handle patchdate: 2017-05-14 15:07:51categories: security   不好意思！欢迎关注技术公众号：汉客儿，回复文章密码，获取密码。 0x00 前言不知道大家有没有多个微信号，我反正有一两三个。 现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
@@ -165,68 +162,37 @@
             <article id="post-wechat-multi-pc" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      微信(WeChat)电脑端多开研究+源码
-    </h1>
-  
-
-        
-        <a href="/wechat-multi-pc/" class="archive-article-date">
-  	<time datetime="2017-05-14T07:07:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-14</time>
-</a>
-        
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        <p>不好意思！<br>欢迎关注技术公众号：<strong>汉客儿</strong>，回复<strong>文章密码</strong>，获取密码。</p>
-<p>encrypt: true<br>enc_pwd: superwechat2019</p>
-<h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>不知道大家有没有多个微信号，我反正有一两三个。</p>
-<p>现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。</p>
-<p>哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个…</p>
-<p>不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！</p>
-<a id="more"></a>
-<h1 id="0x01-分析"><a href="#0x01-分析" class="headerlink" title="0x01 分析"></a>0x01 分析</h1><p>了解过单实例的同学，应该都知道大概是怎么实现的单开。</p>
-<p>简单说下，大都通过判断Mutex、Event、File等等是否已经存在，存在则退出当前开启进程（说明已经有一个进程了），这样也就是单实例了。</p>
-<p>那只要找到微信是通过什么标志来实现单实例的，然后干掉这个标志即可。</p>
-<p>然后…基于这个思路，我们上工具。</p>
-<p>使用procexp找到微信进程，然后翻了一遍句柄。</p>
-<p>找到疑是的一段句柄。</p>
-<p><img src="/img/webchat.png" alt="img"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">\Sessions\1\BaseNamedObjects\_WeChat_App_Instance_Identity_Mutex_Name</span><br><span class="line">\Sessions\1\BaseNamedObjects\WeChat_GlobalConfig_Multi_Process_Mutex</span><br></pre></td></tr></table></figure>
-<p>感觉这两个都像，不管了，上pchunter，kill掉句柄试一下。</p>
-<p>经过尝试，发现<code>_WeChat_App_Instance_Identity_Mutex_Name</code>是单实例标志（kill句柄后可以开第二个客户端），<code>WeChat_GlobalConfig_Multi_Process_Mutex</code>没用。</p>
-<p>既然如此，那开始码代码吧。</p>
-<h1 id="0x02-代码"><a href="#0x02-代码" class="headerlink" title="0x02 代码"></a>0x02 代码</h1><p>可能的方案：</p>
-<ol>
-<li>找微信判断标识的代码位置，然后直接patch掉，或者整个dll进去patch。然后大致去翻了一下，貌似代码在wechatwin.dll，然后加了vmp壳，所以就不折腾这个了。</li>
-<li>直接通过代码kill掉这个Mutex的句柄（类似Pchunter操作），然后就可以开启第二个实例了，貌似明显更有优势啊。</li>
-<li>额，如果觉得无所谓，每次开之前用pchunter关一次句柄也行，下面就不用看了…</li>
-</ol>
-<p>这里选择第二个方案，开始代码。</p>
-<p>流程：</p>
-<ol>
-<li>枚举句柄，找到_WeChat_App_Instance_Identity_Mutex_Name的mutant</li>
-<li>duplicate句柄到本进程，然后close</li>
-<li>启动微信</li>
-</ol>
-<p>下面是主要代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">//步骤1和2的代码</span><br><span class="line">//获取到微信所有进程句柄</span><br><span class="line">DWORD Num = GetProcIds(L&quot;WeChat.exe&quot;, Pids);</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">Status = ZwQuerySystemInformation(SystemHandleInformation, pbuffer, 0x1000, &amp;dwSize);</span><br><span class="line"></span><br><span class="line">PSYSTEM_HANDLE_INFORMATION1 pHandleInfo = (PSYSTEM_HANDLE_INFORMATION1)pbuffer;</span><br><span class="line"></span><br><span class="line">	for(nIndex = 0; nIndex &lt; pHandleInfo-&gt;NumberOfHandles; nIndex++)</span><br><span class="line">	&#123;</span><br><span class="line">	    //句柄在Pids中，就是微信进程的句柄信息</span><br><span class="line">		if(IsTargetPid(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, Pids, Num))</span><br><span class="line">		&#123;</span><br><span class="line">		    HANDLE hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </span><br><span class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</span><br><span class="line">						DUPLICATE_SAME_ACCESS</span><br><span class="line">						);</span><br><span class="line">						</span><br><span class="line">			//对象名</span><br><span class="line">			Status = NtQueryObject(hHandle, ObjectNameInformation, szName, 512, &amp;dwFlags);</span><br><span class="line">			//对象类型名</span><br><span class="line">			Status = NtQueryObject(hHandle,  ObjectTypeInformation, szType, 128, &amp;dwFlags);</span><br><span class="line">			</span><br><span class="line">			//找到微信的标志</span><br><span class="line">			if (0 == wcscmp(TypName, L&quot;Mutant&quot;))</span><br><span class="line">			&#123;</span><br><span class="line">				if (wcsstr(Name, L&quot;_WeChat_App_Instance_Identity_Mutex_Name&quot;))</span><br><span class="line">				&#123;</span><br><span class="line">				    </span><br><span class="line">				    //DUPLICATE_CLOSE_SOURCE标志很重要，不明白的查一查</span><br><span class="line">    				hHandle = DuplicateHandleEx(pHandleInfo-&gt;Handles[nIndex].UniqueProcessId, </span><br><span class="line">						(HANDLE)pHandleInfo-&gt;Handles[nIndex].HandleValue,</span><br><span class="line">						DUPLICATE_CLOSE_SOURCE</span><br><span class="line">						);</span><br><span class="line">					if(hHandle)</span><br><span class="line">					&#123;</span><br><span class="line">						printf(&quot;+ Patch wechat success!\n&quot;);</span><br><span class="line">						CloseHandle(hHandle);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">步骤3的代码</span><br><span class="line"></span><br><span class="line">//通过注册表找到微信安装目录</span><br><span class="line">if(ERROR_SUCCESS != RegOpenKey(HKEY_CURRENT_USER, L&quot;Software\\Tencent\\WeChat&quot;, &amp;hKey))</span><br><span class="line">&#123;</span><br><span class="line">	return;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">DWORD Type = REG_SZ;</span><br><span class="line">WCHAR Path[MAX_PATH] = &#123;0&#125;;</span><br><span class="line">DWORD cbData = MAX_PATH*sizeof(WCHAR);</span><br><span class="line">if(ERROR_SUCCESS != RegQueryValueEx(hKey, L&quot;InstallPath&quot;, 0, &amp;Type, (LPBYTE)Path, &amp;cbData))</span><br><span class="line">&#123;</span><br><span class="line">	goto __exit;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PathAppend(Path, L&quot;WeChat.exe&quot;);</span><br><span class="line"></span><br><span class="line">//启动微信客户端</span><br><span class="line">ShellExecute(NULL, L&quot;Open&quot;, Path, NULL, NULL, SW_SHOW);</span><br></pre></td></tr></table></figure>
-<p>代码就这样，有注释，就不再啰嗦。</p>
-<p>完整代码，请看后面的地址。</p>
-<h1 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h1><p>一个小玩意，供大家一笑。</p>
-<p>编译好的可执行文件：</p>
-<p><a href="https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe" target="_blank" rel="noopener">https://github.com/anhkgg/multi_wechat_pc/raw/master/WeChat%E5%A4%9A%E5%BC%80.exe</a></p>
-<p>源码地址：</p>
-<p><a href="https://github.com/anhkgg/multi_wechat_pc" target="_blank" rel="noopener">https://github.com/anhkgg/multi_wechat_pc</a></p>
-<p>博客原文：</p>
-<p><a href="https://anhkgg.github.io/wechat-multi-pc">https://anhkgg.github.io/wechat-multi-pc</a></p>
-<p>转载请注明出处：<a href="https://anhkgg.github.io/wechat-multi-pc">https://anhkgg.github.io/wechat-multi-pc</a></p>
-
+        <script src=/js/crypto-js.js></script><script>
+function doDecrypt(pwd, onError) {
+	console.log("in doDecrypt");
+	var txt = document.getElementById("enc_content").innerHTML;
+	var plantext;
+	try {
+	  	var bytes = CryptoJS.AES.decrypt(txt, pwd);
+		plaintext = bytes.toString(CryptoJS.enc.Utf8);
+	} catch(err) {
+		if(onError) {onError(err);}
+		return;
+	}
+	document.getElementById("enc_content").innerHTML = plaintext;
+	document.getElementById("enc_content").style.display = "block";
+   document.getElementById("enc_passwd").style.display = "none";
+}
+</script>
+<div id="enc_content" style="display:none">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</div><div id="enc_passwd"> <input id="enc_pwd_input" type="text" style="border-radius: 5px;border-style: groove;height: 30px;width: 50%;cursor: auto;font-size: 102%;color: currentColor;outline: none;text-overflow: initial;padding-left: 5px;" onkeydown="if (event.keyCode == 13) { decrypt(); return false;}"> <input type="submit" value="解&nbsp;密" onclick="decrypt()" style="width: 58px;height: 34px;border-radius: 5px;background-color: white;border-style: solid;color: currentColor;"><div id="enc_error" style="display: inline-block;color: #d84527;margin-left: 10px"></div>
+<script>
+var onError = function(error) {
+	document.getElementById("enc_error").innerHTML = "password error!"
+};
+function decrypt() {
+var passwd = document.getElementById("enc_pwd_input").value;
+console.log(passwd);
+doDecrypt(passwd, onError);
+}
+</script>
+</div>
       
 
       
@@ -260,37 +226,7 @@
     <div class="article-info article-info-index">
       
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">wechat</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">handle</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">patch</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
       
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
 
       
 
@@ -574,6 +510,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -587,6 +527,30 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">PE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">GS</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">dllhijack</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -615,26 +579,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">inject</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">hctf</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">PE</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">GS</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">cookie</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -674,11 +618,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">dllhijack</a>
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -687,14 +631,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -722,7 +658,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">apk</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -742,11 +682,23 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
+                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">apk</a>
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">自动领币</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -790,22 +742,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">自动领币</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">畅言</a>
               </li>
              
@@ -826,6 +762,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">rustls</a>
               </li>
              
@@ -838,39 +778,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">c++</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">ssctf</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">bypassUAC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">UAC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">.NET</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -898,23 +810,27 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">wannacry</a>
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">比特币病毒</a>
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">逆向分析</a>
+                <a href="javascript:void(0)" class="js-tag color5">bypassUAC</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">样本分析</a>
+                <a href="javascript:void(0)" class="js-tag color4">UAC</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">locky</a>
+                <a href="javascript:void(0)" class="js-tag color5">.NET</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">mmc.exe</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -922,15 +838,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">handle</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">patch</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">anti-revoke</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">APC</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -950,7 +862,23 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">APC</a>
+                <a href="javascript:void(0)" class="js-tag color4">wannacry</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">比特币病毒</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">逆向分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">样本分析</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">locky</a>
               </li>
             
             <div class="clearfix"></div>
