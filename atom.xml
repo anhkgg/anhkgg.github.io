@@ -1962,9 +1962,10 @@
     <link href="https://anhkgg.github.io/wechat-multi-pc/"/>
     <id>https://anhkgg.github.io/wechat-multi-pc/</id>
     <published>2017-05-14T07:07:51.000Z</published>
-    <updated>2018-10-09T09:32:02.687Z</updated>
+    <updated>2018-12-19T02:32:23.054Z</updated>
     
-    <content type="html"><![CDATA[<p>欢迎关注技术公众号：<strong>汉客儿</strong></p>
+    <content type="html"><![CDATA[<p>不好意思！<br>欢迎关注技术公众号：<strong>汉客儿</strong>，回复<strong>文章密码</strong>，获取密码。</p>
+<p>encrypt: true<br>enc_pwd: superwechat2019</p>
 <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>不知道大家有没有多个微信号，我反正有一两三个。</p>
 <p>现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。</p>
 <p>哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个…</p>
@@ -2011,7 +2012,8 @@
     
     <summary type="html">
     
-      &lt;p&gt;欢迎关注技术公众号：&lt;strong&gt;汉客儿&lt;/strong&gt;&lt;/p&gt;
+      &lt;p&gt;不好意思！&lt;br&gt;欢迎关注技术公众号：&lt;strong&gt;汉客儿&lt;/strong&gt;，回复&lt;strong&gt;文章密码&lt;/strong&gt;，获取密码。&lt;/p&gt;
+&lt;p&gt;encrypt: true&lt;br&gt;enc_pwd: superwechat2019&lt;/p&gt;
 &lt;h1 id=&quot;0x00-前言&quot;&gt;&lt;a href=&quot;#0x00-前言&quot; class=&quot;headerlink&quot; title=&quot;0x00 前言&quot;&gt;&lt;/a&gt;0x00 前言&lt;/h1&gt;&lt;p&gt;不知道大家有没有多个微信号，我反正有一两三个。&lt;/p&gt;
 &lt;p&gt;现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。&lt;/p&gt;
 &lt;p&gt;哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个…&lt;/p&gt;
