@@ -16,14 +16,14 @@
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="author: anhkggdate: 2019-10-05  最早接触沙箱，对它的印象就是：sandboxie。 因为学的是安全相关专业，在网上下载东西非常谨慎，就算通过了杀毒软件扫描，但是也怕有后门或者其他东西，毕竟我也可以静态过掉杀软。 很多软件没有官网，各种下载站的东西真的是让人不放心。 所以在下载某些软件后，只要不影响功能，基本都会用sandboxie来运行软件。如果不行，则放到虚拟机">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://anhkgg.github.io/sandbox-summary/sandbox/dcom.png">
-<meta property="og:image" content="https://anhkgg.github.io/sandbox-summary/sandbox/sandbox.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/sandbox/dcom.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/sandbox/sandbox.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wx.png">
-<meta property="og:updated_time" content="2019-10-05T03:01:21.215Z">
+<meta property="og:updated_time" content="2019-10-05T03:07:56.052Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="沙箱：概述">
 <meta name="twitter:description" content="author: anhkggdate: 2019-10-05  最早接触沙箱，对它的印象就是：sandboxie。 因为学的是安全相关专业，在网上下载东西非常谨慎，就算通过了杀毒软件扫描，但是也怕有后门或者其他东西，毕竟我也可以静态过掉杀软。 很多软件没有官网，各种下载站的东西真的是让人不放心。 所以在下载某些软件后，只要不影响功能，基本都会用sandboxie来运行软件。如果不行，则放到虚拟机">
-<meta name="twitter:image" content="https://anhkgg.github.io/sandbox-summary/sandbox/dcom.png">
+<meta name="twitter:image" content="https://anhkgg.github.io/img/sandbox/dcom.png">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
@@ -239,7 +239,7 @@
 <p>所谓逃逸，就是沙箱无法控制沙箱内程序行为，程序可以绕过沙箱，对系统造成破坏。</p>
 <p>逃逸的方式有很多，对于支持DCOM的程序，就是其中一种。</p>
 <p>举个例子，在wordpad.exe(写字板）插入对象-画笔图片，会启动mspaint，可以看到mspaint是svchost.exe -k DcomLaunch的子进程。</p>
-<p><img src="sandbox/dcom.png" alt="img"></p>
+<p><img src="/img/sandbox/dcom.png" alt="img"></p>
 <p>什么意思呢？</p>
 <p>一般来说，如果在沙箱中启动wordpad.exe，wordpad.exe的子进程默认也会进入沙箱，但通过DCOM启动的mspaint就没法拉入沙箱了，它不是wordpad.exe子进程。</p>
 <p>所以，此时需要虚拟化DCOM，让沙箱内启动一个DCOM服务，这样wordpad.exe直接和沙箱内DCOM通信，启动子进程mspaint.exe，作为沙箱内DCOM服务的子进程，自然也被拉入沙箱内。</p>
@@ -254,7 +254,7 @@
 <h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>前面说的内容都是如何完成虚拟化的东西，一个成熟的沙箱肯定还包括其他很多东西，比如多沙箱的支持、沙箱清理、安全浏览器等等，不过这些都不在我们重点讨论范围，毕竟这些只有在实际产品才会考虑的问题，我们这里只是研究沙箱核心相关的技术。</p>
 <p>另外，针对每种重定向技术细节后续会慢慢详细分享，敬请关注。</p>
 <p>最后，再来一张简单的沙箱框图。</p>
-<p><img src="sandbox/sandbox.png" alt="img"></p>
+<p><img src="/img/sandbox/sandbox.png" alt="img"></p>
 <p>转载请注明出处：[<a href="https://anhkgg.github.io/sandbox-summary](https://anhkgg.github.io/sandbox-summary">https://anhkgg.github.io/sandbox-summary](https://anhkgg.github.io/sandbox-summary</a></p>
 <p>欢迎关注技术公众号：<strong><span style="color:red">汉客儿</span></strong><br><img src="/img/wx.png" alt="img"></p>
 
@@ -608,18 +608,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">PE</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">GS</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">cookie</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">Windbg调试</a>
               </li>
              
@@ -632,43 +620,27 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">WM_KEYBOARD_LL</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HOOK</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">freepiano</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">inject</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">aboutme</a>
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">微信</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">保护</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">dllhijack</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">hctf</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">IDC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -708,11 +680,47 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">微信</a>
+                <a href="javascript:void(0)" class="js-tag color3">PE</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">保护</a>
+                <a href="javascript:void(0)" class="js-tag color3">GS</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">cookie</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">WM_KEYBOARD_LL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">HOOK</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">freepiano</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">inject</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">inject process</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">reverse</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">IDAPro</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">IDC</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -740,6 +748,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">apk</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">libcurl</a>
               </li>
              
@@ -757,14 +773,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">apk</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -808,19 +816,19 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">自动领币</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -844,31 +852,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">dllhijack</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">c++</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">CTF</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">逆向</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">ssctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -881,6 +869,26 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">TLS/SSL</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">telegram</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">wechat</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">c++</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">ssctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -932,11 +940,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">telegram</a>
+                <a href="javascript:void(0)" class="js-tag color2">handle</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">wechat</a>
+                <a href="javascript:void(0)" class="js-tag color1">patch</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -960,31 +968,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">handle</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">patch</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">crack</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">windbg</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">usb3</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">debug</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">win10</a>
+                <a href="javascript:void(0)" class="js-tag color2">anti-revoke</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1004,7 +988,23 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">anti-revoke</a>
+                <a href="javascript:void(0)" class="js-tag color2">windbg</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">usb3</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">debug</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">crack</a>
               </li>
             
             <div class="clearfix"></div>
