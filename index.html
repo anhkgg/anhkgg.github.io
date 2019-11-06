@@ -160,6 +160,212 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-huawei-pcmanager-nb" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/huawei-pcmanager-nb/">华为电脑管家PcManager多屏协同功能破解</a>
+    </h1>
+  
+
+        
+        <a href="/huawei-pcmanager-nb/" class="archive-article-date">
+  	<time datetime="2019-11-06T04:45:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <a id="more"></a>
+<blockquote>
+<p>author: anhkgg<br>date: 2019年11月6日</p>
+</blockquote>
+<p>让友商电脑兼容了一下华为系专属的多屏协同功能</p>
+<p>笔者注：文中出现的大写<code>C</code>，请轻声念出北京大爷的口头禅。</p>
+<p>华为刚发布多屏协同功能的时候，我就被种草了。</p>
+<p>后来一天在微博看到<a href="https://m.weibo.cn/profile/3513171522" target="_blank" rel="noopener">@Navis-MDT</a>发布的一个体验视频，果然碉堡了。</p>
+<p><a href="https://weibo.com/tv/v/IdIY7gwoF?fid=1034:4432710022688749" target="_blank" rel="noopener">华为多频协同体验视频</a></p>
+<p>瞬间有点想从“米boy”转为“花粉”用户，这…当然是不可能的了。</p>
+<p>翻看微博回复，看到华为手机副总裁<a href="https://m.weibo.cn/u/1945906841" target="_blank" rel="noopener">@李小龙Bruce_Lee</a>也转发了该视频，并回复网友“为啥不面向非华为电脑”说：“不是故意不做其他品牌的电脑，是电脑上WIFI/蓝牙硬件和驱动太乱了，我们没精力搞定兼容性问题。大神们想破解我们也不会拦着。”</p>
+<p><img src="https://i.loli.net/2019/11/06/85obu7Gtvk9zVSZ.jpg" alt="0.jpg"></p>
+<p>对啊，怎么忘了自己也是“大神”啊（羞涩~~）。</p>
+<p>既然主人家都不反对，那我帮他们兼容一下，脑子开始发热，迅速准备搞一搞。</p>
+<p>是的，脑子非常热，导致前期资讯准备不足，后面踩了很多坑。</p>
+<p>下面且听我一一道来。</p>
+<h3 id="1"><a href="#1" class="headerlink" title="1"></a>1</h3><p>视频中提到华为电脑中需要使用“电脑管家”（视频中没看清界面），然后手机扫描连接即可。</p>
+<p>听到“电脑管家”第一反应就是华为多屏协同怎么还跟腾讯合作？懵逼，腾讯NB。</p>
+<p>后来一想不对，应该是华为自己的软件“电脑管家”，类似于小米笔记本上的“小米游戏盒子”之类的软件。</p>
+<p>没有华为电脑，先去搜搜看是否能下载到软件。</p>
+<p><img src="https://i.loli.net/2019/11/06/iC5pdE641nwNZjv.png" alt="1.png"></p>
+<p>果然有，华为官网很友好的给出了操作提示，果然是为客户着想的好公司。</p>
+<p><img src="https://i.loli.net/2019/11/06/b2eT3ODlm9R8yjp.png" alt="2.png"></p>
+<p>版本挺多，下一个最新的。然后我选择了<code>9.1.6.33</code>,因为我看到日期是<code>2019-11-01</code>。（请仔细看图，并记住这里）</p>
+<p><img src="https://i.loli.net/2019/11/06/TzPGDpwZyYXl1L9.png" alt="3.png"></p>
+<h3 id="2"><a href="#2" class="headerlink" title="2"></a>2</h3><p>OK，软件下回来了，接着就开始干正事了。</p>
+<p>习惯性地把软件拉入了虚拟机运行，结果双击后没反应，以为是鼠标出问题或者虚拟机太卡，连续试了好几次依然没反应。</p>
+<p>一瞬间，脑子里翻江倒海，难道华为加了反虚拟机、反调试、反…C</p>
+<p>直接上windbg吧，一运行，直接退出，才发现是乌龙。</p>
+<p>因为这两天在测试DLL劫持，留了个DLL在桌面，华为的“电脑管家”很不幸中枪了，被劫持，然后直接退出。（划重点）</p>
+<p>删掉DLL，终于有了反应，但是…提示只支持64位系统，而我用的是Win7 x86…C</p>
+<p><img src="https://i.loli.net/2019/11/06/fK7xSnAcZDCmksl.png" alt="4.png"></p>
+<p>换呗，还能咋办，切到Win7 x64虚拟机，问题又来了。</p>
+<p><img src="https://i.loli.net/2019/11/06/8zq1WLIKsiNRydT.png" alt="5.png"></p>
+<p>好吧，我错了，我直接本机win10安装吧，一分钟不到，终于装好了。</p>
+<p><img src="https://i.loli.net/2019/11/06/kWzVhx35HPIuc2y.png" alt="6.png"></p>
+<p>但是从下载到装好时间已经过去了30分钟，都是自己作的。</p>
+<h3 id="3"><a href="#3" class="headerlink" title="3"></a>3</h3><p>点击立即体验，看看界面长啥样。</p>
+<p>结果又退出了，退出了…出了…了</p>
+<p>咋回事？难道是直接验证到不是华为电脑，直接退出？</p>
+<p>继续windbg启动软件，看到如下信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Util!HttpUtil::OnDebug+0x13f8:</span><br><span class="line">00007fff`0aa7a2c8 cc              int     3</span><br><span class="line">0:000&gt; kv</span><br><span class="line"> # Child-SP          RetAddr           : Args to Child                                                           : Call Site</span><br><span class="line">00 00000042`558fed10 00007fff`0aa78d2f : 00000219`596f44a0 00000042`558ff339 00000042`558ff2f4 00000042`558ff2f4 : Util!HttpUtil::OnDebug+0x13f8</span><br><span class="line">01 00000042`558fee30 00007fff`0ab05616 : 00000042`558fefe0 00000219`596f44a0 00007fff`0aa60000 00000219`59660000 : Util!mba::util::UrlsManager::ParseXml+0x63f</span><br><span class="line">02 00000042`558fee70 00007fff`0ab04879 : 00000000`00000006 00000000`00000006 00000042`558ff2f4 00000042`558ff339 : Util!CWMI::GetOutPutUIntByString+0x3bb6</span><br><span class="line">03 00000042`558ff1b0 00007fff`0ab04af2 : 00000000`00000000 00000000`00000000 00000042`558ff3c0 00000000`00000000 : Util!CWMI::GetOutPutUIntByString+0x2e19</span><br><span class="line">04 00000042`558ff2d0 00007fff`0aaf53df : 00000000`00000000 7fffffff`ffffffff 00000000`00000000 00000000`00000000 : Util!CWMI::GetOutPutUIntByString+0x3092</span><br><span class="line">05 00000042`558ff3a0 00007ff6`fa838ff3 : 7fffffff`ffffffff 00000000`00000000 7fffffff`ffffffff 00000000`00000000 : Util!SMBIOSHelper::IsSupportDevice+0x1f</span><br><span class="line">06 00000042`558ff400 00007ff6`fa852223 : 00000000`00000000 00000000`0000000a 00000000`00000000 00000000`00000000 : PCManager!SMBIOSHelper::operator=+0xa93</span><br><span class="line">07 00000042`558ffc20 00007fff`4f6f7bd4 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : PCManager!Compression::Compression+0x3b93</span><br><span class="line">08 00000042`558ffc60 00007fff`5150ced1 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : KERNEL32!BaseThreadInitThunk+0x14</span><br><span class="line">09 00000042`558ffc90 00000000`00000000 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : ntdll!RtlUserThreadStart+0x21</span><br><span class="line"></span><br><span class="line">0:000&gt; g</span><br><span class="line">ntdll!NtTerminateProcess+0x14:</span><br><span class="line">00007fff`5153c644 c3              ret</span><br></pre></td></tr></table></figure>
+<p>咋还出现int3了呢，难道这里就是检查是不是华为电脑的位置。</p>
+<p>使用IDA开始粗略分析，进入int3的位置。一处异常，看不出什么东西。</p>
+<p><img src="https://i.loli.net/2019/11/06/r9fKE7tza1enAwu.png" alt="7.png"></p>
+<p>往上回溯两层，看到很重要的信息<code>SystemEnvironment::GetSupportMachineList</code>，确实很像是检查的地方。</p>
+<p><img src="https://i.loli.net/2019/11/06/o9CebfTBOFprmGD.png" alt="8.png"></p>
+<p>对<code>sub_180018D00</code>下断，查看参数。发现第三个参数指向一个xml配置文件路径，看名字很明显是表示支持的机器类型列表。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; db 000001f0`587329b0 </span><br><span class="line">000001f0`587329c0  5c bb aa ce aa 5c 50 43-4d 61 6e 61 67 65 72 5f  \....\PCManager_</span><br><span class="line">000001f0`587329d0  53 65 74 75 70 5f 39 2e-31 2e 36 2e 33 33 5c 48  Setup_9.1.6.33\H</span><br><span class="line">000001f0`587329e0  75 61 77 65 69 5c 50 43-4d 61 6e 61 67 65 72 5c  uawei\PCManager\</span><br><span class="line">000001f0`587329f0  5c 63 6f 6e 66 69 67 5c-4d 61 63 68 69 6e 65 54  \config\MachineT</span><br><span class="line">000001f0`58732a00  79 70 65 4c 69 73 74 2e-78 6d 6c 00 ee fe ee ab  ypeList.xml.....</span><br></pre></td></tr></table></figure>
+<p>打开一看，加密了。</p>
+<p><img src="https://i.loli.net/2019/11/06/Xc81rRIJydlx9UE.png" alt="9.png"></p>
+<p>那看看附近代码，应该是先解密，可以把数据dump出来。</p>
+<p>通过IDA翻看了一下后面的函数，看到另一个特征<code>rapidxml::parse_error::</code>vftable`，这是用了rapidxml开源库来解析xml文档。</p>
+<p>把rapidxml的源码下回来，通过对比（一些log字符特征）来确认函数的功能。</p>
+<p><img src="https://i.loli.net/2019/11/06/MHL31kxyVCQph2a.png" alt="10.png"></p>
+<p>基本弄清楚xml解密到解析的过程，对<code>sub_180014EA0</code>下断，查看参数。果然拿到解密后的xml文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; dq 000000315e6feb48</span><br><span class="line">00000031`5e6feb48  000001ec`051970b0 00000000`00000000</span><br><span class="line">0:000&gt; db 000001ec`051970b0</span><br><span class="line">000001ec`051970b0  3c 3f 78 6d 6c 20 76 65-72 73 69 6f 6e 3d 22 31  &lt;?xml version=&quot;1</span><br><span class="line">000001ec`051970c0  2e 30 22 20 65 6e 63 6f-64 69 6e 67 3d 22 55 54  .0&quot; encoding=&quot;UT</span><br><span class="line">000001ec`051970d0  46 2d 38 22 3f 3e 20 0d-0a 3c 6d 61 63 68 69 6e  F-8&quot;?&gt; ..&lt;machin</span><br><span class="line">000001ec`051970e0  65 54 79 70 65 6c 69 73-74 3e 20 0d 0a 09 3c 6d  eTypelist&gt; ...&lt;m</span><br></pre></td></tr></table></figure>
+<p>xml数据长这样。</p>
+<p><img src="https://i.loli.net/2019/11/06/SnPzyT7GfaAMihO.png" alt="11.png"></p>
+<p>看到这里，其实已经有一个思路了，就是把自己电脑的品牌加入xml文件，重新加密回去，就能够就能够使用华为电脑管家了。</p>
+<p>不过分析解密、拿品牌信息、加密等挺麻烦的，再看看还有方法吗？</p>
+<p>比如直接patch比较品牌的函数，绕过检查。</p>
+<p>继续分析，一堆xml的node的解析比较，因为华为在编译rapidxml时基本都是内联函数，导致跟源码结构并不是很一致，增加了分析难度。</p>
+<p>经过一段数据的比较，还没有找到绕过的点。</p>
+<p>我停了下来，看了看调用栈。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; kv</span><br><span class="line"> # Child-SP          RetAddr           : Args to Child                                                           : Call Site</span><br><span class="line">00 00000031`5e6fea20 00007fff`11184879 : 00000000`00000006 00000000`00000006 00000031`5e6feea4 00000031`5e6feee9 : Util!CWMI::GetOutPutUIntByString+0x4075</span><br><span class="line">01 00000031`5e6fed60 00007fff`11184af2 : 00000000`00000000 00000000`00000000 00000031`5e6fef70 00000000`00000000 : Util!CWMI::GetOutPutUIntByString+0x2e19</span><br><span class="line">02 00000031`5e6fee80 00007fff`111753df : 00000000`00000000 7fffffff`ffffffff 00000000`00000000 00000000`00000000 : Util!CWMI::GetOutPutUIntByString+0x3092</span><br><span class="line">03 00000031`5e6fef50 00007ff7`70a18ff3 : 7fffffff`ffffffff 00000000`00000000 7fffffff`ffffffff 00000000`00000000 : Util!SMBIOSHelper::IsSupportDevice+0x1f</span><br><span class="line">04 00000031`5e6fefb0 00007ff7`70a32223 : 00000000`00000000 00000000`0000000a 00000000`00000000 00000000`00000000 : PCManager!SMBIOSHelper::operator=+0xa93</span><br><span class="line">05 00000031`5e6ff7d0 00007fff`4f6f7bd4 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : PCManager!Compression::Compression+0x3b93</span><br><span class="line">06 00000031`5e6ff810 00007fff`5150ced1 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : KERNEL32!BaseThreadInitThunk+0x14</span><br><span class="line">07 00000031`5e6ff840 00000000`00000000 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : ntdll!RtlUserThreadStart+0x21</span><br></pre></td></tr></table></figure>
+<p>才看到被我忽略的一个很重要的信息<code>Util!SMBIOSHelper::IsSupportDevice</code>，这个函数名太明显了。</p>
+<p>只需要修改这个返回值，基本应该就绕过检查了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BOOL8 __fastcall SMBIOSHelper::IsSupportDevice(SMBIOSHelper *this)</span><br><span class="line">&#123;</span><br><span class="line"> return 1; //patch</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>是的，我好像又掉坑里，浪费了挺多时间。</p>
+<h3 id="4"><a href="#4" class="headerlink" title="4"></a>4</h3><p>但是前面为什么会出现异常呢，导致我掉进了一个确实是对的但又有点坑的位置呢。</p>
+<p>想到xml的路径，此时我终于反应过来哪个异常可能是什么了。</p>
+<p>因为我把软件放在了中文目录中，而软件对中文处理貌似有问题。（我没有深究了）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">D:\华为\PCManager_Setup_9.1.6.33</span><br></pre></td></tr></table></figure>
+<p>果然，去掉中文目录后，再没有上面看到的int3。</p>
+<p>所以，这又是个坑。C</p>
+<p>本来正常的分析逻辑是这样的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; g</span><br><span class="line">ntdll!NtTerminateProcess+0x14:</span><br><span class="line">00007fff`5153c644 c3              ret</span><br><span class="line">0:000&gt; kv</span><br><span class="line"> # Child-SP          RetAddr           : Args to Child                                                           : Call Site</span><br><span class="line">00 00000042`558ffb38 00007fff`5150a9b8 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : ntdll!NtTerminateProcess+0x14</span><br><span class="line">01 00000042`558ffb40 00007fff`4f6fcd8a : 00000000`00000000 00000000`00000000 00007fff`4ecb9b68 00000000`00000000 : ntdll!RtlExitUserProcess+0xb8</span><br><span class="line">02 00000042`558ffb70 00007fff`4ec1ae38 : 00000000`00000000 00000000`00000000 00000042`558ffbf8 00007fff`4ecebc20 : KERNEL32!ExitProcessImplementation+0xa</span><br><span class="line">03 00000042`558ffba0 00007fff`4ec186ef : 00000000`00000000 00000000`00000000 00000000`00000000 00000042`558ffbf0 : ucrtbase!exit_or_terminate_process+0x44</span><br><span class="line">04 00000042`558ffbd0 00007ff6`fa852235 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000001 : ucrtbase!common_exit+0x6f</span><br><span class="line">05 00000042`558ffc20 00007fff`4f6f7bd4 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : PCManager!Compression::Compression+0x3ba5</span><br><span class="line">06 00000042`558ffc60 00007fff`5150ced1 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : KERNEL32!BaseThreadInitThunk+0x14</span><br><span class="line">07 00000042`558ffc90 00000000`00000000 : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : ntdll!RtlUserThreadStart+0x21</span><br></pre></td></tr></table></figure>
+<p>看到exit进程，回溯到调用位置，看看做了什么判断。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.text:000000014003221E                 call    WinMain</span><br><span class="line">.text:0000000140032223                 mov     ebx, eax</span><br><span class="line">.text:0000000140032225                 call    __scrt_is_managed_app</span><br><span class="line">.text:000000014003222A                 test    al, al</span><br><span class="line">.text:000000014003222C                 jnz     short loc_140032235</span><br><span class="line">.text:000000014003222E                 mov     ecx, ebx        ; Code</span><br><span class="line">.text:0000000140032230                 call    exit</span><br><span class="line">.text:0000000140032235 ; ---------------------------------------------------------------------------</span><br><span class="line">.text:0000000140032235</span><br><span class="line">.text:0000000140032235 loc_140032235:                          ; CODE XREF: __scrt_common_main_seh(void)+120↑j</span><br><span class="line">.text:0000000140032235                 test    dil, dil</span><br></pre></td></tr></table></figure>
+<p>是在WinMain中正常退出的，所以判断就是在WinMain中。在IDA翻看一下，很容就找到了重要提示。</p>
+<p><img src="https://i.loli.net/2019/11/06/yRocGLDu1rEnxUl.png" alt="12.png"></p>
+<p>在往上看，正主来了。</p>
+<p><img src="https://i.loli.net/2019/11/06/MZUQkX39yOTzfmn.png" alt="13.png"></p>
+<p>这样简单太多了，已经不记得是第几次被中文路径坑了，又想用英文系统了。</p>
+<h3 id="5"><a href="#5" class="headerlink" title="5"></a>5</h3><p>把<code>Util!SMBIOSHelper::IsSupportDevice</code>修正一番，替换原始的utlil.dll，直接运行软件，在华为的友商电脑中成功启动。</p>
+<p><img src="https://i.loli.net/2019/11/06/F3wceBx5uIOGC8N.png" alt="14.png"></p>
+<p>开始尝试连接手机。</p>
+<p>点击我的手机-&gt;扫码连接，提示需使用华为浏览器扫描。</p>
+<p>因为我不是华为手机，所以是不是下载一个华为浏览器就OK了呢。</p>
+<p>一番搜索，在华为市场找到了华为浏览器的app。</p>
+<p><img src="https://i.loli.net/2019/11/06/KZNm6WhFCle251b.png" alt="15.png"></p>
+<p>兴致勃勃地装到了我的小米手机上，嗯，友商之间很友好，并没有出现什么异常情况。</p>
+<p>打开浏览器，点开二维码扫描，扫描软件管家二维码，提示需要安装华为移动服务，ok，安装。</p>
+<p><img src="https://i.loli.net/2019/11/06/7qUPYXiEAbLBsKH.jpg" alt="16.jpg"></p>
+<p>安装完成之后，啥也没提示，就光秃秃一个网页页面，电脑助手。</p>
+<p>懵逼中，再次扫描，同样地情况。</p>
+<p>脑筋一转，把链接复制发到了电脑，浏览器打开，看到了下载按钮。</p>
+<p><img src="https://i.loli.net/2019/11/06/LiES1xyownVmjCa.png" alt="17.png"></p>
+<p>第三个app了，继续把华为电脑助手安卓版装入了小米，瞬间感觉MIUI好像被华为全家桶强X了一下ε(┬┬﹏┬┬)3。</p>
+<p>重新扫描，这次果然不一样了，浏览器跳转到了助手页面，提示配对。</p>
+<p>这中间又出现了n多问题</p>
+<p>(怀疑蓝牙服务不正常、二维码生成不正常、电脑管家是否对手机校验、分析是否还有check…)</p>
+<p>不想细说了，反正经过一番折腾，终于手机和电脑连上了。</p>
+<p><img src="https://i.loli.net/2019/11/06/Wse91QrShUYMxX8.png" alt="18.png"></p>
+<p>但是这也没有多屏协同啊，就一个手机助手啊。</p>
+<p>难道我哪里又弄错了？</p>
+<p>去搜了搜多屏协同的帖子，算是找到了问题。</p>
+<p><img src="https://i.loli.net/2019/11/06/XrUAeYTOdxla74k.png" alt="19.png"></p>
+<p>TMD，原来下载的软件版本低了，而我还眼瞎地没看到上面的下载列表的10.0.2.59版本。</p>
+<p>真是被自己蠢哭了。</p>
+<p>下载最新版，重新修正了util.dll，这次连上果然不一样了。</p>
+<p><img src="https://s2.ax1x.com/2019/11/06/MCgQAg.png" alt="20.png"></p>
+<p>但是，最终还是没能用上多屏协同，尽管我已经安装了3个华为的app，但就是手机不支持（EMUI系统功能）。</p>
+<p><img src="https://s2.ax1x.com/2019/11/06/MCgKHS.png" alt="21.png"></p>
+<p>看到这些条件，我真是感到心累，“这是对冲动最好的惩罚”。</p>
+<h3 id="6"><a href="#6" class="headerlink" title="6"></a>6</h3><p>是的，虽然折腾了这么久，最后也没用上这个牛逼的功能，但是我很充实（哭）。</p>
+<p>因为我为其他拥有华为手机但没有华为电脑然后想体验华为多屏协同功能的大伙做出了我的贡献。</p>
+<p>我满足了。</p>
+<p>哎，卑微的我去咸鱼看看二手的华为手机，或者去问问华为EMUI适配不适配友商的手机了。</p>
+<p>或者哪位大佬有换代的华为手机邮我一个，地址是：XXXX。</p>
+<p>哎，曾经的我没钱买华为，现在的我依然没钱买华为。</p>
+<p>申明：虽然华为手机副总裁已经说过不反对破解，但这里还是郑重申明，文章仅仅是做技术研究，如侵删，谢谢。</p>
+<p>最后，小声地说，如果想体验的朋友，请到<a href="https://github.com/anhkgg/Huawei_PCManager_NB" target="_blank" rel="noopener">https://github.com/anhkgg/Huawei_PCManager_NB</a>下载试用，务必阅后即焚。</p>
+<p>文件较大，也可以公众号后台回复：<code>HuaweiNB</code>获取网盘链接。</p>
+<p>如果觉得内容还不错，欢迎关注公众号：<a href="https://mp.weixin.qq.com/s/RnFXcn_Lj3lfQguv8EQeJw" target="_blank" rel="noopener">汉客儿</a>。</p>
+<p>交流群：<a href="https://jq.qq.com/?_wv=1027&amp;k=5ww6tlB" target="_blank" rel="noopener">753894145</a></p>
+<p>转载请注明出处：<a href="https://anhkgg.github.io/huawei-pcmanager-nb">https://anhkgg.github.io/huawei-pcmanager-nb</a></p>
+<p>欢迎关注技术公众号：<strong><span style="color:red">汉客儿</span></strong><br><img src="/img/wx.png" alt="img"></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">crack</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">pcmanager</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">huawei</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/huawei-pcmanager-nb/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+  
     <article id="post-inject-dllhijack-tool" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -344,11 +550,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">sandbox</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">security</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">security</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">sandbox</a>
         		</li>
       		
 		</ul>
@@ -497,11 +703,11 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">wechat</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">crack</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">crack</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">wechat</a>
         		</li>
       		
 		</ul>
@@ -865,87 +1071,6 @@
 
 
   
-    <article id="post-dllhijack" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/dllhijack/">一种通用Dll劫持技术研究</a>
-    </h1>
-  
-
-        
-        <a href="/dllhijack/" class="archive-article-date">
-  	<time datetime="2018-11-29T09:45:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>欢迎关注技术公众号：<strong><span style="color:red">汉客儿</span></strong><br><img src="/img/wx.png" alt="img"></p>
-<blockquote>
-<p>通用DLL劫持技术研究<br><br>by anhkgg<br><br>2018年11月29日<br></p>
-</blockquote>
-<h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>Dll劫持相信大家都不陌生，理论就不多说了。Dll劫持的目的一般都是为了自己的dll模块能够在别人进程中运行，然后做些不可描述的事情。</p>
-<p>为了让别人的程序能够正常运行，通常都需要在自己的dll中导出和劫持的目标dll相同的函数接口，然后在自己的接口函数中调用原始dll的函数，如此使得原始dll的功能能够正常被使用。导出接口可以自己手工写，也可以通过工具自动生成，比如著名的<code>Aheadlib</code>。这种方法的缺点就是针对不同的dll需要导出不同的接口，虽然有工具帮助，但也有限制，比如不支持x64。</p>
-        
-          <a class="article-more-a" href="/dllhijack/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">dllhijack</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">windows</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/dllhijack/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1074,6 +1199,14 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">微信</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">保护</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Anti-AntiVirus</a>
               </li>
              
@@ -1087,10 +1220,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">杀毒软件</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">010editor</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1123,6 +1252,30 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">inject</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">010editor</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">crack</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">pcmanager</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">huawei</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">dllhijack</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1186,19 +1339,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">dllhijack</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">inject process</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">微信</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">保护</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1226,7 +1367,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
+                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">apk</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1243,6 +1388,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">get_post_ajax</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">pyspider</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1286,22 +1435,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">安卓</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">apk</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">v2ex</a>
               </li>
              
@@ -1310,15 +1443,15 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">shellcode</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">IDAPython</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">畅言</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1342,18 +1475,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">c++</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">ssctf</a>
               </li>
              
@@ -1370,7 +1491,19 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">sandbox</a>
+                <a href="javascript:void(0)" class="js-tag color5">sctf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">c++</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">upx</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1383,14 +1516,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">wechat</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">upx</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">unpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1410,11 +1535,11 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">handle</a>
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">patch</a>
+                <a href="javascript:void(0)" class="js-tag color3">逆向</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1430,23 +1555,23 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">windbg</a>
+                <a href="javascript:void(0)" class="js-tag color3">多开</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">usb3</a>
+                <a href="javascript:void(0)" class="js-tag color4">防撤销</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">debug</a>
+                <a href="javascript:void(0)" class="js-tag color3">解密</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">win10</a>
+                <a href="javascript:void(0)" class="js-tag color3">sandbox</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">crack</a>
+                <a href="javascript:void(0)" class="js-tag color2">anti-revoke</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1470,23 +1595,31 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">anti-revoke</a>
+                <a href="javascript:void(0)" class="js-tag color2">windbg</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">usb3</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">debug</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">win10</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">handle</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">patch</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">APC</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">多开</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">防撤销</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">解密</a>
               </li>
             
             <div class="clearfix"></div>
