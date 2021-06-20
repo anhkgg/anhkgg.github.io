@@ -158,6 +158,89 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-tans-fireeye-cve-2017-8759-finspy-0day" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/tans-fireeye-cve-2017-8759-finspy-0day/">翻译：FireEye揭露CVE-2017-8759：分发FINSPY的0day</a>
+    </h1>
+  
+
+        
+        <a href="/tans-fireeye-cve-2017-8759-finspy-0day/" class="archive-article-date">
+  	<time datetime="2017-09-14T02:12:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>2017.9.12 | by Genwei Jiang, Ben Read, Tom Bennett | Threat Research</p>
+<p>FIreEye近期检测到一个恶意的利用CVE-2017-8759漏洞的微软Office RTF文档。</p>
+<p>CVE-2017-8759是SOAP WSDL分析器代码注入漏洞，在解析SOAP WSDL定义的内容中它允许攻击者注入任意代码。</p>
+<p>FireEye分析了这个攻击者使用的微软Word文档，它利用任意代码注入来下载和执行一个包含PowerShell命令的VB脚本。</p>
+        
+          <a class="article-more-a" href="/tans-fireeye-cve-2017-8759-finspy-0day/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">FireEye</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">cve20178759</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">FINSPY</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/tans-fireeye-cve-2017-8759-finspy-0day/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+  
     <article id="post-pylogin-baidutongji-login-analyze" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1013,97 +1096,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/aanti-virus/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-  
-    <article id="post-wechat-multi-pc" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/wechat-multi-pc/">微信(WeChat)电脑端多开研究+源码</a>
-    </h1>
-  
-
-        
-        <a href="/wechat-multi-pc/" class="archive-article-date">
-  	<time datetime="2017-05-14T07:07:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>欢迎关注技术公众号：<strong><span style="color:red">汉客儿</span></strong><br><img src="/img/wx.png" alt="img"></p>
-<p>QQ交流群：<a target="_blank" rel="noopener" href="https://jq.qq.com/?_wv=1027&amp;k=5ww6tlB">753894145</a></p>
-<div style="color:red">更新（2019年2月23日）：<br>1. 目前项目已经支持<strong>防消息撤回</strong>，细节请看<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/E7N6LzAH4p88Gu4f_qwGlg">文章</a><br>2. 支持<strong>语音消息备份</strong>，细节请看<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/h9d8aO79OvkpV9bknVT60A">文章</a><br>3. 支持<strong>发送消息接口</strong>，细节请看<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/uUXB9AHtnhCsD7gAfFYRoA">文章</a><br>4. 目前发布WeChatSDK，第三方可以应用SDK开发自己的软件，详细请看<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/WBDPc3Vd0X_zLb3qqITlmg">文章</a><br>5. <span style="font-size:16px">项目一直持续更新，跟进微信发布的新版本，欢迎关注公众号<strong>汉客儿</strong>获取最新信息</span><br>6. 项目地址：<a target="_blank" rel="noopener" href="https://github.com/anhkgg/SuperWeChatPC">https://github.com/anhkgg/SuperWeChatPC</a><br>7. 最新版可用多开软件exe可再公众号后台回复”微信多开”获得下载链接。<br></div>
-
-<script type="text/javascript">
-<!--window.open("https://mp.weixin.qq.com/s/WBDPc3Vd0X_zLb3qqITlmg");-->
-</script>
-
-<h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>不知道大家有没有多个微信号，我反正有一两三个。</p>
-<p>现在电脑端微信使用频率也比较高，主要用于大文件传输，或者手机电脑文件互传等等，除了不能收红包和看朋友圈，貌似电脑端没其他毛病。</p>
-<p>哦，还有个毛病，只能开一个微信，只能开一个，开一个，一个…</p>
-<p>不管这些有的没的，今天的主题是，怎么样在电脑上开多个微信客户端！</p>
-        
-          <a class="article-more-a" href="/wechat-multi-pc/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">wechat</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">handle</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">patch</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/wechat-multi-pc/">展开全文 >></a>
         </p>
       
 
