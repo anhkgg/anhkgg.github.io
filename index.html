@@ -165,7 +165,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/relive-LordPE/">relive-LordPE</a>
+      <a class="article-title" href="/relive-LordPE/">LordPE在win10无法工作折腾笔记-死而复生</a>
     </h1>
   
 
@@ -178,13 +178,20 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <a id="more"></a>
-<blockquote>
-<p>author: anhkgg<br>date: 1624157174000</p>
-</blockquote>
-<p>转载请注明出处：<a href="https://anhkgg.github.io/&lt;!--swig￼2--">https://anhkgg.github.io/relive-LordPE</a></p>
-<p>欢迎关注技术公众号：<strong><span style="color:red">汉客儿</span></strong><br><img src="/img/wx.png" alt="img"></p>
-
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">author: anhkgg</span><br><span class="line">date: 2021年6月19日</span><br></pre></td></tr></table></figure>
+<h2 id="前情提要"><a href="#前情提要" class="headerlink" title="前情提要"></a>前情提要</h2><p>最近在分析某个软件时，提示错误。赶紧挂上windbg看看调用栈，看能不能找到问题。</p>
+<p>一看应该能够解决，需要结合IDA静态分析。</p>
+<p>通过任务管理器进程转到文件，发现文件已经不存在了，咋办？</p>
+<p>还好，进程还在，可以把主程序dump下来，就可以静态分析了。</p>
+<p>如何dump呢？简单的可以通过windbg的.writemem把内存写入文件，但是文件不是合法（可运行）的PE，虽然此时文件和内存中数据完全相同（IDA可以将就分析）。</p>
+<p>PE文件的文件结构和内存结构是不完全相同的，最重要的原因是文件对齐和内存对齐不同。</p>
+<p>所以windbg的.writemem是不支持把内存dump生成合法的PE文件，除非自己再进行文件修复。</p>
+<p>此时，不知道有没有人想起来逆向中脱壳，是不是也有类似操作，我这里不是脱壳，但需要做的确和脱壳类似。</p>
+<p>所以我想到了LordPE（没用OD），它可以把内存dump之后生成正确的PE文件，然后再ImportREC修复输入表即可。</p>
+<p>这活脱脱得就是脱壳啊，哈哈，无所谓啦。</p>
+        
+          <a class="article-more-a" href="/relive-LordPE/#more">more >></a>
+        
       
 
       
@@ -192,7 +199,33 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">逆向</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">LordPE</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/security/" class="article-tag-list-link color4">security</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
         <p class="article-more-link">
@@ -1475,6 +1508,10 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">APC</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">LordPE</a>
               </li>
             
             <div class="clearfix"></div>
