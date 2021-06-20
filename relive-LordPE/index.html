@@ -15,25 +15,25 @@
 <meta property="og:site_name" content="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘">
 <meta property="og:description" content="12author: anhkggdate: 2021年6月19日 前情提要最近在分析某个软件时，提示错误。赶紧挂上windbg看看调用栈，看能不能找到问题。 一看应该能够解决，需要结合IDA静态分析。 通过任务管理器进程转到文件，发现文件已经不存在了，咋办？ 还好，进程还在，可以把主程序dump下来，就可以静态分析了。 如何dump呢？简单的可以通过windbg的.writemem把内存写入文件，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-16-54-03.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-16-56-55.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-17-21-22.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-17-33-24.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-17-35-45.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-17-41-33.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-17-26-16.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-17-59-06.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-18-44-10.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-18-58-09.png">
-<meta property="og:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-19-16-06.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-16-54-03.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-16-56-55.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-17-21-22.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-17-33-24.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-17-35-45.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-17-41-33.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-17-26-16.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-17-59-06.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-18-44-10.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-18-58-09.png">
+<meta property="og:image" content="https://anhkgg.github.io/img/2021-06-19-19-16-06.png">
 <meta property="og:image" content="https://anhkgg.github.io/img/wx.png">
 <meta property="article:published_time" content="2021-06-20T02:46:14.000Z">
-<meta property="article:modified_time" content="2021-06-20T02:54:33.766Z">
+<meta property="article:modified_time" content="2021-06-20T03:01:33.769Z">
 <meta property="article:author" content="Anhkgg">
 <meta property="article:tag" content="逆向">
 <meta property="article:tag" content="LordPE">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://anhkgg.github.io/relive-LordPE/img/2021-06-19-16-54-03.png">
+<meta name="twitter:image" content="https://anhkgg.github.io/img/2021-06-19-16-54-03.png">
   
     <link rel="alternative" href="/atom.xml" title="Anhkgg&#39;Lab | Windows Kernel | Rootkit | Reverse Engineer | Expolit | 内核研究 | 逆向分析 | 漏洞分析挖掘" type="application/atom+xml">
   
@@ -214,30 +214,30 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">0:000&gt; kv</span><br><span class="line"> # ChildEBP RetAddr  Args to Child              </span><br><span class="line">00 0019f5e0 200013fc 004a0010 00000400 0019f600 KERNELBASE!K32EnumProcesses (FPO: [Non-Fpo])</span><br><span class="line">01 0019f74c 00405fb6 004a0010 00000400 69970c70 procs!GetProcessIDList+0x13c</span><br><span class="line">02 0019f7a0 6992b4f2 ffffffff 00001003 00000001 LordPE+0x5fb6</span><br><span class="line">03 0019f7c4 69929edb 00040426 00001003 00000001 COMCTL32!FlatSB_SubclassWndProc+0x22 (FPO: [6,0,0])</span><br><span class="line">04 0019f820 fffffffe 0019f874 69929e20 00040426 COMCTL32!CallNextSubclassProc+0x69 (FPO: [Non-Fpo])</span><br><span class="line">05 0019f844 7789c79c 00000000 00559420 00000000 0xfffffffe</span><br><span class="line">06 0019f920 766760bf 00000000 00000000 004911c8 ntdll!RtlDeactivateActivationContextUnsafeFast+0x9c (FPO: [Non-Fpo])</span><br></pre></td></tr></table></figure>
 <p>然后发现procs!GetProcessIDList，看名字明显就是获取所有进程PID。</p>
 <p>IDA打开procs.dll一看，这个DLL提供了所有进程和模块管理的接口。</p>
-<p><img src="img/2021-06-19-16-54-03.png" alt=""></p>
+<p><img src="/img/2021-06-19-16-54-03.png" alt=""></p>
 <p>可以看到，他根据Is_xxx_200024FC（系统版本）分两类API来获取信息，第二种才是我前面没成功下断的ProcessNext。</p>
-<p><img src="img/2021-06-19-16-56-55.png" alt=""></p>
+<p><img src="/img/2021-06-19-16-56-55.png" alt=""></p>
 <p>这不是重点，上面的枚举代码没什么问题，不过我没怎么用过EnumProcess接口，不确定是否有问题，所以我把Is_xxx_200024FC强制改为0，然后所有接口都通过tlhelp32接口来获取进程和模块信息。</p>
 <p>再往上层回溯，进入LordPE，发现神奇的东西。</p>
-<p><img src="img/2021-06-19-17-21-22.png" alt=""></p>
+<p><img src="/img/2021-06-19-17-21-22.png" alt=""></p>
 <p>长度传的0xF0，也就是240 / 4 = 60，也就是说LordPE只能获取60个进程。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DWORD dwProcessId[60];</span><br></pre></td></tr></table></figure>
 <p>而在win10上，动不动就是上百个进程，所以没有枚举到我要看的目标进程太正常了。</p>
 <p>只想吐槽，LordPE作者怎么会写出这样的代码，这就算在xp、win7，进程超过60个也歇菜了。</p>
 <h2 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h2><p>问题找到了，现在该想想如何修改让LordPE能够正常用起来。</p>
 <p>首先想到的是，既然枚举进程不全，我可以自己枚举进程插入到进程列表中。</p>
-<p><img src="img/2021-06-19-17-33-24.png" alt=""></p>
+<p><img src="/img/2021-06-19-17-33-24.png" alt=""></p>
 <p>但需要确认点击某个进程选dump是怎么处理的？</p>
-<p><img src="img/2021-06-19-17-35-45.png" alt=""></p>
+<p><img src="/img/2021-06-19-17-35-45.png" alt=""></p>
 <p>获取到选择的进程行，让后dwProcessId[index]拿到进程PID，然后调用dump函数。</p>
 <p>这，index超了60，dwProcessId[index]就不行了啊，这个PID不合法啊。</p>
 <p>此路不通。</p>
 <p>那把dwProcessId扩大呢？</p>
-<p><img src="img/2021-06-19-17-41-33.png" alt=""></p>
+<p><img src="/img/2021-06-19-17-41-33.png" alt=""></p>
 <p>dwProcessId大小60个，后面马上接着其他变量，连对齐空间都没有。</p>
 <p>不可行。</p>
 <p>可以看到，引用dwProcessId的位置还不只一个。</p>
-<p><img src="img/2021-06-19-17-26-16.png" alt=""></p>
+<p><img src="/img/2021-06-19-17-26-16.png" alt=""></p>
 <p>更多想法：</p>
 <ol>
 <li>dwProcessId通过malloc分配，但得修改所有引用位置的代码，从dwProcessId[index]换成(*dwProcess)[index]</li>
@@ -249,7 +249,7 @@
 <p><a target="_blank" rel="noopener" href="https://bbs.pediy.com/thread-34814-1.htm">LordPE只显示60个进程 fix </a></p>
 <p>他是在PE中找到空白位置，用做新的dwProcessId地址，然后把所有引用dwProcessId的位置换成这个新地址，还挺简单，不过最多只能存256个进程PID，将就可以用了。</p>
 <p>然后procs.dll接口也存在问题，居然还有硬编码F0来EnumProcess获取进程（几乎所有接口）。</p>
-<p><img src="img/2021-06-19-17-59-06.png" alt=""></p>
+<p><img src="/img/2021-06-19-17-59-06.png" alt=""></p>
 <p>不过我前面已经修改了Is_xxx_200024FC，所以不会用enumprocess，全部使用的tlhelp32的ProcessNext接口，不会存在这个问题。</p>
 <p>所以暂时确定方案：</p>
 <ol>
@@ -257,12 +257,12 @@
 <li>修改procs.dll的Is_xxx_200024FC为0</li>
 </ol>
 <p>在结尾看到800h的对齐位置。</p>
-<p><img src="img/2021-06-19-18-44-10.png" alt=""></p>
+<p><img src="/img/2021-06-19-18-44-10.png" alt=""></p>
 <p>0x800/4=0x200=512字节，那么可以枚举到512个进程。</p>
 <p>把所有dwProcessId换成41EA88，大小F0换成800h。</p>
-<p><img src="img/2021-06-19-18-58-09.png" alt=""></p>
+<p><img src="/img/2021-06-19-18-58-09.png" alt=""></p>
 <p>现在可以正常枚举到进程。</p>
-<p><img src="img/2021-06-19-19-16-06.png" alt=""></p>
+<p><img src="/img/2021-06-19-19-16-06.png" alt=""></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>经过一番折腾，目前满足我当前需求，可以正常dump出错的软件，但是LordPE不支持64进程，所有可能某些情况下还是鸡肋。</p>
 <p>很少这么手工修改软件，思路还是挺重要的，要不是搜到那篇帖子，我可能就会采用勾上procs.dll的导出接口和dump函数，但随便几点某个进程，选择dump时，会弹出一个我的界面选择真实的目标进程，然后返回调用dump函数，也同样是可以同样的功能。</p>
 <p>最后立个flag，有时间还是想写个支持64进程的增强版LordPE。或者我孤陋寡闻，目前已经有类似程序，有知情大佬，请不吝告知。</p>
