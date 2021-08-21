@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://anhkgg.github.io/aboutme/</loc>
+    <lastmod>2021-08-21</lastmod>
+  </url>
+  <url>
     <loc>https://anhkgg.github.io/relive-LordPE/</loc>
     <lastmod>2021-06-20</lastmod>
   </url>
@@ -39,10 +43,6 @@
   <url>
     <loc>https://anhkgg.github.io/huawei-pcmanager-nb/</loc>
     <lastmod>2019-11-06</lastmod>
-  </url>
-  <url>
-    <loc>https://anhkgg.github.io/aboutme/</loc>
-    <lastmod>2019-11-04</lastmod>
   </url>
   <url>
     <loc>https://anhkgg.github.io/inject-dllhijack-tool/</loc>
